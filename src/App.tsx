@@ -6,10 +6,12 @@ import Home from "./pages/Home/Home";
 const App: React.FC = () => {
   return(
     <Router>  
-      <Routes>
-        <Route path="/" element={<Login />} /> 
-        <Route path="/Home" element={<Home />} />
-      </Routes>
+      <div className="flex flex-col h-full bg-red-500">
+        <Routes>
+          <Route path="/" element={<Login />} /> 
+          <Route path="/Home" element={<Home />} />
+        </Routes>
+      </div>
     </Router>
   );
 };

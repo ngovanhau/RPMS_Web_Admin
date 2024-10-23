@@ -1,10 +1,8 @@
-// src/pages/Login.tsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { login, information } from "../../services/userApi/userApi";
-import './Login.css';
 import { EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons'; 
-import {anhlogin, chiphi, doanhnghiep, quanly, quytrinh, ungdung} from '../../assets/index';
+import { anhlogin, chiphi, doanhnghiep, quanly, quytrinh, ungdung } from '../../assets/index';
 
 const Login: React.FC = () => {
     const [username, setUsername] = useState("");
@@ -14,11 +12,11 @@ const Login: React.FC = () => {
     const navigate = useNavigate();
 
     const handleLogin = async () => {
-        if(username === ""){
+        if (username === "") {
             setError("Username không được bỏ trống !");
-        }else if(password === ""){
+        } else if (password === "") {
             setError("Password không được bỏ trống !");
-        }else{
+        } else {
             try {
                 const response = await login(username, password);
                 if (response && response.data) {
@@ -49,49 +47,51 @@ const Login: React.FC = () => {
     }
 
     return (
-        <div className="login-page">
-            <div className="welcome-container">
-            <h2 className="welcome-title">Welcome!</h2>
-                <div className="right-welcom">
-                <img src={ungdung} alt="Welcome" className="welcome-image-quytrinh" />
-                <img src={doanhnghiep} alt="Welcome" className="welcome-image-doanhnghiep" />
-                <img src={anhlogin} alt="Welcome" className="welcome-image" />
-                </div>
-                <div className="left-welcom">
-                <img src={chiphi} alt="Welcome" className="welcome-image-chiphi" />
-                <img src={quanly} alt="Welcome" className="welcome-image-quanly" />
-                </div>
-                
-            </div>
-            <div className="login-container">
-                <h2 className="login-title">Đăng nhập</h2>
-                <div className="input-group">
+        <div className="flex justify-center items-center h-screen bg-gray-100 overflow-hidden">
+            <div className="bg-white rounded-lg shadow-md p-5 w-[20%] text-center bg-blue-500">
+                <h2 className="text-blue-800 mb-5 text-xl">Đăng nhập</h2>
+                <div className="mb-4">
                     <input
                         type="text"
                         placeholder="Username"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
-                        className="login-input"
+                        className="bg-gray-200 w-full p-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
                     />
                 </div>
-                <div className="input-group password-group">
+                <div className="relative mb-4">
                     <input
                         type={showPassword ? "text" : "password"} 
                         placeholder="Password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="login-input"
+                        className="bg-gray-200 w-full p-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
                     />
                     <span 
-                        className="password-toggle" 
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer text-blue-500" 
                         onClick={() => setShowPassword(!showPassword)} 
                     >
                         {showPassword ? <EyeOutlined /> : <EyeInvisibleOutlined />} 
                     </span>
                 </div>
-                {error && <p className="error-message">{error}</p>}
-                <button onClick={handleLogin} className="login-button">Đăng nhập</button>
+                {error && <p className="text-red-500 mb-4">{error}</p>}
+                <button onClick={handleLogin} className="w-full p-2 bg-blue-800 text-white rounded hover:bg-blue-700 transition duration-300">
+                    Đăng nhập
+                </button>
             </div>
+            <div className="flex flex-col items-center  mr-12 w-[40%]">
+                <h2 className="text-2xl text-blue-800 mb-5">Welcome!</h2>
+                <div className="flex flex-row justify-center mb-2">
+                    <img src={ungdung} alt="Welcome" className="w-52 h-auto rounded-lg m-1" />
+                    <img src={doanhnghiep} alt="Welcome" className="w-52 h-auto rounded-lg m-1" />
+                    <img src={anhlogin} alt="Welcome" className="w-52 h-auto rounded-lg m-1" />
+                </div>
+                <div className="flex flex-row justify-center mb-2">
+                    <img src={chiphi} alt="Welcome" className="w-52 h-auto rounded-lg m-1" />
+                    <img src={quanly} alt="Welcome" className="w-52 h-auto rounded-lg m-1" />
+                </div>
+            </div>
+            
         </div>
     );
 };
