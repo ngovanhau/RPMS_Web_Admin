@@ -1,0 +1,117 @@
+/* src/pages/Login.css */
+.login-page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh; /* Chiều cao đầy đủ của màn hình */
+    background-color: #f0f0f0; /* Màu nền cho toàn trang */
+    width: 100vw; /* Chiều rộng đầy đủ của màn hình */
+    margin: 0; /* Bỏ khoảng cách mặc định */
+    overflow-x: hidden; /* Ẩn thanh cuộn ngang */
+}
+
+.welcome-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-right: 50px; /* Khoảng cách giữa ảnh và form đăng nhập */
+    flex: 1; /* Cho phép welcome-container chiếm không gian còn lại */
+}
+
+.welcome-title {
+    font-size: 2rem;
+    color: rgb(0, 0, 204);
+    margin-bottom: 20px;
+}
+
+.right-welcom,
+.left-welcom {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    margin-bottom: 10px; /* Khoảng cách giữa các hàng ảnh */
+}
+
+.welcome-image,
+.welcome-image-chiphi,
+.welcome-image-doanhnghiep,
+.welcome-image-quanly,
+.welcome-image-quytrinh {
+    width: 200px; /* Chiều rộng ảnh */
+    height: auto; 
+    border-radius: 8px; 
+    margin: 5px; /* Khoảng cách giữa các ảnh */
+}
+
+.login-container {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    width: 550px; /* Kích thước của form đăng nhập */
+    text-align: center;
+    margin-right: 250px;
+}
+
+.login-title {
+    color: #0000CC; 
+    margin-bottom: 20px;
+    font-size: 24px;
+}
+
+.input-group {
+    margin: 10px 0; 
+}
+
+.login-input {
+    background-color: #f9f9f9;
+    width: 95%; 
+    padding: 10px; 
+    border: 1px solid #ccc; 
+    border-radius: 4px; 
+    font-size: 16px; 
+    color: black;
+}
+
+.login-input:focus {
+    border-color: #007bff; 
+    outline: none; 
+}
+
+.password-group {
+    position: relative; 
+}
+
+.password-toggle {
+    position: absolute; 
+    right: 10px; 
+    top: 50%; 
+    transform: translateY(-50%); 
+    cursor: pointer; 
+    color: #007bff; 
+}
+
+.password-toggle:hover {
+    color: #0056b3; 
+}
+
+.error-message {
+    color: red; 
+    margin: 10px 0; 
+}
+
+.login-button {
+    width: 99%; 
+    padding: 10px; 
+    background-color: #0000CC;
+    color: white; 
+    border: none; 
+    border-radius: 4px; 
+    font-size: 16px; 
+    cursor: pointer; 
+    transition: background-color 0.3s ease;
+}
+
+.login-button:hover {
+    background-color: #0056b3; 
+}
