@@ -48,7 +48,7 @@ const Login: React.FC = () => {
 
     return (
         <div className="flex justify-center items-center h-screen bg-gray-100 overflow-hidden">
-            <div className="bg-white rounded-lg shadow-md p-5 w-[20%] text-center bg-blue-500">
+            <div className="bg-white rounded-lg shadow-md p-5 w-[20%] text-center ">
                 <h2 className="text-blue-800 mb-5 text-xl">Đăng nhập</h2>
                 <div className="mb-4">
                     <input
