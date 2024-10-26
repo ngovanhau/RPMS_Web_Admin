@@ -1,0 +1,24 @@
+/* Sidebar.css */
+.sidebar {
+    width: 200px;
+    background: #f4f4f4;
+    padding: 15px;
+    height: 100%;
+}
+
+.sidebar ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.sidebar a {
+    text-decoration: none;
+    color: black; /* Màu chữ cho liên kết */
+    display: block; /* Để liên kết chiếm toàn bộ chiều rộng */
+    padding: 10px 5px; /* Thêm khoảng cách cho liên kết */
+    transition: background 0.3s; /* Hiệu ứng chuyển đổi màu nền */
+}
+
+.sidebar a:hover {
+    background: #ddd; /* Thay đổi màu nền khi di chuột */
+}
