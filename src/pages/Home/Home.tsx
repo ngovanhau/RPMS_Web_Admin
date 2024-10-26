@@ -1,10 +1,10 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import './Home.css';
-
-const DasboardHome: React.FC = () => {
+import useAuthStore from "@/stores/userStore";
+const DashboardHome: React.FC = () => {
     const navigate = useNavigate();
-
+    
     const handleLogout = () => {
         localStorage.removeItem("authToken"); 
         navigate("/"); 
@@ -19,4 +19,4 @@ const DasboardHome: React.FC = () => {
     );
 };
 
-export default DasboardHome;
+export default DashboardHome;

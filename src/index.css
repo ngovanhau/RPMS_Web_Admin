@@ -13,3 +13,30 @@ html, body {
 #root {
     @apply h-full; /* Đảm bảo #root chiếm chiều cao đầy đủ */
 }
+
+
+.item-sidebar {
+  @apply flex flex-row cursor-pointer gap-4 transition-all duration-300 rounded-md;
+}
+
+.sideBarItemText {
+  @apply font-semibold text-gray-600 text-lg cursor-pointer
+}
+.sideBarItemTextAct {
+  @apply font-semibold text-green-500 text-lg cursor-pointer
+}
+
+.sideBarItemText:hover {
+  @apply font-semibold text-green-500
+}
+
+
+.item-sidebar:hover {
+  @apply text-green-500 cursor-pointer; /* Thay đổi nền và con trỏ khi hover */
+}
+
+.itemDropDown-Profile {
+  @apply w-full h-10 text-lg py-6 cursor-pointer transition-colors duration-200 ease-in-out hover:bg-green-300;
+}
+
+
