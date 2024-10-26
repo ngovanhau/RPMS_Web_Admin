@@ -22,9 +22,8 @@ export const login = async (username: string, password: string): Promise<any> =>
 export const information = async (username: string) => {
     try {
         const response = await api.get("/identityusers/information?username=" + username);
-
         if (response.status === 200) {
-            return response.data;
+            return response.data.data;
         } else {
             console.error("Lấy thông tin người dùng thất bại:", response.data);
             return null;
