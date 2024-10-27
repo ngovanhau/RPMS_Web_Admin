@@ -9,27 +9,27 @@ export const HeaderServiceRow: React.FC<HeaderServiceRowProps> = () => {
         
       </div>
       <div className="w-[25%]  flex items-center justify-start">
-        <span className="text-green-400 font-semibold text-xl text-left">
+        <span className="text-green-400 font-semibold text-base text-left">
           Tên dịch vụ
         </span>
       </div>
       <div className="w-[15%]  flex items-center justify-start">
-        <span className="text-green-400 font-semibold text-xl text-left">
+        <span className="text-green-400 font-semibold text-base text-left">
           Đơn vị
         </span>
       </div>
       <div className="w-[15%] flex items-center justify-start">
-        <span className="text-green-400 font-semibold text-xl text-left">
+        <span className="text-green-400 font-semibold text-base text-left">
           Phí dịch vụ
         </span>
       </div>
       <div className="w-[15%] flex items-center justify-start">
-        <span className="text-green-400 font-semibold text-xl text-left">
+        <span className="text-green-400 font-semibold text-base text-left">
           Cập nhật
         </span>
       </div>
       <div className="w-[24%] flex items-center justify-start">
-        <span className="text-green-400 font-semibold text-xl text-left">
+        <span className="text-green-400 font-semibold text-base text-left">
           Ghi chú
         </span>
       </div>

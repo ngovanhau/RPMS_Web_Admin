@@ -1,14 +1,15 @@
 // DashBoardService.tsx
-import React, { useEffect, useState } from "react";
-import useAuthStore from "@/stores/userStore";
-import ServiceRow from "@/components/ServicesRow/ServicesRow";
-import api from "@/services/axios";
-import useServiceStore from "@/stores/servicesStore";
-import CustomModal from "@/components/Modal/Modal";
-import { createService } from "@/services/servicesApi/servicesApi";
-import { Service } from "@/types/types";
+
 import HeaderServiceRow from "./components/HeaderServiceRow";
 import ServiceForm from "./components/ServiceForm";
+import CustomModal from "@/components/Modal/Modal";
+import ServiceRow from "@/components/ServicesRow/ServicesRow";
+import api from "@/services/axios";
+import { createService } from "@/services/servicesApi/servicesApi";
+import useServiceStore from "@/stores/servicesStore";
+import useAuthStore from "@/stores/userStore";
+import { Service } from "@/types/types";
+import React, { useEffect, useState } from "react";
 
 const DashBoardService: React.FC = () => {
   const { userData } = useAuthStore();
@@ -88,13 +89,13 @@ const DashBoardService: React.FC = () => {
           <div className="flex flex-row justify-between items-center pb-4 border-b">
             <div className="flex flex-row items-center gap-6">
               <div className="py-1 px-2 rounded-[6px] flex justify-center items-center bg-green-500">
-                <span className="text-lg text-white font-bold">0</span>
+                <span className="text-base text-white font-bold">0</span>
               </div>
-              <span className="text-lg">0 Đã chọn</span>
+              <span className="text-base">0 Đã chọn</span>
             </div>
             <div>
-              <button
-                className="bg-green-400 text-xl h-14 text-white py-2 w-80 rounded-[6px] shadow hover:bg-green-500 transition duration-300"
+              <div
+                className="bg-green-400 flex flex-row justify-center items-center gap-2 text-base h-12 text-white py-2 w-44 rounded-[6px] shadow hover:bg-green-500 transition duration-300"
                 title="Thêm dịch vụ"
                 onClick={() => {
                   setIsEdit(false);
@@ -102,8 +103,23 @@ const DashBoardService: React.FC = () => {
                   setModalIsOpen(true);
                 }}
               >
-                Thêm dịch vụ
-              </button>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke-width="1.5"
+                  stroke="currentColor"
+                  className="size-6"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+                  />
+                </svg>
+
+                <span>Thêm</span>
+              </div>
             </div>
           </div>
 
@@ -127,7 +143,7 @@ const DashBoardService: React.FC = () => {
       <CustomModal
         isOpen={modalIsOpen}
         onClose={() => setModalIsOpen(false)}
-        header={isEdit ? "Chỉnh sửa dịch vụ" : "Thêm dịch vụ"}
+        header={isEdit ? "Chỉnh sửa" : "Thêm mới"}
       >
         <ServiceForm
           onSuccess={handleSuccess}

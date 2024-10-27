@@ -40,46 +40,48 @@ const Sidebar: React.FC = () => {
   return (
     <div className="flex flex-col h-full w-full">
       {/* Header hoặc tên sidebar */}
-      <div className="h-[5%] flex items-center justify-start px-10 border-r border-b">
-        <img className="h-9 w-9" src="https://i.ibb.co/QbdnKPT/logo.png" />
-        <span className="text-2xl text-black ml-5 font-bold">RPMS</span>
+      <div className="h-[5%] flex items-center justify-start  px-10 border-r border-b">
+        <img className="h-8 w-8" src="https://i.ibb.co/QbdnKPT/logo.png" />
+        <span className="text-xl text-black ml-5 font-bold">RPMS</span>
       </div>
       {/* Nội dung chính của sidebar */}
-      <div className="flex-1 flex-col  flex items-center justify-start py-6">
-        <DropdownMenu>
-          <DropdownMenuTrigger className="flex flex-row gap-8 items-center">
-            <img
-              src="https://i.ibb.co/sqPnpsZ/hau.jpg"
-              className="h-14 w-14 object-cover rounded-full bg-red-400"
-            />
-            <div className="flex flex-col text-left">
-              <span className="font-bold text-lg">{userData?.firstName} {userData?.lastName}</span>
-              <span className="text-md text-gray-400">
-                {userData?.email == null ? "Chưa có email" : userData.email}
-              </span>
-            </div>
-          </DropdownMenuTrigger>
+      <div className="h-[95%] flex-col  flex items-center justify-start">
+        <div className="w-[70%] h-[8%]  flex items-center justify-start">
+          <DropdownMenu>
+            <DropdownMenuTrigger className="flex  flex-row gap-4 items-center">
+              <img
+                src="https://i.ibb.co/sqPnpsZ/hau.jpg"
+                className="h-10 w-10 object-cover rounded-full bg-red-400"
+              />
+              <div className="flex flex-col text-left">
+                <span className="font-bold text-sm">{userData?.lastName}</span>
+                <span className="text-sm text-gray-400">
+                  {userData?.email == null ? "Chưa có email" : userData.email}
+                </span>
+              </div>
+            </DropdownMenuTrigger>
+  
+            <DropdownMenuContent className="w-[200px] bg-white rounded-xl">
+              <DropdownMenuLabel>My Account</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem className="itemDropDown-Profile">
+                👤 Profile
+              </DropdownMenuItem>
+              <DropdownMenuItem className="itemDropDown-Profile">
+                💵 Billing
+              </DropdownMenuItem>
+              <DropdownMenuItem className="itemDropDown-Profile">
+                👥 Team
+              </DropdownMenuItem>
+              <DropdownMenuItem className="itemDropDown-Profile">
+                💬 Subscription
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu> 
+        </div>
 
-          <DropdownMenuContent className="w-[200px] bg-white rounded-xl">
-            <DropdownMenuLabel>My Account</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem className="itemDropDown-Profile">
-              👤 Profile
-            </DropdownMenuItem>
-            <DropdownMenuItem className="itemDropDown-Profile">
-              💵 Billing
-            </DropdownMenuItem>
-            <DropdownMenuItem className="itemDropDown-Profile">
-              👥 Team
-            </DropdownMenuItem>
-            <DropdownMenuItem className="itemDropDown-Profile">
-              💬 Subscription
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu> 
-
-        <div className="flex flex-1 w-full justify-center py-20">
-          <div className="flex flex-col w-[60%] gap-8 justify-start items-start ">
+        <div className="flex h-[86%]  w-full justify-center py-5">
+          <div className="flex flex-col w-[70%] gap-8 justify-start items-start ">
             {sidebarItems.map((item) => (
               <SidebarItem
                 key={item.type}
@@ -215,7 +217,7 @@ const Sidebar: React.FC = () => {
             </Collapsible>
           </div>
         </div>
-        <div className="flex flex-1 w-[60%] self-center justify-start items-end pb-24 ">
+        <div className="flex h-[8%] w-[60%] self-center justify-start items-start ">
           <button className="flex items-center text-red-500 gap-4">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -232,7 +234,7 @@ const Sidebar: React.FC = () => {
               />
             </svg>
 
-            <span onClick={handleSignOut} className="text-lg font-semibold">Đăng xuất</span>
+            <span onClick={handleSignOut} className="text-sm font-semibold">Đăng xuất</span>
           </button>
         </div>
       </div>
