@@ -5,6 +5,9 @@ import DashboardHome from "./pages/Home/Home";
 import DashboardLayout from "./layouts/Dashboard/DashboardLayout";
 import DashBoardService from "./pages/Service/Service";
 import DashBoardBuidling from "./pages/Buidling/Building";
+import Profile from "./pages/Profile/Profile";
+import ChangePassWord from "./pages/ChangePassWord/ChangePassWord";
+
 const App: React.FC = () => {
     return (
         <Router>
@@ -16,7 +19,9 @@ const App: React.FC = () => {
                 <Route element={<DashboardLayout />}>
                     <Route path="Dashboard" element={<DashboardHome />} />
                     <Route path="Service" element={<DashBoardService />} />
-                    <Route path="Building" element={<DashBoardBuidling />} />
+                    <Route path="/building" element={<DashBoardBuidling />} />
+                    <Route path="/Profile" element={<Profile/>}/>
+                    <Route path="/Changepass" element={<ChangePassWord/>}/>
                 </Route>
             </Routes>
         </Router>

@@ -11,7 +11,8 @@ export interface User {
     createdAt?: string;
     updatedAt?: string;
     salts?: string;
-    status?: number;
+    phone?:string;
+    status?:string;
   }
 
   export interface Building {
@@ -28,11 +29,20 @@ export interface User {
     payment_time: number;
     payment_timeout: number;
     management: string;
-    fee_based_service: string[] | undefined; 
-    free_service: string[] | undefined;
+    fee_based_service: Service[] | undefined; 
+    free_service: Service[] | undefined;
     utilities: string;
     building_note?: string;
   }
+
+  export interface Service {
+    serviceId : string | null,
+    serviceName : string | null
+  }
+  export interface ServiceInfo {
+    serviceId: string | null;
+    serviceName: string | null;
+}
 
   
   export interface Service {

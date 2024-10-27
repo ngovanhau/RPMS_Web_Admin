@@ -1,6 +1,5 @@
 // Sidebar.tsx
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import {
   Collapsible,
@@ -37,6 +36,13 @@ const Sidebar: React.FC = () => {
     navigate("/");
   }
 
+  const handleProfile = () => {
+    navigate("/profile")
+  }
+
+  const handleChangePass = () => {
+    navigate("/Changepass")
+  }
   return (
     <div className="flex flex-col h-full w-full">
       {/* Header hoặc tên sidebar */}
@@ -65,17 +71,17 @@ const Sidebar: React.FC = () => {
             <DropdownMenuContent className="w-[200px] bg-white rounded-xl">
               <DropdownMenuLabel>My Account</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="itemDropDown-Profile">
-                👤 Profile
+              <DropdownMenuItem className="itemDropDown-Profile"
+              onClick={handleProfile}>
+              <span className="text-[13px]">👤 Thông tin tài khoản</span>
+                
               </DropdownMenuItem>
               <DropdownMenuItem className="itemDropDown-Profile">
-                💵 Billing
+                <span className="text-[13px]">💵 Tài liệu hướng dẫn</span>
               </DropdownMenuItem>
-              <DropdownMenuItem className="itemDropDown-Profile">
-                👥 Team
-              </DropdownMenuItem>
-              <DropdownMenuItem className="itemDropDown-Profile">
-                💬 Subscription
+              <DropdownMenuItem className="itemDropDown-Profile"
+              onClick={handleChangePass}>
+                <span className="text-[13px]">👥 Đổi mật khẩu </span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu> 
