@@ -34,3 +34,22 @@ export const information = async (username: string) => {
     }
 };
 
+export const changepassword = async (username: string, oldPassword: string, newPassword: string): Promise<any> => {
+    try {
+        const response = await api.post("/identityusers/changepassword", {
+            username,
+            oldPassword,
+            newPassword,
+        });
+
+        if (response.status === 200) {
+            return response.data;
+        } else {
+            console.error("Đổi mật khẩu thất bại:", response.data);
+            return null;
+        }
+    } catch (error) {
+        console.error("Lỗi khi gọi API đổi mật khẩu:", error);
+        return null;
+    }
+};
