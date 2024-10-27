@@ -40,3 +40,24 @@ export const getBuildingById = async (buildingId: string) => {
     throw error;
   }
 };
+
+
+export const editBuilding = async (building: Building) => {
+  try {
+    const response = await api.put(`/building/update?id=${building.id}`, building);
+    return response
+  } catch (error) {
+    console.error("Failed to update building", error);
+    throw error;
+  }
+};
+
+export const addBuilding = async (building: Building) => {
+  try {
+      const response = await api.post("/building/create", building);
+      return response;
+  } catch (error) {
+      console.error("Failed to add building:", error);
+      throw error;
+  }
+};

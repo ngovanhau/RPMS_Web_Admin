@@ -47,6 +47,6 @@ export const useBuildingStore = create<BuildingStore>((set) => ({
   setBuilding: (building) => set({ building }),
 
   // Clear the single building (set to null)
-  clearBuilding: () => set({ building: null }),
+  clearBuilding: () => set({ building: null }), 
 }));
 

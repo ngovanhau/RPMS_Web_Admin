@@ -28,8 +28,8 @@ export interface User {
     payment_time: number;
     payment_timeout: number;
     management: string;
-    fee_based_service: string[]; 
-    free_service: string[];
+    fee_based_service: string[] | undefined; 
+    free_service: string[] | undefined;
     utilities: string;
     building_note?: string;
   }

@@ -9,6 +9,7 @@ interface CustomModalProps {
   overlayClassName?: string;
   headerClassName?: string;
   contentClassName?: string;
+  modalWrapperClassName?: string; // New prop for outer wrapper class
 }
 
 const CustomModal: React.FC<CustomModalProps> = ({
@@ -19,14 +20,15 @@ const CustomModal: React.FC<CustomModalProps> = ({
   className = '',
   overlayClassName = '',
   headerClassName = '',
-  contentClassName = ''
+  contentClassName = '',
+  modalWrapperClassName = '' // Using the new prop here
 }) => {
   if (!isOpen) return null;
 
   return (
-    <div className={`fixed inset-0 z-50 flex items-center justify-center ${overlayClassName}`}>
-      <div className="fixed inset-0 bg-black bg-opacity-30 transition-opacity" onClick={onClose}></div>
-      <div className={`bg-white rounded-lg shadow-lg w-full max-w-2xl transform transition-all ${className}`}>
+    <div className={`fixed inset-0 z-50 flex items-center justify-center ${modalWrapperClassName}`}>
+      <div className={`fixed inset-0 bg-black bg-opacity-30 transition-opacity ${overlayClassName}`} onClick={onClose}></div>
+      <div className={`bg-white rounded-xl shadow-lg w-full max-w-7xl transform transition-all ${className}`}>
         <div className={`flex justify-between items-center border-b pb-3 px-6 pt-4 ${headerClassName}`}>
           <h2 className="text-xl font-bold text-gray-800">{header}</h2>
           <button

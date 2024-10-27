@@ -46,6 +46,7 @@ const Sidebar: React.FC = () => {
       </div>
       {/* Nội dung chính của sidebar */}
       <div className="h-[95%] flex-col  flex items-center justify-start">
+        {/* avatar */}
         <div className="w-[70%] h-[8%]  flex items-center justify-start">
           <DropdownMenu>
             <DropdownMenuTrigger className="flex  flex-row gap-4 items-center">
@@ -79,9 +80,11 @@ const Sidebar: React.FC = () => {
             </DropdownMenuContent>
           </DropdownMenu> 
         </div>
+    {/* avatar */}
 
         <div className="flex h-[86%]  w-full justify-center py-5">
           <div className="flex flex-col w-[70%] gap-8 justify-start items-start ">
+
             {sidebarItems.map((item) => (
               <SidebarItem
                 key={item.type}
@@ -92,6 +95,8 @@ const Sidebar: React.FC = () => {
                 pathIcon={item.pathIcon}
               />
             ))}
+
+
             <Collapsible>
               <CollapsibleTrigger className="item-sidebar items-center cursor-pointer">
                 <div className="w-10">
@@ -217,6 +222,9 @@ const Sidebar: React.FC = () => {
             </Collapsible>
           </div>
         </div>
+
+
+
         <div className="flex h-[8%] w-[60%] self-center justify-start items-start ">
           <button className="flex items-center text-red-500 gap-4">
             <svg
