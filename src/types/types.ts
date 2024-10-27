@@ -11,7 +11,8 @@ export interface User {
     createdAt?: string;
     updatedAt?: string;
     salts?: string;
-    status?: number;
+    phone?:string;
+    status?:string;
   }
 
   export interface Building {
