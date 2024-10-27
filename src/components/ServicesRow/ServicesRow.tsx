@@ -63,32 +63,32 @@ const ServiceRow: React.FC<ServiceRowProps> = ({
           </DropdownMenuTrigger>
           <DropdownMenuContent className="bg-white ml-32">
             <DropdownMenuItem onSelect={handleDelete}>Xóa</DropdownMenuItem>
-            <DropdownMenuItem onSelect={handleEditClick}>Hiệu chỉnh</DropdownMenuItem>
+            <DropdownMenuItem onSelect={handleEditClick}>Chỉnh sửa</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
       <div className="w-[25%] flex items-center justify-start">
-        <span className="text-gray-600 font-semibold text-xl text-left">
+        <span className="text-gray-600 font-semibold text-[15px] text-left">
           {service.service_name}
         </span>
       </div>
       <div className="w-[15%] flex items-center justify-start">
-        <span className="text-gray-600 font-semibold text-xl text-left">
+        <span className="text-gray-600 font-semibold text-[15px] text-left">
           {service.unitMeasure}
         </span>
       </div>
       <div className="w-[15%] flex items-center justify-start">
-        <span className="text-gray-600 font-semibold text-xl text-left">
+        <span className="text-gray-600 font-semibold text-[15px] text-left">
           {service.service_cost}
         </span>
       </div>
       <div className="w-[15%] flex items-center justify-start">
-        <span className="text-gray-600 font-semibold text-xl text-left">
+        <span className="text-gray-600 font-semibold text-[15px] text-left">
           {service.updatedAt ? formatDate(service.updatedAt) : "N/A"}
         </span>
       </div>
       <div className="w-[24%] flex items-center justify-start">
-        <span className="text-gray-600 font-semibold text-xl text-left">
+        <span className="text-gray-600 font-semibold text-[15px] text-left">
           {service.note}
         </span>
       </div>

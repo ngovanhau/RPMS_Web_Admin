@@ -6,8 +6,8 @@ import useAuthStore from "@/stores/userStore";
 
 const Login: React.FC = () => {
     const { setUserData } = useAuthStore();
-    const [username, setUsername] = useState("");
-    const [password, setPassword] = useState("");
+    const [username, setUsername] = useState("string");
+    const [password, setPassword] = useState("string");
     const [error, setError] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();

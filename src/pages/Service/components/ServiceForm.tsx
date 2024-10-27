@@ -188,7 +188,7 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
             isEdit ? "bg-yellow-600" : "bg-green-600"
           } transition`}
         >
-          {isEdit ? "Cập nhật dịch vụ" : "Thêm dịch vụ"}
+          {isEdit ? "Chỉnh sửa" : "Thêm mới"}
         </button>
       </div>
     </form>
