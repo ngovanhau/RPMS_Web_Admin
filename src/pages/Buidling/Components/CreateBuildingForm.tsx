@@ -22,10 +22,10 @@ const CreateBuildingForm: React.FC<CreateBuildingFormProps> = ({
   } = useForm<Building>({
     defaultValues: {
       fee_based_service: [
-        { serviceId: "3fa85f64-5717-4562-b3fc-2c963f66afa6", serviceName: "string" },
+        { serviceId: "7e2d6bcc-0350-4474-bb71-03c5b33cb2bb", serviceName: "" },
       ],
       free_service: [
-        { serviceId: "3fa85f64-5717-4562-b3fc-2c963f66afa6", serviceName: "string" },
+        { serviceId: "285a87f1-883d-416f-a23a-9808a963d1e1", serviceName: "" },
       ],
     },
   });

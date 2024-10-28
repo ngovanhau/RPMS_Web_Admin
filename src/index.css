@@ -42,6 +42,9 @@ html, body {
 .text-global {
   @apply text-[15px] text-gray-800
 }
+.text-global-green {
+  @apply text-[15px] text-green-400
+}
 .text-global-size {
   @apply text-[15px]
 }
