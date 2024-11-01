@@ -138,7 +138,7 @@ const Tenant: React.FC = () => {
               />
             ))
           ) : (
-            <p>No tenants found.</p>
+            <div className="h-full w-full flex justify-center items-center"><p className="text-sm mb-10 text-gray-500">Chưa có khách hàng nào.</p></div>
           )}
         </div>
         </div>

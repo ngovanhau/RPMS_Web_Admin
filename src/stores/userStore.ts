@@ -11,13 +11,19 @@ interface AuthStore {
 
 // Tạo store Zustand với kiểu dữ liệu được định nghĩa
 const useAuthStore = create<AuthStore>((set) => ({
-  userData: null, // Thông tin user ban đầu
+  userData: JSON.parse(localStorage.getItem('userData') || 'null'), // Lấy userData từ localStorage nếu có
 
-  // Hành động để cập nhật thông tin userData
-  setUserData: (user) => set({ userData: user }),
+  // Hành động để cập nhật thông tin userData và lưu vào localStorage
+  setUserData: (user) => {
+    localStorage.setItem('userData', JSON.stringify(user));
+    set({ userData: user });
+  },
 
-  // Hành động để xóa thông tin userData
-  clearUserData: () => set({ userData: null }),
+  // Hành động để xóa thông tin userData khỏi store và localStorage
+  clearUserData: () => {
+    localStorage.removeItem('userData');
+    set({ userData: null });
+  },
 }));
 
 export default useAuthStore;

@@ -88,9 +88,12 @@ const TenantForm: React.FC<TenantFormProps> = ({
     event.preventDefault();
     try {
       if (isEdit) {
-        await updateTenant(tenant);
+        // await updateTenant(tenant);
+        console.log(tenant);
+
       } else {
-        await createTenant(tenant);
+        // await createTenant(tenant);
+        console.log(tenant);
       }
       onSuccess();
       onClose();
