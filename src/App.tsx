@@ -8,6 +8,7 @@ import DashBoardBuidling from "./pages/Buidling/Building";
 import DashBoardRoom from "./pages/Room/Room";
 import Profile from "./pages/Profile/Profile";
 import ChangePassWord from "./pages/ChangePassWord/ChangePassWord";
+import Tenant from "./pages/Tenant/Tenant";     
 
 const App: React.FC = () => {
     return (
@@ -24,6 +25,7 @@ const App: React.FC = () => {
                     <Route path="/room" element={<DashBoardRoom />} />
                     <Route path="/Profile" element={<Profile/>}/>
                     <Route path="/Changepass" element={<ChangePassWord/>}/>
+                    <Route path="/Tenant" element={<Tenant/>}/>
                 </Route>
             </Routes>
         </Router>

@@ -12,7 +12,7 @@ const ChangePassWord: React.FC = () => {
     if (!userData) {
         return <div>Không có thông tin người dùng</div>;
     }
-
+    
     const handleChangePassword = async () => {
         if (!oldPassword || !newPassword || !confirmPassword) {
             setMessage("Vui lòng điền đầy đủ tất cả các trường");

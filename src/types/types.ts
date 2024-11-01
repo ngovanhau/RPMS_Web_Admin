@@ -36,6 +36,13 @@ export interface User {
   }
 
 
+
+
+  // export interface Service {
+  //   serviceId : string | null,
+  //   serviceName : string | null
+  // }
+
   export interface ServiceInfo {
     serviceId: string | null;
     serviceName: string | null;
@@ -53,6 +60,7 @@ export interface User {
     updatedAt?: string;
     id?: string;
   }
+
 
   export interface Room {
       id: string;
@@ -76,3 +84,18 @@ export interface User {
       CreatedAt?: Date;
       UpdatedAt?: Date;
     }
+
+  export interface Tenant{
+    id?: string;
+    customer_name:string;
+    phone_number: string;
+    choose_room?: string;
+    email: string;
+    date_of_birth: Date;
+    cccd: string;
+    date_of_issue: string;
+    place_of_issue: string;
+    address?: string;
+    imageCCCDs: string[];
+    roomName: string;
+  }
