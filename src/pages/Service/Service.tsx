@@ -3,7 +3,7 @@
 import HeaderServiceRow from "./components/HeaderServiceRow";
 import ServiceForm from "./components/ServiceForm";
 import CustomModal from "@/components/Modal/Modal";
-import ServiceRow from "@/components/ServicesRow/ServicesRow";
+import ServiceRow from "./components/ServicesRow/ServicesRow";
 import api from "@/services/axios";
 import { createService } from "@/services/servicesApi/servicesApi";
 import useServiceStore from "@/stores/servicesStore";

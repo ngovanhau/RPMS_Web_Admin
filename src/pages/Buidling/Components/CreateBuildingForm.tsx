@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import CustomModal from "@/components/Modal/Modal";
 import { useForm } from "react-hook-form";
-import { Building } from "@/types/types";
-
+import { Building, Service } from "@/types/types";
+import { getallService } from "@/services/servicesApi/servicesApi";
+import useServiceStore from "@/stores/servicesStore";
 interface CreateBuildingFormProps {
   isOpen: boolean;
   onClose: () => void;
@@ -13,22 +14,20 @@ const CreateBuildingForm: React.FC<CreateBuildingFormProps> = ({
   isOpen,
   onClose,
   onSubmit,
+  
 }) => {
   const {
     register,
     handleSubmit,
     formState: { errors },
     reset,
+    setValue,
   } = useForm<Building>({
     defaultValues: {
-      fee_based_service: [
-        { serviceId: "7e2d6bcc-0350-4474-bb71-03c5b33cb2bb", serviceName: "" },
-      ],
-      free_service: [
-        { serviceId: "285a87f1-883d-416f-a23a-9808a963d1e1", serviceName: "" },
-      ],
+      free_service: ["285a87f1-883d-416f-a23a-9808a963d1e1"],
     },
   });
+  const [paidServiceList, setPaidServiceList] = useState<string[]>([]);
 
   const [subDetails, setSubDetails] = useState<number>(0);
   const subDetailsLabel = [
@@ -46,8 +45,22 @@ const CreateBuildingForm: React.FC<CreateBuildingFormProps> = ({
   }, [isOpen, reset]);
 
   const handleFormSubmit = (data: Building) => {
+    setValue("fee_based_service", paidServiceList);
     onSubmit(data);
     onClose();
+  };
+
+  useEffect(() => {
+    getallService();
+  }, []);
+
+  const handleServiceClick = (serviceId: string) => {
+    setPaidServiceList(
+      (prevList) =>
+        prevList.includes(serviceId)
+          ? prevList.filter((id) => id !== serviceId) // Xóa nếu đã có
+          : [...prevList, serviceId] // Thêm nếu chưa có
+    );
   };
 
   return (
@@ -225,15 +238,45 @@ const CreateBuildingForm: React.FC<CreateBuildingFormProps> = ({
           </div>
           <div className="flex-1 w-full py-5 flex justify-start items-start">
             {subDetails === 0 && (
-              <textarea
-                {...register("fee_based_service.0.serviceName")}
-                placeholder="Nhập dịch vụ có phí"
-                className="h-full w-full shadow-xl align-text-top text-sm outline-none p-2 rounded-xl border resize-none"
-              />
+              // <textarea
+              //   {...register("fee_based_service")}
+              //   placeholder="Nhập dịch vụ có phí"
+              //   className="h-full w-full shadow-xl align-text-top text-sm outline-none p-2 rounded-xl border resize-none"
+              // />
+              <div className="h-full w-full flex flex-row flex-wrap">
+                {useServiceStore.getState().services.map((service) => (
+                  <div
+                    key={service.id}
+                    className="h-14 mr-2 px-2 w-36 flex flex-row border justify-center items-center border-gray-200 rounded-[8px]"
+                    onClick={() => handleServiceClick(service.id!)}
+                    style={{
+                      borderColor: paidServiceList.includes(service.id!)
+                        ? "#4ade80" // Màu nền khác khi dịch vụ đã chọn
+                        : "transparent",
+                    }}
+                  >
+                    {" "}
+                    <div className="w-1/5 ">
+                      <img
+                        className="object-cover h-8 w-8"
+                        src="https://as1.ftcdn.net/jpg/01/40/62/16/500_F_140621690_lCjpTdvOoqdovvUlh89F5FM1gODHMIdx.jpg"
+                      />
+                    </div>
+                    <div className="w-4/5 flex flex-col pl-3">
+                      <span className="text-gray-700 text-[13px] font-semibold">
+                        {service.service_name}
+                      </span>
+                      <span className="text-gray-700 text-[13px] font-semibold">
+                        {service.service_cost}/{service.collect_fees}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
             )}
             {subDetails === 1 && (
               <textarea
-                {...register("free_service.0.serviceName")}
+                {...register("free_service")}
                 placeholder="Nhập dịch vụ miễn phí"
                 className="h-full w-full shadow-xl align-text-top text-sm outline-none p-2 rounded-xl border resize-none"
               />

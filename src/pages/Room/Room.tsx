@@ -1,5 +1,5 @@
-// DashBoardBuilding.tsx
-import BuildingInfo from "./Components/BuildingInfo";
+// DashBoardRoom.tsx
+import BuildingInfo from "../Buidling/Components/BuildingInfo";
 import {
   getAllBuildings,
   getBuildingById,
@@ -7,34 +7,60 @@ import {
   editBuilding,
   addBuilding,
   getRoomByBuildingId,
+  deleteRoom,
+  addRoom,
+  editRoom,
 } from "@/services/buildingApi/buildingApi";
+import { Check, ChevronsUpDown } from "lucide-react";
+
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { useBuildingStore } from "@/stores/buildingStore";
 import React, { useEffect, useState } from "react";
-import BuildingForm from "./Components/BuildingForm";
-import CreateBuildingForm from "./Components/CreateBuildingForm";
-import { Building } from "@/types/types";
+import BuildingForm from "../Buidling/Components/BuildingForm";
+import CreateRoomForm from "../Room/components/CreateRoomForm";
+import { Building, Room } from "@/types/types";
 import { sortBuildingsByName } from "@/config/config";
 import RoomCard from "@/components/RoomCard/RoomCard";
+import { getRoomById } from "@/services/buildingApi/buildingApi";
+import EditRoomForm from "./components/EditRoomForm";
 
-const DashBoardBuilding: React.FC = () => {
+const DashBoardRoom: React.FC = () => {
   const buildings = useBuildingStore((state) => state.buildings);
   const building = useBuildingStore((state) => state.building);
   const roomList = useBuildingStore((state) => state.roomList);
+  console.log(roomList);
   const setBuilding = useBuildingStore((state) => state.setBuilding);
+  const room = useBuildingStore((state) => state.room);
   const [selectedBuildingId, setSelectedBuildingId] = useState<string | null>(
     null
   );
+  const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [isOpenBuildingForm, setIsOpenBuildingForm] = useState(false);
-  const [isOpenCreateBuildingForm, setIsOpenCreateBuildingForm] =
-    useState(false);
+  const [open, setOpen] = React.useState(false);
+  const [value, setValue] = React.useState("");
+  const [isOpenRoomForm, setIsOpenRoomForm] = useState(false);
+  const [isOpenCreateRoomForm, setIsOpenCreateRoomForm] = useState(false);
 
-  const handleOpenUpdateBuildingForm = () => {
-    setIsOpenBuildingForm(true);
+  const handleOpenUpdateRoomForm = () => {
+    setIsOpenRoomForm(true);
   };
 
-  const handleOpenCreateBuildingForm = () => {
-    setIsOpenCreateBuildingForm(true);
+  const handleOpenCreateRoomForm = () => {
+    setIsOpenCreateRoomForm(true);
   };
 
   const handleSelectBuilding = async (id: string) => {
@@ -42,62 +68,70 @@ const DashBoardBuilding: React.FC = () => {
       setSelectedBuildingId(id);
       await getBuildingById(id);
       await getRoomByBuildingId(id);
+      setOpen(false);
     } catch (err) {
       setError("Failed to fetch building details");
     }
   };
 
-  const handleSubmitBuilding = async (building: Building) => {
+  const handleClickRoomCard = async (roomId: string) => {
     try {
-      await editBuilding(building);
-      await getAllBuildings();
-      setIsOpenBuildingForm(false);
+      setSelectedRoomId(roomId);
+      await getRoomById(roomId);
+    } catch (error) {
+      setError("Failed to fetch room");
+    }
+  };
+
+  const handleSubmitRoom = async (room: Room) => {
+    try {
+      await editRoom(room);
+      await getRoomByBuildingId(selectedBuildingId);
+      setIsOpenRoomForm(false);
     } catch (err) {
       setError("Failed to update building");
     }
   };
 
-  const handleCreateBuilding = async (building: Building) => {
+  const handleCreateRoom = async (room: Room) => {
     try {
-      await addBuilding(building);
-      await getAllBuildings();
-      setIsOpenCreateBuildingForm(false);
+      console.log("Data room tạo nè : ", room);
+      await addRoom(room);
+      await getRoomByBuildingId(selectedBuildingId);
+      setIsOpenCreateRoomForm(false);
     } catch (err) {
-      setError("Failed to create building");
+      setError("Failed to create room");
     }
   };
-
-
 
   useEffect(() => {
     const fetchBuildings = async () => {
       try {
-        const response  = await getAllBuildings(); // Lưu kết quả vào biến tạm
-        const buildingsData = sortBuildingsByName(response.data.data)
-          setSelectedBuildingId(buildingsData[0].id)
-          await getBuildingById(buildingsData[0].id);
-          await getRoomByBuildingId(buildingsData[0].id);
+        const response = await getAllBuildings();
+        const buildingsData = sortBuildingsByName(response.data.data);
+        setSelectedBuildingId(buildingsData[0].id);
+        await getBuildingById(buildingsData[0].id);
+        await getRoomByBuildingId(buildingsData[0].id);
       } catch (err) {
         setError("Failed to load buildings");
       }
     };
     fetchBuildings();
   }, []);
-  
 
-  const handleDeleteBuilding = async () => {
-    if (!selectedBuildingId) return;
+  const handleDeleteRoom = async () => {
+    if (!selectedRoomId) return;
     try {
-      const response = await deleteBuilding(selectedBuildingId);
+      const response = await deleteRoom(selectedRoomId);
       if (response.data.isSuccess) {
-        await getAllBuildings();
-        if (buildings.length > 1) {
-          const firstBuildingId = buildings[0].id;
-          setSelectedBuildingId(firstBuildingId);
-          await handleSelectBuilding(firstBuildingId);
+        await getRoomByBuildingId(selectedBuildingId);
+        if (roomList.length > 0) {
+          const firstRoomId = roomList[0].id;
+          setSelectedRoomId(firstRoomId);
+          await handleClickRoomCard(roomList[0].id);
         } else {
-          setSelectedBuildingId(null);
-          useBuildingStore.getState().clearBuilding();
+          setSelectedRoomId(null);
+          useBuildingStore.getState().clearRoom();
         }
       }
     } catch (err) {
@@ -117,23 +151,82 @@ const DashBoardBuilding: React.FC = () => {
 
       <div className="flex h-[95%] flex-row justify-between bg-gray-200 p-4">
         <div className="w-[24%] h-full rounded-l-[8px] flex flex-col bg-white">
-          <div className="h-[90%]  w-full overflow-y-scroll scrollbar-hide border-b">
-            {buildings.map((building) => (
-              <BuildingInfo
-                onSelect={() => handleSelectBuilding(building.id)}
-                isSelected={selectedBuildingId === building.id}
-                key={building.id}
-                building={building}
-              />
-            ))}
+          <div className="h-[90%] relative  w-full overflow-y-scroll scrollbar-hide border-b">
+            <div className="flex absolute top-0 left-0 w-full">
+              <Popover open={open} onOpenChange={setOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={open}
+                    className="w-full h-[60px] border-gray-200 bg-white justify-between"
+                  >
+                    <span className="text-green-400">
+                      {selectedBuildingId
+                        ? buildings.find(
+                            (building) => building.id === selectedBuildingId
+                          )?.building_name
+                        : "Select building..."}
+                    </span>
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-[350px] bg-white p-0">
+                  <Command>
+                    <CommandInput placeholder="Search building..." />
+                    <CommandList>
+                      <CommandEmpty>No building found.</CommandEmpty>
+                      <CommandGroup>
+                        {buildings.map((building) => (
+                          <CommandItem
+                            className={cn("w-full bg-white")}
+                            key={building.id}
+                            value={building.id}
+                            onSelect={() => handleSelectBuilding(building.id)}
+                          >
+                            <Check
+                              className={cn(
+                                "mr-2 h-4 w-4",
+                                selectedBuildingId === building.id
+                                  ? "opacity-100"
+                                  : "opacity-0"
+                              )}
+                            />
+                            {building.building_name}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+            </div>
+
+            <div className="flex flex-col w-full mt-[60px]">
+              {roomList.length > 0 ? (
+                roomList.map((room, index) => (
+                  <RoomCard
+                    onSelect={() => handleClickRoomCard(room.id)}
+                    key={index}
+                    room={room}
+                  />
+                ))
+              ) : (
+                <div className="flex h-[350px]  justify-center items-end  w-full ">
+                  <span className="text-sm font-semibold text-gray-700">
+                    Chưa có room nào
+                  </span>
+                </div>
+              )}
+            </div>
           </div>
           <div className="h-[10%] w-full flex justify-center items-center">
             <div
-              onClick={handleOpenCreateBuildingForm}
+              onClick={handleOpenCreateRoomForm}
               className="h-12 rounded-xl w-[90%] cursor-pointer bg-green-400 flex justify-center items-center"
             >
               <span className="text-sm text-white font-semibold">
-                Thêm tòa nhà
+                Thêm phòng
               </span>
             </div>
           </div>
@@ -166,10 +259,7 @@ const DashBoardBuilding: React.FC = () => {
               </div>
               <div className="w-[75%] flex flex-col h-full justify-center">
                 <span className="text-global-size font-bold text-green-400">
-                  {
-                    buildings.find((b) => b.id === selectedBuildingId)
-                      ?.building_name
-                  }
+                  {room?.room_name}
                 </span>
                 <span className="text-[14px] font-semibold">
                   {buildings.find((b) => b.id === selectedBuildingId)?.address}
@@ -177,13 +267,13 @@ const DashBoardBuilding: React.FC = () => {
               </div>
               <div className="w-[20%]  flex flex-row justify-evenly ">
                 <button
-                  onClick={handleDeleteBuilding}
+                  onClick={handleDeleteRoom}
                   className="bg-red-500 hover:bg-red-600 text-white text-[14px] w-24 py-2 rounded"
                 >
                   Xóa
                 </button>
                 <button
-                  onClick={handleOpenUpdateBuildingForm}
+                  onClick={handleOpenUpdateRoomForm}
                   className="bg-green-500 hover:bg-green-600 text-white text-[14px] w-24 py-2 rounded"
                 >
                   Cập nhật
@@ -192,7 +282,7 @@ const DashBoardBuilding: React.FC = () => {
             </div>
           )}
           <div className="h-[70px] items-center justify-between flex flex-row w-full  mt-2 rounded-[8px] overflow-hidden">
-          <div className="h-full w-[18%] bg-white flex flex-row justify-center items-center rounded-[8px] overflow-hidden">
+            <div className="h-full w-[18%] bg-white flex flex-row justify-center items-center rounded-[8px] overflow-hidden">
               <div className="w-1/4 h-full flex justify-center items-center  ">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -211,7 +301,9 @@ const DashBoardBuilding: React.FC = () => {
               </div>
               <div className="w-2/4 flex justify-center pl-4 items-start flex-col h-full ">
                 <span className="text-global-green font-bold">Phòng</span>
-                <span className="text-global font-semibold">{roomList.length}</span>
+                <span className="text-global font-semibold">
+                  {room?.room_name}
+                </span>
               </div>
               <div className="w-1/4 "></div>
             </div>
@@ -235,7 +327,7 @@ const DashBoardBuilding: React.FC = () => {
               </div>
               <div className="w-2/4 flex justify-center pl-4 items-start flex-col h-full ">
                 <span className="text-global-green font-bold">Người thuê</span>
-                <span className="text-global ">1</span>
+                <span className="text-global ">{room?.renter}</span>
               </div>
               <div className="w-1/4 "></div>
             </div>
@@ -258,8 +350,8 @@ const DashBoardBuilding: React.FC = () => {
                 </svg>
               </div>
               <div className="w-2/4 flex justify-center pl-4 items-start flex-col h-full ">
-                <span className="text-global-green font-bold">Số tầng</span>
-                <span className="text-global ">{building?.number_of_floors}</span>
+                <span className="text-global-green font-bold">Diện tích</span>
+                <span className="text-global ">{room?.acreage} m²</span>
               </div>
               <div className="w-1/4 "></div>
             </div>
@@ -285,7 +377,7 @@ const DashBoardBuilding: React.FC = () => {
                 <span className="text-global-green font-bold">
                   Chi phí thuê
                 </span>
-                <span className="text-global ">{building?.rental_costs} VND</span>
+                <span className="text-global ">{room?.room_price} VND</span>
               </div>
               <div className="w-1/4 "></div>
             </div>
@@ -312,52 +404,40 @@ const DashBoardBuilding: React.FC = () => {
                 <span className="text-global">Phạm Văn Hoàng</span>
               </div>
             </div>
-
           </div>
 
           <div className="flex-1 flex flex-row justify-between h-full  mt-2 rounded-[8px]  overflow-hidden">
-            <div className="h-full w-[59%] p-3 pt-4 rounded-[8px] flex flex-col  overflow-hidden bg-white">
+            <div className=" h-full max-h-[760px] w-[59%] flex-col  overflow-y-scroll p-4  bg-white">
               <span className="text-global font-semibold">Dịch vụ có phí</span>
               <div className="flex flex-row rounded-[8px] flex-wrap overflow-hidden mt-2">
-                <div className="flex items-center justify-center w-36 h-[70px] rounded-[8px] border-2 border-green-400 p-2 bg-white shadow-sm">
-                  <div className="flex items-center space-x-3">
-                    <div className="flex items-center justify-center w-10 h-10">
-                      <img
-                        className="h-8 w-8"
-                        src="https://as1.ftcdn.net/jpg/01/40/62/16/500_F_140621690_lCjpTdvOoqdovvUlh89F5FM1gODHMIdx.jpg"
-                      />
-                    </div>
-                    <div>
-                      <div className="text-gray-700 font-semibold text-sm">
-                        Điện
+                {room?.roomservice && room.roomservice.length > 0 ? (
+                  room.roomservice.map((service) => (
+                    <div className="flex items-center mr-4 justify-center h-[70px] rounded-[8px] border-2 border-green-400 px-4 bg-white shadow-sm">
+                      <div className="flex items-center space-x-3">
+                        <div className="flex items-center justify-center w-10 h-10">
+                          <img
+                            className="h-8 w-8"
+                            src="https://as1.ftcdn.net/jpg/01/40/62/16/500_F_140621690_lCjpTdvOoqdovvUlh89F5FM1gODHMIdx.jpg"
+                          />
+                        </div>
+                        <div>
+                          <div className="text-gray-700 font-semibold text-sm">
+                            {service.serviceName}
+                          </div>
+                          <div className="text-red-500 text-sm">3.500/Kwh</div>
+                        </div>
                       </div>
-                      <div className="text-red-500 text-sm">3.500/Kwh</div>
                     </div>
+                  ))
+                ) : (
+                  <div className="h-10 w-full flex justify-center items-center">
+                    <span className="text-sm text-gray-500">
+                      Không có dịch vụ
+                    </span>
                   </div>
-                </div>
+                )}
               </div>
 
-              <span className="text-global mt-4 font-semibold">
-                Dịch vụ miễn phí
-              </span>
-              <div className="flex flex-row rounded-[8px] flex-wrap overflow-hidden mt-2">
-                <div className="flex items-center justify-center w-36 h-[70px] rounded-[8px] border-2 border-green-400 p-2 bg-white shadow-sm">
-                  <div className="flex items-center space-x-3">
-                    <div className="flex items-center justify-center w-10 h-10">
-                      <img
-                        className="h-8 w-8"
-                        src="https://as1.ftcdn.net/jpg/01/40/62/16/500_F_140621690_lCjpTdvOoqdovvUlh89F5FM1gODHMIdx.jpg"
-                      />
-                    </div>
-                    <div>
-                      <div className="text-gray-700 font-semibold text-sm">
-                        Điện
-                      </div>
-                      <div className="text-red-500 text-sm">3.500/Kwh</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
 
               <span className="text-global mt-4 font-semibold">
                 Tiện ích tòa nhà
@@ -367,51 +447,39 @@ const DashBoardBuilding: React.FC = () => {
                   Thang máy
                 </button>
               </div>
+              <div className="flex flex-col">
+                <span className="text-global mt-4 font-semibold">Mô tả</span>
+                <span className="text-gray-700 text-sm mt-2">
+                  {room?.describe}
+                </span>
 
-              <span className="text-global mt-4 font-semibold">Mô tả</span>
-              <span className="text-gray-700 text-sm mt-2">
-                {building?.description}
-              </span>
-
-              <span className="text-global mt-4 font-semibold">Lưu ý</span>
-              <span className="text-gray-700 text-sm mt-2">
-                {building?.advance_notice}
-              </span>
+                <span className="text-global mt-4 font-semibold">Lưu ý</span>
+                <span className="text-gray-700 text-sm mt-2">
+                  {room?.note}
+                </span>
+              </div>
+              <div className="h-[300px]"></div>
             </div>
 
-            <div className="h-full w-[38.5%] bg-white rounded-[8px]  overflow-hidden ">
-              {
-                roomList.length > 0 ? 
-                (
-                  roomList.map((room, index) => (
-                    <RoomCard key={index} room={room} />
-                  ))
-                )
-                :
-                (
-                  <div className="flex h-1/3 justify-center items-end  w-full ">
-                    <span className="text-sm font-semibold text-gray-700">Chưa có room nào</span>
-                  </div>
-                )
-              }
-
-            </div>
+            <div className="h-full w-[38.5%] bg-white rounded-[8px]  overflow-hidden "></div>
           </div>
         </div>
       </div>
-      <BuildingForm
-        onSubmit={handleSubmitBuilding}
+      <EditRoomForm
+        room={room}
+        onSubmit={handleSubmitRoom}
         building={building}
-        isOpen={isOpenBuildingForm}
-        onClose={() => setIsOpenBuildingForm(false)}
+        isOpen={isOpenRoomForm}
+        onClose={() => setIsOpenRoomForm(false)}
       />
-      <CreateBuildingForm
-        onSubmit={handleCreateBuilding}
-        isOpen={isOpenCreateBuildingForm}
-        onClose={() => setIsOpenCreateBuildingForm(false)}
+      <CreateRoomForm
+        building={building}
+        onSubmit={handleCreateRoom}
+        isOpen={isOpenCreateRoomForm}
+        onClose={() => setIsOpenCreateRoomForm(false)}
       />
     </div>
   );
 };
 
-export default DashBoardBuilding;
+export default DashBoardRoom;

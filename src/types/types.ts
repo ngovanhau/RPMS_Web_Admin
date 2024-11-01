@@ -29,16 +29,13 @@ export interface User {
     payment_time: number;
     payment_timeout: number;
     management: string;
-    fee_based_service: Service[] | undefined; 
-    free_service: Service[] | undefined;
+    fee_based_service: string[] | undefined; 
+    free_service: string[] | undefined;
     utilities: string;
     building_note?: string;
   }
 
-  export interface Service {
-    serviceId : string | null,
-    serviceName : string | null
-  }
+
   export interface ServiceInfo {
     serviceId: string | null;
     serviceName: string | null;
@@ -56,3 +53,26 @@ export interface User {
     updatedAt?: string;
     id?: string;
   }
+
+  export interface Room {
+      id: string;
+      room_name?: string;
+      status?: number;
+      room_price?: number;
+      floor?: number;
+      number_of_bedrooms?: number;
+      number_of_living_rooms?: number;
+      acreage?: number;
+      limited_occupancy?: number;
+      deposit?: number;
+      renter?: number;
+      roomservice?: ServiceInfo[];
+      imageUrls?: string[];
+      utilities?: string;
+      interior?: string;
+      describe?: string;
+      note?: string;
+      building_Id?: string;
+      CreatedAt?: Date;
+      UpdatedAt?: Date;
+    }
