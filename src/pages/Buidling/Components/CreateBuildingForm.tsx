@@ -14,7 +14,6 @@ const CreateBuildingForm: React.FC<CreateBuildingFormProps> = ({
   isOpen,
   onClose,
   onSubmit,
-  
 }) => {
   const {
     register,
@@ -24,11 +23,12 @@ const CreateBuildingForm: React.FC<CreateBuildingFormProps> = ({
     setValue,
   } = useForm<Building>({
     defaultValues: {
-      free_service: ["285a87f1-883d-416f-a23a-9808a963d1e1"],
     },
   });
-  const [paidServiceList, setPaidServiceList] = useState<string[]>([]);
-
+  const serviceList = useServiceStore((state) => state.services);
+  const [paidServiceList, setPaidServiceList] = useState<
+    { serviceId: string; serviceName: string | null }[]
+  >([]);
   const [subDetails, setSubDetails] = useState<number>(0);
   const subDetailsLabel = [
     { id: 0, label: "DỊCH VỤ CÓ PHÍ" },
@@ -45,7 +45,7 @@ const CreateBuildingForm: React.FC<CreateBuildingFormProps> = ({
   }, [isOpen, reset]);
 
   const handleFormSubmit = (data: Building) => {
-    setValue("fee_based_service", paidServiceList);
+    data.fee_based_service = paidServiceList;
     onSubmit(data);
     onClose();
   };
@@ -54,12 +54,14 @@ const CreateBuildingForm: React.FC<CreateBuildingFormProps> = ({
     getallService();
   }, []);
 
-  const handleServiceClick = (serviceId: string) => {
-    setPaidServiceList(
-      (prevList) =>
-        prevList.includes(serviceId)
-          ? prevList.filter((id) => id !== serviceId) // Xóa nếu đã có
-          : [...prevList, serviceId] // Thêm nếu chưa có
+  const handleServiceClick = (
+    serviceId: string,
+    serviceName: string | null
+  ) => {
+    setPaidServiceList((prevList) =>
+      prevList.some((service) => service.serviceId === serviceId)
+        ? prevList.filter((service) => service.serviceId !== serviceId)
+        : [...prevList, { serviceId, serviceName }]
     );
   };
 
@@ -238,40 +240,42 @@ const CreateBuildingForm: React.FC<CreateBuildingFormProps> = ({
           </div>
           <div className="flex-1 w-full py-5 flex justify-start items-start">
             {subDetails === 0 && (
-              // <textarea
-              //   {...register("fee_based_service")}
-              //   placeholder="Nhập dịch vụ có phí"
-              //   className="h-full w-full shadow-xl align-text-top text-sm outline-none p-2 rounded-xl border resize-none"
-              // />
-              <div className="h-full w-full flex flex-row flex-wrap">
-                {useServiceStore.getState().services.map((service) => (
-                  <div
-                    key={service.id}
-                    className="h-14 mr-2 px-2 w-36 flex flex-row border justify-center items-center border-gray-200 rounded-[8px]"
-                    onClick={() => handleServiceClick(service.id!)}
-                    style={{
-                      borderColor: paidServiceList.includes(service.id!)
-                        ? "#4ade80" // Màu nền khác khi dịch vụ đã chọn
-                        : "transparent",
-                    }}
-                  >
-                    {" "}
-                    <div className="w-1/5 ">
-                      <img
-                        className="object-cover h-8 w-8"
-                        src="https://as1.ftcdn.net/jpg/01/40/62/16/500_F_140621690_lCjpTdvOoqdovvUlh89F5FM1gODHMIdx.jpg"
-                      />
-                    </div>
-                    <div className="w-4/5 flex flex-col pl-3">
-                      <span className="text-gray-700 text-[13px] font-semibold">
-                        {service.service_name}
-                      </span>
-                      <span className="text-gray-700 text-[13px] font-semibold">
-                        {service.service_cost}/{service.collect_fees}
-                      </span>
-                    </div>
+              <div className="h-56 w-full flex flex-col">
+                <div className="flex-1 w-full py-5 flex justify-start items-start">
+                  <div className="h-full w-full flex flex-row flex-wrap">
+                    {serviceList.map((service) => (
+                      <div
+                        key={service.id}
+                        className="h-14 mr-2 px-2 w-36 flex flex-row border justify-center items-center border-gray-200 rounded-[8px]"
+                        onClick={() =>
+                          handleServiceClick(service.id!, service.service_name)
+                        }
+                        style={{
+                          borderColor: paidServiceList.some(
+                            (s) => s.serviceId === service.id!
+                          )
+                            ? "#4ade80"
+                            : "transparent",
+                        }}
+                      >
+                        <div className="w-1/5">
+                          <img
+                            className="object-cover h-8 w-8"
+                            src="https://as1.ftcdn.net/jpg/01/40/62/16/500_F_140621690_lCjpTdvOoqdovvUlh89F5FM1gODHMIdx.jpg"
+                          />
+                        </div>
+                        <div className="w-4/5 flex flex-col pl-3">
+                          <span className="text-gray-700 text-[13px] font-semibold">
+                            {service?.service_name}
+                          </span>
+                          <span className="text-gray-700 text-[13px] font-semibold">
+                            {service.service_cost}/{service.collect_fees}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                ))}
+                </div>
               </div>
             )}
             {subDetails === 1 && (

@@ -8,7 +8,10 @@ import DashBoardBuidling from "./pages/Buidling/Building";
 import DashBoardRoom from "./pages/Room/Room";
 import Profile from "./pages/Profile/Profile";
 import ChangePassWord from "./pages/ChangePassWord/ChangePassWord";
-import Tenant from "./pages/Tenant/Tenant";     
+import Tenant from "./pages/Tenant/Tenant";  
+import DashBoardContract from "./pages/Contract/Contract";   
+import DashBoardAccount from "./pages/Account/Account";
+import DashBoardPermission from "./pages/Permission/Permission";
 
 const App: React.FC = () => {
     return (
@@ -26,6 +29,10 @@ const App: React.FC = () => {
                     <Route path="/Profile" element={<Profile/>}/>
                     <Route path="/Changepass" element={<ChangePassWord/>}/>
                     <Route path="/Tenant" element={<Tenant/>}/>
+                    <Route path="/Contract" element={<DashBoardContract/>}/>
+                    <Route path="/Account" element={<DashBoardAccount/>}/>
+                    <Route path="/Permission" element={<DashBoardPermission/>}/>
+                    
                 </Route>
             </Routes>
         </Router>

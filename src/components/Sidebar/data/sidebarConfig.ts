@@ -1,44 +1,55 @@
-import { FaTachometerAlt, FaClipboardList, FaMoneyBill, FaBuilding, FaDoorOpen, FaConciergeBell, FaUserFriends, FaFileContract } from 'react-icons/fa';
-
+import { FaTachometerAlt, FaClipboardList, FaMoneyBill, FaLock, FaBuilding, FaDoorOpen, FaConciergeBell, FaUserFriends, FaFileContract, FaUser } from 'react-icons/fa';
 export const sidebarItems = [
   {
     type: "dashboard",
     label: "Dashboard",
-    icon: FaTachometerAlt, // Icon bảng điều khiển
+    icon: FaTachometerAlt,
   },
   {
     type: "roomstatement",
     label: "Chốt điện nước",
-    icon: FaClipboardList, // Icon cho các báo cáo hoặc danh sách
+    icon: FaClipboardList,
   },
   {
     type: "deposit",
     label: "Cọc giữ chỗ",
-    icon: FaMoneyBill, // Icon đại diện cho cọc tiền
+    icon: FaMoneyBill,
   },
   {
     type: "building",
     label: "Tòa nhà",
-    icon: FaBuilding, // Icon cho tòa nhà
+    icon: FaBuilding,
   },
   {
     type: "room",
     label: "Phòng",
-    icon: FaDoorOpen, // Icon cửa phòng
+    icon: FaDoorOpen,
   },
   {
     type: "service",
     label: "Dịch vụ",
-    icon: FaConciergeBell, // Icon đại diện cho dịch vụ
+    icon: FaConciergeBell,
   },
   {
     type: "Tenant",
     label: "Người thuê",
-    icon: FaUserFriends, // Icon người thuê
+    icon: FaUserFriends,
   },
   {
     type: "Contract",
     label: "Hợp đồng",
-    icon: FaFileContract, // Icon hợp đồng
+    icon: FaFileContract,
+  },
+  {
+    type: "Account",
+    label: "Tài khoản",
+    icon: FaUser, 
+  },
+  {
+    type: "Permission",
+    label: "Phân quyền",
+    icon: FaLock, 
   },
 ];
+
+

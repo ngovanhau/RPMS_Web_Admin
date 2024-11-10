@@ -25,6 +25,7 @@ export const getbyidTenant = async(TenanID: string) => {
 export const createTenant = async (TenantData: Tenant) => {
     try {
       const response = await api.post("/customer/create", TenantData);
+      console.log('Đây là response của tạo customer ',response);
       return response.data;
     } catch (error) {
       console.error("Error creating Tenant:", error);

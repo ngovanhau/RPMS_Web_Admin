@@ -16,7 +16,7 @@ interface TenantsRowProps {
 }
 
 const TenantRow: React.FC<TenantsRowProps> = ({
-    tenant,
+  tenant,
   onDeleteSuccess,
   handleEdit,
 }) => {
@@ -33,11 +33,9 @@ const TenantRow: React.FC<TenantsRowProps> = ({
 
   const handleEditClick = () => {
     if (handleEdit) {
-      handleEdit(tenant); 
+      handleEdit(tenant);
     }
   };
-
-  
 
   return (
     <div className="flex flex-row w-full h-16 cursor-pointer">
@@ -63,7 +61,9 @@ const TenantRow: React.FC<TenantsRowProps> = ({
           </DropdownMenuTrigger>
           <DropdownMenuContent className="bg-white ml-32">
             <DropdownMenuItem onSelect={handleDelete}>Xóa</DropdownMenuItem>
-            <DropdownMenuItem onSelect={handleEditClick}>Chỉnh sửa</DropdownMenuItem>
+            <DropdownMenuItem onSelect={handleEditClick}>
+              Chỉnh sửa
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
@@ -89,7 +89,10 @@ const TenantRow: React.FC<TenantsRowProps> = ({
       </div>
       <div className="w-[24%] flex items-center justify-start">
         <span className="text-gray-600 font-semibold text-[15px] text-left">
-          {tenant.date_of_issue}
+          {/* {tenant.date_of_birth instanceof Date
+            ? tenant.date_of_birth.toISOString().split("T")[0]
+            : tenant.date_of_birth} */}
+            {tenant.email}
         </span>
       </div>
     </div>

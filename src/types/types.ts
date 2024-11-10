@@ -1,6 +1,6 @@
 // Định nghĩa giao diện cho User
 export interface User {
-    id?: string;
+    id: string;
     firstName?: string;
     lastName?: string;
     username: string;
@@ -13,6 +13,7 @@ export interface User {
     salts?: string;
     phone?:string;
     status?:string;
+    userId?:string
   }
 
   export interface Building {
@@ -29,7 +30,7 @@ export interface User {
     payment_time: number;
     payment_timeout: number;
     management: string;
-    fee_based_service: string[] | undefined; 
+    fee_based_service: ServiceInfo[]; 
     free_service: string[] | undefined;
     utilities: string;
     building_note?: string;
@@ -85,17 +86,53 @@ export interface User {
       UpdatedAt?: Date;
     }
 
-  export interface Tenant{
-    id?: string;
-    customer_name:string;
-    phone_number: string;
-    choose_room?: string;
-    email: string;
-    date_of_birth: Date;
-    cccd: string;
-    date_of_issue: string;
-    place_of_issue: string;
-    address?: string;
-    imageCCCDs: string[];
-    roomName: string;
+    export interface Tenant {
+      id?: string;
+      customer_name: string;
+      phone_number: string;
+      choose_room?: string;
+      email: string;
+      date_of_birth: Date;
+      cccd: string;
+      date_of_issue: Date;
+      place_of_issue: string;
+      address?: string;
+      imageCCCDs: string[];
+      roomName: string;
+    }
+    
+
+
+  export interface Contract {
+    id: string; // Guid
+    contract_name: string;
+    rentalManagement?: string;
+    room: string;
+    roomId: string; // Guid
+    start_day: Date;
+    end_day: Date;
+    billing_start_date: Date;
+    payment_term: number;
+    room_fee: number;
+    deposit: number;
+    customerId?: string; // Guid
+    // service?: ServiceInfo[];
+    service?: string;
+    clause?: string;
+    image?: string;
+    customerName?: string | undefined;
   }
+  
+  
+  export interface Account {
+    id?:string,
+    username: string;
+    password: string;
+    firstName: string;
+    lastName: string;
+    role: string;
+    email: string;
+    phone: string;
+    userId? : string
+  }
+  

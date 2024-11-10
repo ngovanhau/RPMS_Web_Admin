@@ -9,7 +9,7 @@ export interface Tenant {
   email: string;
   date_of_birth: Date;
   cccd: string;
-  date_of_issue: string;
+  date_of_issue: Date;
   place_of_issue: string;
   address: string;
   imageCCCDs: string[];
@@ -19,7 +19,9 @@ export interface Tenant {
 // Định nghĩa interface cho TenantStore
 interface TenantStore {
   tenants: Tenant[];
+  tenantsWithoutRoom: Tenant[]; // Mảng lưu tenant chưa có room
   setTenants: (tenants: Tenant[]) => void;
+  setTenantsWithoutRoom: (tenants: Tenant[]) => void; // Thêm hàm mới
   addTenant: (tenant: Tenant) => void;
   updateTenant: (tenant: Tenant) => void;
   removeTenant: (id: string) => void;
@@ -27,27 +29,49 @@ interface TenantStore {
 
 // Tạo store Zustand với kiểu dữ liệu được định nghĩa
 const useTenantStore = create<TenantStore>((set) => ({
-  tenants: [], // Danh sách tenant ban đầu
+  tenants: [],
+  tenantsWithoutRoom: [],
 
-  // Hành động để cập nhật danh sách tenants
-  setTenants: (tenants) => set({ tenants }),
+  setTenants: (tenants) =>
+    set({
+      tenants,
+      tenantsWithoutRoom: tenants.filter((tenant) => !tenant.choose_room),
+    }),
 
-  // Hành động để thêm một tenant mới
-  addTenant: (tenant) => set((state) => ({ tenants: [...state.tenants, tenant] })),
+  // Thêm hàm mới để cập nhật tenantsWithoutRoom
+  setTenantsWithoutRoom: (tenants) =>
+    set({
+      tenantsWithoutRoom: tenants,
+    }),
 
-  // Hành động để cập nhật một tenant
+  addTenant: (tenant) =>
+    set((state) => {
+      const updatedTenants = [...state.tenants, tenant];
+      return {
+        tenants: updatedTenants,
+        tenantsWithoutRoom: updatedTenants.filter((tenant) => !tenant.choose_room),
+      };
+    }),
+
   updateTenant: (updatedTenant) =>
-    set((state) => ({
-      tenants: state.tenants.map((tenant) =>
+    set((state) => {
+      const updatedTenants = state.tenants.map((tenant) =>
         tenant.id === updatedTenant.id ? updatedTenant : tenant
-      ),
-    })),
+      );
+      return {
+        tenants: updatedTenants,
+        tenantsWithoutRoom: updatedTenants.filter((tenant) => !tenant.choose_room),
+      };
+    }),
 
-  // Hành động để xóa một tenant
   removeTenant: (id) =>
-    set((state) => ({
-      tenants: state.tenants.filter((tenant) => tenant.id !== id),
-    })),
+    set((state) => {
+      const updatedTenants = state.tenants.filter((tenant) => tenant.id !== id);
+      return {
+        tenants: updatedTenants,
+        tenantsWithoutRoom: updatedTenants.filter((tenant) => !tenant.choose_room),
+      };
+    }),
 }));
 
 export default useTenantStore;

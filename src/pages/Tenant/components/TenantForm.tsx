@@ -1,4 +1,4 @@
-import { createTenant, updateTenant } from "@/services/tenantApi/tenant";
+import { createTenant } from "@/services/tenantApi/tenant";
 import { Tenant } from "@/types/types";
 import React, { useState, useEffect } from "react";
 import { getroombystatus } from "@/services/tenantApi/tenant";
@@ -7,8 +7,6 @@ import { uploadImage } from "@/services/uploadApi/upload";
 interface TenantFormProps {
   onSuccess: () => void;
   onClose: () => void;
-  isEdit?: boolean;
-  initialTenant?: Tenant | null;
 }
 
 interface Room {
@@ -16,35 +14,26 @@ interface Room {
   room_name: string;
 }
 
-const TenantForm: React.FC<TenantFormProps> = ({
-  onSuccess,
-  onClose,
-  isEdit = false,
-  initialTenant,
-}) => {
-  const [tenant, setTenant] = useState<Tenant>(
-    initialTenant || {
-      customer_name: "",
-      phone_number: "",
-      choose_room: "",
-      email: "",
-      date_of_birth: new Date(),
-      cccd: "",
-      date_of_issue: "",
-      place_of_issue: "",
-      address: "",
-      imageCCCDs: [],
-      roomName:"",
-    }
-  );
+const TenantForm: React.FC<TenantFormProps> = ({ onSuccess, onClose }) => {
+  const [tenant, setTenant] = useState<Tenant>({
+    customer_name: "",
+    phone_number: "",
+    choose_room: "",
+    email: "",
+    date_of_birth: new Date(),
+    cccd: "",
+    date_of_issue: new Date(),
+    place_of_issue: "",
+    address: "",
+    imageCCCDs: [],
+    roomName: "",
+  });
+
   const [rooms, setRooms] = useState<Room[]>([]);
 
   useEffect(() => {
-    if (initialTenant) {
-      setTenant(initialTenant);
-    }
     fetchAvailableRooms();
-  }, [initialTenant]);
+  }, []);
 
   const fetchAvailableRooms = async () => {
     try {
@@ -55,7 +44,11 @@ const TenantForm: React.FC<TenantFormProps> = ({
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
     const { id, value } = e.target;
     setTenant((prevTenant) => ({
       ...prevTenant,
@@ -63,7 +56,9 @@ const TenantForm: React.FC<TenantFormProps> = ({
     }));
   };
 
-  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     if (event.target.files) {
       const files = Array.from(event.target.files);
       const uploadedImageUrls: string[] = [];
@@ -86,28 +81,31 @@ const TenantForm: React.FC<TenantFormProps> = ({
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
+  
+    // Tạo một bản sao của tenant mà không có `choose_room` nếu nó trống
+    const { choose_room, ...otherTenantData } = tenant;
+    const tenantData = choose_room ? tenant : otherTenantData;
+  
     try {
-      if (isEdit) {
-        // await updateTenant(tenant);
-        console.log(tenant);
-
-      } else {
-        // await createTenant(tenant);
-        console.log(tenant);
-      }
+      await createTenant(tenantData); // Gửi tenantData thay vì tenant
+      console.log("Tenant created:", tenantData);
       onSuccess();
       onClose();
     } catch (error) {
-      console.error("Failed to create or update tenant:", error);
+      console.error("Failed to create tenant:", error);
     }
   };
+  
 
   return (
     <form onSubmit={handleSubmit} className="w-full p-6 bg-white">
       <div className="grid grid-cols-2 gap-4">
         {/* Full Name */}
         <div>
-          <label htmlFor="customer_name" className="block text-gray-700 font-semibold mb-1">
+          <label
+            htmlFor="customer_name"
+            className="block text-gray-700 font-semibold mb-1"
+          >
             Họ và tên *
           </label>
           <input
@@ -123,7 +121,10 @@ const TenantForm: React.FC<TenantFormProps> = ({
 
         {/* Phone Number */}
         <div>
-          <label htmlFor="phone_number" className="block text-gray-700 font-semibold mb-1">
+          <label
+            htmlFor="phone_number"
+            className="block text-gray-700 font-semibold mb-1"
+          >
             Số điện thoại *
           </label>
           <input
@@ -139,7 +140,10 @@ const TenantForm: React.FC<TenantFormProps> = ({
 
         {/* Email */}
         <div>
-          <label htmlFor="email" className="block text-gray-700 font-semibold mb-1">
+          <label
+            htmlFor="email"
+            className="block text-gray-700 font-semibold mb-1"
+          >
             Email
           </label>
           <input
@@ -154,24 +158,32 @@ const TenantForm: React.FC<TenantFormProps> = ({
 
         {/* Date of Birth */}
         <div>
-          <label htmlFor="date_of_birth" className="block text-gray-700 font-semibold mb-1">
+          <label
+            htmlFor="date_of_birth"
+            className="block text-gray-700 font-semibold mb-1"
+          >
             Ngày sinh
           </label>
           <input
             type="date"
             id="date_of_birth"
-            value={tenant.date_of_birth.toISOString().split('T')[0]}
-            onChange={(e) => setTenant((prev) => ({
-              ...prev,
-              date_of_birth: new Date(e.target.value)
-            }))}
+            value={tenant.date_of_birth.toISOString().split("T")[0]}
+            onChange={(e) =>
+              setTenant((prev) => ({
+                ...prev,
+                date_of_birth: new Date(e.target.value),
+              }))
+            }
             className="w-full p-2 border rounded-md"
           />
         </div>
 
         {/* Choose Room */}
         <div>
-          <label htmlFor="choose_room" className="block text-gray-700 font-semibold mb-1">
+          <label
+            htmlFor="choose_room"
+            className="block text-gray-700 font-semibold mb-1"
+          >
             Chọn phòng thuê
           </label>
           <select
@@ -182,7 +194,7 @@ const TenantForm: React.FC<TenantFormProps> = ({
           >
             <option value="">Chọn phòng thuê có sẵn</option>
             {rooms.map((room) => (
-              <option key={room.id} value={room.room_name}>
+              <option key={room.id} value={room.id}>
                 {room.room_name}
               </option>
             ))}
@@ -191,7 +203,10 @@ const TenantForm: React.FC<TenantFormProps> = ({
 
         {/* CCCD */}
         <div>
-          <label htmlFor="cccd" className="block text-gray-700 font-semibold mb-1">
+          <label
+            htmlFor="cccd"
+            className="block text-gray-700 font-semibold mb-1"
+          >
             Số CMND/CCCD
           </label>
           <input
@@ -206,7 +221,10 @@ const TenantForm: React.FC<TenantFormProps> = ({
 
         {/* Place of Issue */}
         <div>
-          <label htmlFor="place_of_issue" className="block text-gray-700 font-semibold mb-1">
+          <label
+            htmlFor="place_of_issue"
+            className="block text-gray-700 font-semibold mb-1"
+          >
             Nơi cấp
           </label>
           <input
@@ -221,21 +239,36 @@ const TenantForm: React.FC<TenantFormProps> = ({
 
         {/* Date of Issue */}
         <div>
-          <label htmlFor="date_of_issue" className="block text-gray-700 font-semibold mb-1">
+          <label
+            htmlFor="place_of_issue"
+            className="block text-gray-700 font-semibold mb-1"
+          >
             Ngày cấp
           </label>
-          <input
-            type="date"
-            id="date_of_issue"
-            value={tenant.date_of_issue}
-            onChange={handleChange}
-            className="w-full p-2 border rounded-md"
-          />
-        </div>
+        <input
+          type="date"
+          id="date_of_issue"
+          value={
+            tenant.date_of_issue
+              ? tenant.date_of_issue.toISOString().split("T")[0]
+              : ""
+          }
+          onChange={(e) =>
+            setTenant((prev) => ({
+              ...prev,
+              date_of_issue: new Date(e.target.value),
+            }))
+          }
+          className="w-full p-2 border rounded-md"
+        />
+                </div>
 
         {/* Address */}
         <div className="col-span-2">
-          <label htmlFor="address" className="block text-gray-700 font-semibold mb-1">
+          <label
+            htmlFor="address"
+            className="block text-gray-700 font-semibold mb-1"
+          >
             Địa chỉ
           </label>
           <textarea
@@ -249,7 +282,10 @@ const TenantForm: React.FC<TenantFormProps> = ({
 
         {/* Image CCCD */}
         <div className="col-span-2">
-          <label htmlFor="imageCCCDs" className="block text-gray-700 font-semibold mb-1">
+          <label
+            htmlFor="imageCCCDs"
+            className="block text-gray-700 font-semibold mb-1"
+          >
             Ảnh CMND/CCCD
           </label>
           <input
@@ -277,7 +313,7 @@ const TenantForm: React.FC<TenantFormProps> = ({
           type="submit"
           className="bg-green-500 text-white py-2 px-6 rounded-md"
         >
-          {isEdit ? "Chỉnh sửa" : "Thêm mới"}
+          Thêm mới
         </button>
       </div>
     </form>

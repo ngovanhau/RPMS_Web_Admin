@@ -1,4 +1,3 @@
-//core
 import React, { useEffect, useState } from "react";
 
 //internal
@@ -10,12 +9,13 @@ import TenantForm from "./components/TenantForm";
 import TenantRow from "./components/TenantsRow";
 import CustomModal from "@/components/Modal/Modal";
 import type { Tenant } from "@/types/types";
+import EditTenantForm from "./components/EditTenantForm";
 
 const Tenant: React.FC = () => {
   const { userData } = useAuthStore();
   const { tenants, setTenants } = useTenantStore();
-  const [modalIsOpen, setModalIsOpen] = useState(false);
-  const [isEdit, setIsEdit] = useState(false);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedTenant, setSelectedTenant] = useState<Tenant | null>(null);
 
   // Fetch all tenants
@@ -29,19 +29,19 @@ const Tenant: React.FC = () => {
     }
   };
 
-  const handleDeleteSuccess = () => {
-    fetchAllTenants(); 
+  const handleDeleteSuccess = async () => {
+    await fetchAllTenants();
   };
 
-  const handleSuccess = () => {
-    fetchAllTenants();
-    setModalIsOpen(false);
+  const handleSuccess = async () => {
+    await fetchAllTenants();
+    setIsAddModalOpen(false);
+    setIsEditModalOpen(false);
   };
 
   const handleEdit = (tenant: Tenant) => {
     setSelectedTenant(tenant);
-    setIsEdit(true);
-    setModalIsOpen(true);
+    setIsEditModalOpen(true);
   };
 
   useEffect(() => {
@@ -85,8 +85,8 @@ const Tenant: React.FC = () => {
         </svg>
       </div>
 
-      <div className="flex h-[95%] p-6 overflow-hidden">
-        <div className="flex flex-1 flex-col py-4 px-4 w-full bg-white">
+      <div className="flex h-[95%] p-4  overflow-hidden">
+        <div className="flex flex-1 flex-col rounded-[8px] py-4 px-4 w-full bg-white">
           <div className="flex flex-row justify-between items-center pb-4 border-b">
             <div className="flex flex-row items-center gap-6">
               <div className="py-1 px-2 rounded-[6px] flex justify-center items-center bg-green-500">
@@ -99,22 +99,21 @@ const Tenant: React.FC = () => {
                 className="bg-green-400 flex flex-row justify-center items-center gap-2 text-base h-12 text-white py-2 w-44 rounded-[6px] shadow hover:bg-green-500 transition duration-300"
                 title="Thêm Mới"
                 onClick={() => {
-                  setIsEdit(false);
                   setSelectedTenant(null);
-                  setModalIsOpen(true);
+                  setIsAddModalOpen(true);
                 }}
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
                   viewBox="0 0 24 24"
-                  stroke-width="1.5"
+                  strokeWidth="1.5"
                   stroke="currentColor"
                   className="size-6"
                 >
                   <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
                     d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
                   />
                 </svg>
@@ -128,33 +127,51 @@ const Tenant: React.FC = () => {
 
           {/* Display list of tenants */}
           <div className="flex-1 w-full flex-col overflow-y-auto">
-          {tenants.length > 0 ? (
-            tenants.map((tenant) => (
-              <TenantRow
-                key={tenant.id}
-                tenant={tenant}
-                onDeleteSuccess={handleDeleteSuccess}
-                handleEdit={handleEdit}
-              />
-            ))
-          ) : (
-            <div className="h-full w-full flex justify-center items-center"><p className="text-sm mb-10 text-gray-500">Chưa có khách hàng nào.</p></div>
-          )}
-        </div>
+            {tenants.length > 0 ? (
+              tenants.map((tenant) => (
+                <TenantRow
+                  key={tenant.id}
+                  tenant={tenant}
+                  onDeleteSuccess={handleDeleteSuccess}
+                  handleEdit={handleEdit}
+                />
+              ))
+            ) : (
+              <div className="h-full w-full flex justify-center items-center">
+                <p className="text-sm mb-10 text-gray-500">
+                  Chưa có khách hàng nào.
+                </p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
+      {/* Modal for adding a new Tenant */}
       <CustomModal
-        isOpen={modalIsOpen}
-        onClose={() => setModalIsOpen(false)}
-        header={isEdit ? "Chỉnh sửa Tenant" : "Thêm mới Tenant"}
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        header="Thêm mới Tenant"
       >
         <TenantForm
           onSuccess={handleSuccess}
-          onClose={() => setModalIsOpen(false)}
-          isEdit={isEdit}
-          initialTenant={selectedTenant}
+          onClose={() => setIsAddModalOpen(false)}
         />
+      </CustomModal>
+
+      {/* Modal for editing an existing Tenant */}
+      <CustomModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        header="Chỉnh sửa Tenant"
+      >
+        {selectedTenant && (
+          <EditTenantForm
+            onSuccess={handleSuccess}
+            onClose={() => setIsEditModalOpen(false)}
+            tenant={selectedTenant}
+          />
+        )}
       </CustomModal>
     </div>
   );

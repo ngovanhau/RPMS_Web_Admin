@@ -26,7 +26,7 @@ const CustomModal: React.FC<CustomModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className={`fixed inset-0 z-50 flex items-center justify-center ${modalWrapperClassName}`}>
+    <div className={`fixed inset-0  z-50 flex items-center justify-center ${modalWrapperClassName}`}>
       <div className={`fixed inset-0 bg-black bg-opacity-30 transition-opacity ${overlayClassName}`} onClick={onClose}></div>
       <div className={`bg-white rounded-xl shadow-lg w-full max-w-7xl transform transition-all ${className}`}>
         <div className={`flex justify-between items-center border-b pb-3 px-6 pt-4 ${headerClassName}`}>
@@ -40,7 +40,7 @@ const CustomModal: React.FC<CustomModalProps> = ({
             </svg>
           </button>
         </div>
-        <div className={`px-6 py-4 ${contentClassName}`}>
+        <div className={`px-6 py-4 max-h-[90vh] overflow-y-auto ${contentClassName}`}>
           {children}
         </div>
       </div>

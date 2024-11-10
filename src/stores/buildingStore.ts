@@ -3,16 +3,20 @@ import { Building, Room } from '@/types/types';
 
 interface BuildingStore {
   buildings: Building[];
+  buildingByUserId: Building[]; // Another array to store buildings by user ID
   building: Building | null;
   roomList: Room[];
-  room: Room | null; // Changed to null for consistency
+  room: Room | null;
   
   // Building functions
   addBuilding: (building: Building) => void;
+  addBuildingByUserId: (building: Building) => void; // New function to add to buildingByUserId
   updateBuilding: (id: string, updatedBuilding: Partial<Building>) => void;
   removeBuilding: (id: string) => void;
   setBuildings: (buildings: Building[]) => void;
+  setBuildingByUserId: (buildings: Building[]) => void; // New function to set buildingByUserId array
   clearAllBuildings: () => void;
+  clearAllBuildingsByUserId: () => void; // New function to clear buildingByUserId array
   setBuilding: (building: Building) => void;
   clearBuilding: () => void;
   
@@ -31,6 +35,7 @@ interface BuildingStore {
 
 export const useBuildingStore = create<BuildingStore>((set) => ({
   buildings: [],
+  buildingByUserId: [], // Initialize as an empty array
   building: null,
   roomList: [],
   room: null,
@@ -39,6 +44,9 @@ export const useBuildingStore = create<BuildingStore>((set) => ({
   addBuilding: (building) =>
     set((state) => ({ buildings: [...state.buildings, building] })),
   
+  addBuildingByUserId: (building) =>
+    set((state) => ({ buildingByUserId: [...state.buildingByUserId, building] })),
+
   updateBuilding: (id, updatedBuilding) =>
     set((state) => ({
       buildings: state.buildings.map((building) =>
@@ -52,7 +60,9 @@ export const useBuildingStore = create<BuildingStore>((set) => ({
     })),
   
   setBuildings: (buildings) => set({ buildings }),
+  setBuildingByUserId: (buildings) => set({ buildingByUserId: buildings }),
   clearAllBuildings: () => set({ buildings: [] }),
+  clearAllBuildingsByUserId: () => set({ buildingByUserId: [] }),
   setBuilding: (building) => set({ building }),
   clearBuilding: () => set({ building: null }),
 

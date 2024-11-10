@@ -1,8 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import CustomModal from "@/components/Modal/Modal";
 import { useForm } from "react-hook-form";
 import { Building } from "@/types/types";
-
+import { getallService } from "@/services/servicesApi/servicesApi";
+import useServiceStore from "@/stores/servicesStore";
+import { ServiceInfo } from "@/types/types";
 interface BuildingFormProps {
   isOpen: boolean;
   onClose: () => void;
@@ -32,6 +34,23 @@ const BuildingForm: React.FC<BuildingFormProps> = ({
     { id: 4, label: "LƯU Ý TÒA NHÀ" },
   ];
 
+  const serviceList = useServiceStore((state) => state.services);
+  const [paidServiceList, setPaidServiceList] = useState<{ serviceId: string; serviceName: string | null }[]>([]);
+  
+  useEffect(() => {
+    if (building?.fee_based_service?.length) {
+      const filteredServices = building.fee_based_service
+        .filter((service) => service.serviceId !== null)
+        .map((service) => ({
+          serviceId: service.serviceId as string,
+          serviceName: service.serviceName,
+        }));
+      setPaidServiceList(filteredServices);
+    } else {
+      setPaidServiceList([]);
+    }
+  }, [building]);
+
   React.useEffect(() => {
     if (isOpen && building) {
       reset(building); // Populate form with building data when editing
@@ -39,9 +58,30 @@ const BuildingForm: React.FC<BuildingFormProps> = ({
   }, [isOpen, building, reset]);
 
   const handleFormSubmit = (data: Building) => {
+  
+    data.fee_based_service = paidServiceList;
     onSubmit(data);
     onClose();
   };
+
+  const handleServiceClick = (
+    serviceId: string,
+    serviceName: string | null
+  ) => {
+    setPaidServiceList((prevList) =>
+      prevList.some((service) => service.serviceId === serviceId)
+        ? prevList.filter((service) => service.serviceId !== serviceId)
+        : [...prevList, { serviceId, serviceName }]
+    );
+  };
+
+  useEffect(() => {
+    const fetchService = async () => {
+      await getallService();
+    };
+
+    fetchService();
+  }, []);
 
   return (
     <CustomModal
@@ -218,8 +258,42 @@ const BuildingForm: React.FC<BuildingFormProps> = ({
           </div>
           <div className="flex-1 w-full py-5 flex justify-start items-start">
             {subDetails === 0 && (
-              <div className="h-full w-full ">
-                {/* <div>{building?.fee_based_service}</div> */}
+              <div className="h-56 w-full flex flex-col">
+                <div className="flex-1 w-full py-5 flex justify-start items-start">
+                  <div className="h-full w-full flex flex-row flex-wrap">
+                    {serviceList.map((service) => (
+                      <div
+                        key={service.id}
+                        className="h-14 mr-2 px-2 w-36 flex flex-row border justify-center items-center border-gray-200 rounded-[8px]"
+                        onClick={() =>
+                          handleServiceClick(service.id!, service.service_name)
+                        }
+                        style={{
+                          borderColor: paidServiceList.some(
+                            (s) => s.serviceId === service.id!
+                          )
+                            ? "#4ade80"
+                            : "transparent",
+                        }}
+                      >
+                        <div className="w-1/5">
+                          <img
+                            className="object-cover h-8 w-8"
+                            src="https://as1.ftcdn.net/jpg/01/40/62/16/500_F_140621690_lCjpTdvOoqdovvUlh89F5FM1gODHMIdx.jpg"
+                          />
+                        </div>
+                        <div className="w-4/5 flex flex-col pl-3">
+                          <span className="text-gray-700 text-[13px] font-semibold">
+                            {service?.service_name}
+                          </span>
+                          <span className="text-gray-700 text-[13px] font-semibold">
+                            {service.service_cost}/{service.collect_fees}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             )}
             {subDetails === 1 && (

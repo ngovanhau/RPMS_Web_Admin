@@ -89,9 +89,9 @@ const DashBoardService: React.FC = () => {
           <div className="flex flex-row justify-between items-center pb-4 border-b">
             <div className="flex flex-row items-center gap-6">
               <div className="py-1 px-2 rounded-[6px] flex justify-center items-center bg-green-500">
-                <span className="text-base text-white font-bold">0</span>
+                <span className="text-base text-white font-bold">{services.length}</span>
               </div>
-              <span className="text-base">0 Đã chọn</span>
+              <span className="text-base">{services.length} dịch vụ</span>
             </div>
             <div>
               <div
