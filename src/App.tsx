@@ -12,6 +12,7 @@ import Tenant from "./pages/Tenant/Tenant";
 import DashBoardContract from "./pages/Contract/Contract";   
 import DashBoardAccount from "./pages/Account/Account";
 import DashBoardPermission from "./pages/Permission/Permission";
+import DashBoardDeposit from "./pages/Deposit/Deposit";
 
 const App: React.FC = () => {
     return (
@@ -32,6 +33,7 @@ const App: React.FC = () => {
                     <Route path="/Contract" element={<DashBoardContract/>}/>
                     <Route path="/Account" element={<DashBoardAccount/>}/>
                     <Route path="/Permission" element={<DashBoardPermission/>}/>
+                    <Route path="/Deposit" element={<DashBoardDeposit/>}/>
                     
                 </Route>
             </Routes>

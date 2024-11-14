@@ -238,7 +238,7 @@ const EditRoomForm: React.FC<EditRoomFormProps> = ({
                 onClick={() => setSelectedSubDetail(tab.id)}
                 className={`h-10 px-4 flex justify-center items-center cursor-pointer ${
                   selectedSubDetail === tab.id
-                    ? "border-b-2 border-green-400 text-green-500"
+                    ? "border-b-2 border-themeColor text-themeColor"
                     : ""
                 }`}
               >
@@ -262,7 +262,7 @@ const EditRoomForm: React.FC<EditRoomFormProps> = ({
                         borderColor: paidServiceList.some(
                           (s) => s.serviceId === service.id!
                         )
-                          ? "#4ade80"
+                          ? "#001eb4"
                           : "transparent",
                       }}
                     >
@@ -298,7 +298,7 @@ const EditRoomForm: React.FC<EditRoomFormProps> = ({
           </button>
           <button
             type="submit"
-            className="px-4 py-2 bg-green-600 text-white rounded-lg"
+            className="px-4 py-2 bg-themeColor text-white rounded-lg"
           >
             Lưu thay đổi
           </button>

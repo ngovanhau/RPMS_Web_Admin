@@ -18,10 +18,12 @@ export interface Tenant {
 
 // Định nghĩa interface cho TenantStore
 interface TenantStore {
+  allTenants: Tenant[]; // Biến lưu trữ tất cả tenants
   tenants: Tenant[];
   tenantsWithoutRoom: Tenant[]; // Mảng lưu tenant chưa có room
   setTenants: (tenants: Tenant[]) => void;
-  setTenantsWithoutRoom: (tenants: Tenant[]) => void; // Thêm hàm mới
+  setAllTenants: (tenants: Tenant[]) => void; // Hàm cập nhật allTenants
+  setTenantsWithoutRoom: (tenants: Tenant[]) => void;
   addTenant: (tenant: Tenant) => void;
   updateTenant: (tenant: Tenant) => void;
   removeTenant: (id: string) => void;
@@ -29,13 +31,18 @@ interface TenantStore {
 
 // Tạo store Zustand với kiểu dữ liệu được định nghĩa
 const useTenantStore = create<TenantStore>((set) => ({
+  allTenants: [], // Initialize the allTenants array
   tenants: [],
   tenantsWithoutRoom: [],
+
+  setAllTenants: (tenants) => 
+    set({ allTenants: tenants }),
 
   setTenants: (tenants) =>
     set({
       tenants,
       tenantsWithoutRoom: tenants.filter((tenant) => !tenant.choose_room),
+      allTenants: tenants, // Ensure allTenants is also set when tenants are set
     }),
 
   // Thêm hàm mới để cập nhật tenantsWithoutRoom
@@ -47,9 +54,11 @@ const useTenantStore = create<TenantStore>((set) => ({
   addTenant: (tenant) =>
     set((state) => {
       const updatedTenants = [...state.tenants, tenant];
+      const updatedAllTenants = [...state.allTenants, tenant];
       return {
         tenants: updatedTenants,
         tenantsWithoutRoom: updatedTenants.filter((tenant) => !tenant.choose_room),
+        allTenants: updatedAllTenants,
       };
     }),
 
@@ -58,18 +67,24 @@ const useTenantStore = create<TenantStore>((set) => ({
       const updatedTenants = state.tenants.map((tenant) =>
         tenant.id === updatedTenant.id ? updatedTenant : tenant
       );
+      const updatedAllTenants = state.allTenants.map((tenant) =>
+        tenant.id === updatedTenant.id ? updatedTenant : tenant
+      );
       return {
         tenants: updatedTenants,
         tenantsWithoutRoom: updatedTenants.filter((tenant) => !tenant.choose_room),
+        allTenants: updatedAllTenants,
       };
     }),
 
   removeTenant: (id) =>
     set((state) => {
       const updatedTenants = state.tenants.filter((tenant) => tenant.id !== id);
+      const updatedAllTenants = state.allTenants.filter((tenant) => tenant.id !== id);
       return {
         tenants: updatedTenants,
         tenantsWithoutRoom: updatedTenants.filter((tenant) => !tenant.choose_room),
+        allTenants: updatedAllTenants,
       };
     }),
 }));

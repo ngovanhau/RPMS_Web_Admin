@@ -53,12 +53,12 @@ const AddManagerForm: React.FC<AddManagerFormProps> = ({
               <table className="w-full text-left">
                 <thead className="sticky top-0 bg-white">
                   <tr>
-                    <th className="border-b p-2 text-green-400 h-16">Tên đăng nhập</th>
-                    <th className="border-b p-2 text-green-400 h-16">Họ</th>
-                    <th className="border-b p-2 text-green-400 h-16">Tên</th>
-                    <th className="border-b p-2 text-green-400 h-16">Vai trò</th>
-                    <th className="border-b p-2 text-green-400 h-16">Email</th>
-                    <th className="border-b p-2 text-green-400 h-16">Số điện thoại</th>
+                    <th className="border-b p-2 text-themeColor h-16">Tên đăng nhập</th>
+                    <th className="border-b p-2 text-themeColor h-16">Họ</th>
+                    <th className="border-b p-2 text-themeColor h-16">Tên</th>
+                    <th className="border-b p-2 text-themeColor h-16">Vai trò</th>
+                    <th className="border-b p-2 text-themeColor h-16">Email</th>
+                    <th className="border-b p-2 text-themeColor h-16">Số điện thoại</th>
                   </tr>
                 </thead>
                 <tbody>

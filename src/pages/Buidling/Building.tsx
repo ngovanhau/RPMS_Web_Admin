@@ -39,7 +39,7 @@ const DashBoardBuilding: React.FC = () => {
   const serviceList = useServiceStore((state) => state.services);
   const roomList = useBuildingStore((state) => state.roomList);
   const userData = useAuthStore((state) => state.userData);
-  const setBuilding = useBuildingStore((state) => state.setBuilding);
+
   const [selectedBuildingId, setSelectedBuildingId] = useState<string | null>(
     null
   );
@@ -161,7 +161,7 @@ const DashBoardBuilding: React.FC = () => {
           <div className="h-[10%] w-full flex justify-center items-center">
             <div
               onClick={handleOpenCreateBuildingForm}
-              className="h-12 rounded-xl w-[90%] cursor-pointer bg-green-400 flex justify-center items-center"
+              className="h-12 rounded-xl w-[90%] cursor-pointer bg-themeColor flex justify-center items-center"
             >
               <span className="text-sm text-white font-semibold">
                 Thêm tòa nhà
@@ -173,10 +173,10 @@ const DashBoardBuilding: React.FC = () => {
         <div className="w-[75%] h-full flex-col rounded-[8px]  overflow-hidden">
           <div className="h-[75px] items-center flex flex-row rounded-[8px] w-full px-3 bg-white">
             <div className="w-[5%]">
-              <FaBuilding size={30} color="#04c45c" />
+              <FaBuilding size={30} color="#001eb4" />
             </div>
             <div className="w-[75%] flex flex-col h-full justify-center">
-              <span className="text-global-size font-bold text-green-400">
+              <span className="text-global-size font-bold text-themeColor">
                 {
                   buildings.find((b) => b.id === selectedBuildingId)
                     ?.building_name
@@ -195,7 +195,7 @@ const DashBoardBuilding: React.FC = () => {
               </button>
               <button
                 onClick={handleOpenUpdateBuildingForm}
-                className="bg-green-500 hover:bg-green-600 text-white text-[14px] w-24 py-2 rounded"
+                className="bg-themeColor hover:bg-themeColor text-white text-[14px] w-24 py-2 rounded"
               >
                 Cập nhật
               </button>
@@ -205,10 +205,10 @@ const DashBoardBuilding: React.FC = () => {
           <div className="h-[70px] items-center justify-between flex flex-row w-full  mt-2 rounded-[8px] overflow-hidden">
             <div className="h-full w-[18%] bg-white flex flex-row justify-center items-center rounded-[8px] overflow-hidden">
               <div className="w-1/4 h-full flex justify-center items-center  ">
-                <FaHome size={30} color="#22c55e" />
+                <FaHome size={30} color="#001eb4" />
               </div>
               <div className="w-2/4 flex justify-center pl-4 items-start flex-col h-full ">
-                <span className="text-global-green font-bold">Phòng</span>
+                <span className="text-themeColor font-bold">Phòng</span>
                 <span className="text-global font-semibold">
                   {roomList.length}
                 </span>
@@ -218,10 +218,10 @@ const DashBoardBuilding: React.FC = () => {
 
             <div className="h-full w-[18%] bg-white flex flex-row justify-center items-center rounded-[8px] overflow-hidden">
               <div className="w-1/4 h-full flex justify-center items-center  ">
-                <FaMapMarkerAlt size={30} color="#04c45c" />
+                <FaMapMarkerAlt size={30} color="#001eb4" />
               </div>
               <div className="w-2/4 flex justify-center pl-4 items-start flex-col h-full ">
-                <span className="text-global-green font-bold">Địa chỉ</span>
+                <span className="text-themeColor font-bold">Địa chỉ</span>
                 <span className="text-global ">
                   {buildings.find((b) => b.id === selectedBuildingId)?.address}
                 </span>
@@ -231,10 +231,10 @@ const DashBoardBuilding: React.FC = () => {
 
             <div className="h-full w-[18%] bg-white flex flex-row justify-center items-center rounded-[8px] overflow-hidden">
               <div className="w-1/4 h-full flex justify-center items-center  ">
-                <FaLayerGroup size={30} color="#22c55e" />
+                <FaLayerGroup size={30} color="#001eb4" />
               </div>
               <div className="w-2/4 flex justify-center pl-4 items-start flex-col h-full ">
-                <span className="text-global-green font-bold">Số tầng</span>
+                <span className="text-themeColor font-bold">Số tầng</span>
                 <span className="text-global ">
                   {building?.number_of_floors}
                 </span>
@@ -244,10 +244,10 @@ const DashBoardBuilding: React.FC = () => {
 
             <div className="h-full w-[18%] bg-white flex flex-row justify-center items-center rounded-[8px] overflow-hidden">
               <div className="w-1/4 h-full flex justify-center items-center  ">
-                <FaDollarSign size={30} color="#22c55e" />
+                <FaDollarSign size={30} color="#001eb4" />
               </div>
               <div className="w-2/4 flex justify-center pl-4 items-start flex-col h-full ">
-                <span className="text-global-green font-bold">
+                <span className="text-themeColor font-bold">
                   Chi phí thuê
                 </span>
                 <span className="text-global ">
@@ -259,10 +259,10 @@ const DashBoardBuilding: React.FC = () => {
 
             <div className="h-full w-[18%] bg-white flex flex-row justify-center items-center rounded-[8px] overflow-hidden">
               <div className="w-1/4 h-full flex justify-center items-center  ">
-                <FaUserTie size={30} color="#22c55e" />
+                <FaUserTie size={30} color="#001eb4" />
               </div>
               <div className="w-3/4 flex justify-center pl-4 items-start flex-col h-full ">
-                <span className="text-global-green font-bold">Quản lý</span>
+                <span className="text-themeColor font-bold">Quản lý</span>
                 <span className="text-global">Phạm Văn Hoàng</span>
               </div>
             </div>
@@ -283,7 +283,7 @@ const DashBoardBuilding: React.FC = () => {
                     return (
                       <div
                         key={service.serviceId}
-                        className="flex items-center mr-4 justify-center h-[70px] rounded-[8px] border-2 border-green-400 px-4 bg-white shadow-sm"
+                        className="flex items-center mr-4 justify-center h-[70px] rounded-[8px] border-2 border-themeColor px-4 bg-white shadow-sm"
                       >
                         <div className="flex items-center space-x-3">
                           <div className="flex items-center justify-center w-10 h-10">

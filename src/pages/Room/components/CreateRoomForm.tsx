@@ -235,7 +235,7 @@ const CreateRoomForm: React.FC<CreateRoomFormProps> = ({
                 onClick={() => setSelectedSubDetail(tab.id)}
                 className={`h-10 px-4 flex justify-center items-center cursor-pointer ${
                   selectedSubDetail === tab.id
-                    ? "border-b-2 border-green-400 text-green-500"
+                    ? "border-b-2 border-themeColor text-themeColor"
                     : ""
                 }`}
               >
@@ -259,7 +259,7 @@ const CreateRoomForm: React.FC<CreateRoomFormProps> = ({
                         borderColor: paidServiceList.some(
                           (s) => s.serviceId === service.id!
                         )
-                          ? "#4ade80"
+                          ? "#001eb4"
                           : "transparent",
                       }}
                     >
@@ -322,7 +322,7 @@ const CreateRoomForm: React.FC<CreateRoomFormProps> = ({
           </button>
           <button
             type="submit"
-            className="px-4 py-2 bg-green-600 text-white rounded-lg"
+            className="px-4 py-2 bg-themeColor text-white rounded-lg"
           >
             Thêm phòng
           </button>

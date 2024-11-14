@@ -31,12 +31,12 @@ export const AccountRow: React.FC<AccountRowProps> = ({
   onClick
 }) => {
   return (
-    <div onClick={onClick} className="flex flex-row w-full h-16 cursor-pointer items-center border-b border-gray-200 hover:bg-green-50 transition duration-200 ease-in-out">
+    <div onClick={onClick} className="flex flex-row w-full h-16 cursor-pointer items-center border-b border-gray-200 hover:bg-blue-50 transition duration-200 ease-in-out">
       {/* Three-dots menu */}
       <div className="w-[4%] flex items-center justify-start">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className="text-green-400 hover:text-green-500 focus:outline-none">
+            <button className="text-themeColor hover:text-themeColor focus:outline-none">
               <FaEllipsisV className="w-5 h-5" />
             </button>
           </DropdownMenuTrigger>
@@ -50,7 +50,7 @@ export const AccountRow: React.FC<AccountRowProps> = ({
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={onEdit}
-              className="p-2 text-green-400 hover:bg-green-50 flex items-center gap-2 rounded-md transition-colors duration-150"
+              className="p-2 text-themeColor hover:bg-blue-50 flex items-center gap-2 rounded-md transition-colors duration-150"
             >
               <FaEdit className="w-4 h-4" />
               <span>Chỉnh sửa</span>

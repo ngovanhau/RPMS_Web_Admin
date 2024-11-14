@@ -72,7 +72,7 @@ const DashBoardContract: React.FC = () => {
         <div className="flex flex-1 rounded-[8px] flex-col py-4 px-4 w-full bg-white">
           <div className="flex flex-row justify-between items-center pb-4 border-b">
             <div className="flex flex-row items-center gap-6">
-              <div className="py-1 px-2 rounded-[6px] flex justify-center items-center bg-green-500">
+              <div className="py-1 px-2 rounded-[6px] flex justify-center items-center bg-themeColor">
                 <span className="text-base text-white font-bold">
                   {contractData.length}
                 </span>
@@ -82,7 +82,7 @@ const DashBoardContract: React.FC = () => {
             <div>
               <div
                 onClick={() => setIsOpenCreateModal(true)}
-                className="bg-green-400 flex flex-row justify-center items-center gap-2 text-base h-12 text-white py-2 w-44 rounded-[6px] shadow hover:bg-green-500 transition duration-300 cursor-pointer"
+                className="bg-themeColor flex flex-row justify-center items-center gap-2 text-base h-12 text-white py-2 w-44 rounded-[6px] shadow hover:bg-themeColor transition duration-300 cursor-pointer"
                 title="Thêm Mới"
               >
                 <svg

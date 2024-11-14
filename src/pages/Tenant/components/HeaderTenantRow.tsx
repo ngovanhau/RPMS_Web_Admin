@@ -8,27 +8,27 @@ export const HeaderTenantRow: React.FC<HeaderTenantRowProps> = () => {
       <div className="w-[4%] flex items-center justify-start">
       </div>
       <div className="w-[25%]  flex items-center justify-start">
-        <span className="text-green-400 font-semibold text-base text-left">
+        <span className="text-themeColor font-semibold text-base text-left">
           Tên người thuê
         </span>
       </div>
       <div className="w-[15%]  flex items-center justify-start">
-        <span className="text-green-400 font-semibold text-base text-left">
+        <span className="text-themeColor font-semibold text-base text-left">
           Phòng
         </span>
       </div>
       <div className="w-[15%] flex items-center justify-start">
-        <span className="text-green-400 font-semibold text-base text-left">
+        <span className="text-themeColor font-semibold text-base text-left">
           Số điện thoại
         </span>
       </div>
       <div className="w-[15%] flex items-center justify-start">
-        <span className="text-green-400 font-semibold text-base text-left">
+        <span className="text-themeColor font-semibold text-base text-left">
           CMND/CCCD
         </span>
       </div>
       <div className="w-[24%] flex items-center justify-start">
-        <span className="text-green-400 font-semibold text-base text-left">
+        <span className="text-themeColor font-semibold text-base text-left">
           Email
         </span>
       </div>

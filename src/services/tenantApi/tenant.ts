@@ -1,17 +1,19 @@
 import api from "../axios";
 
 import { Tenant } from "@/types/types";
+import useTenantStore from "@/stores/tenantStore";
 
-export const getallTenant = async() => {
+export const getallTenant = async () => {
   try {
     const response = await api.get(`/customer/customerall`);
+    const tenantData = response.data.data;
+    useTenantStore.getState().setAllTenants(tenantData);
     return response.data;
   } catch (error) {
     console.error("Error fetching all Tenants:", error);
-      throw error;
+    throw error;
   }
-}
-
+};
 export const getbyidTenant = async(TenanID: string) => {
   try {
     const response = await api.get(`/customer/getcustomerbyid?id=${TenanID}` );

@@ -311,7 +311,7 @@ const TenantForm: React.FC<TenantFormProps> = ({ onSuccess, onClose }) => {
       <div className="flex justify-between mt-6">
         <button
           type="submit"
-          className="bg-green-500 text-white py-2 px-6 rounded-md"
+          className="bg-themeColor text-white py-2 px-6 rounded-md"
         >
           Thêm mới
         </button>

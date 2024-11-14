@@ -136,3 +136,21 @@ export interface User {
     userId? : string
   }
   
+
+  export interface Deposit {
+    id: string;
+    deposit_amount: number;
+    roomid: string;
+    roomname: string;
+    move_in_date: Date;
+    payment_method: string;
+    customerid: string;
+    customername: string;
+    image: string[];
+    note: string;
+    status: number;
+    createdAt?: Date;
+    updatedAt?: Date;
+  }
+  
+  

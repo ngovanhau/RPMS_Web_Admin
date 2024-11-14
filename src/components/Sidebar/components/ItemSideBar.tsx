@@ -10,12 +10,17 @@ type SidebarItemProps = {
 };
 
 const SidebarItem: React.FC<SidebarItemProps> = ({ type, label, selectedPage, handlePageChange, Icon }) => {
+  const isSelected = selectedPage === type;
+
   return (
-    <div className="item-sidebar" onClick={() => handlePageChange(type)}>
+    <div
+      className={`item-sidebar flex items-center cursor-pointer ${isSelected ? "text-themeColor" : "text-gray-600 hover:text-themeColor"}`}
+      onClick={() => handlePageChange(type)}
+    >
       <div className="w-10">
-        <Icon size={20} color={selectedPage === type ? "#22c55e" : "#4b5563"} />
+        <Icon size={20} color={isSelected ? "#001eb4" : "#4b5563"} /> {/* You can also replace this with themeColor */}
       </div>
-      <span className={`${selectedPage === type ? "sideBarItemTextAct" : "sideBarItemText"}`}>
+      <span className={`${isSelected ? "sideBarItemTextAct text-themeColor" : "sideBarItemText"}`}>
         {label}
       </span>
     </div>

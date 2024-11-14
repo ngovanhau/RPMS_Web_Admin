@@ -13,7 +13,7 @@ const RoomCard: React.FC<RoomCardProps> = ({ room, onSelect }) => {
         <svg
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 24 24"
-          fill="#4ade80"
+          fill="#001eb4"
           className="size-7"
         >
           <path
@@ -24,13 +24,13 @@ const RoomCard: React.FC<RoomCardProps> = ({ room, onSelect }) => {
         </svg>
       </div>
       <div className="w-[30%] h-full justify-center flex flex-col">
-        <span className="text-sm font-semibold text-green-400">
+        <span className="text-sm font-semibold text-themeColor">
           {room.room_name || "Unknown Room"}
         </span>
         <span className="text-[12px]">Người thuê: {room.renter ?? "N/A"}</span>
       </div>
       <div className="w-[40%] justify-center flex flex-col h-full">
-        <span className="text-sm font-semibold text-green-400">
+        <span className="text-sm font-semibold text-themeColor">
           {room.room_price ? `${room.room_price.toLocaleString()} đ` : "N/A"}
         </span>
         <span className="text-[12px]">Hóa đơn: 1</span>
@@ -42,7 +42,7 @@ const RoomCard: React.FC<RoomCardProps> = ({ room, onSelect }) => {
               Trống
             </span>
           ) : (
-            <span className="bg-green-400 text-white px-2 py-1 text-[10px] rounded-xl">
+            <span className="bg-themeColor text-white px-2 py-1 text-[10px] rounded-xl">
               Đã thuê
             </span>
           )}

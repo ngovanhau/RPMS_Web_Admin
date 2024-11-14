@@ -9,32 +9,32 @@ export const HeaderAccountRow: React.FC<HeaderAccountRowProps> = () => {
       <div className="w-[4%]"></div>
       
       <div className="w-[25%] flex items-center justify-start">
-        <span className="text-green-400 font-semibold text-base text-left">
+        <span className="text-themeColor font-semibold text-base text-left">
           Tên đăng nhập
         </span>
       </div>
       <div className="w-[12%] flex items-center justify-start">
-        <span className="text-green-400 font-semibold text-base text-left">
+        <span className="text-themeColor font-semibold text-base text-left">
           Họ
         </span>
       </div>
       <div className="w-[12%] flex items-center justify-start">
-        <span className="text-green-400 font-semibold text-base text-left">
+        <span className="text-themeColor font-semibold text-base text-left">
           Tên
         </span>
       </div>
       <div className="w-[10%] flex items-center justify-start">
-        <span className="text-green-400 font-semibold text-base text-left">
+        <span className="text-themeColor font-semibold text-base text-left">
           Vai trò
         </span>
       </div>
       <div className="w-[23%] flex items-center justify-start">
-        <span className="text-green-400 font-semibold text-base text-left">
+        <span className="text-themeColor font-semibold text-base text-left">
           Email
         </span>
       </div>
       <div className="w-[14%] flex items-center justify-start">
-        <span className="text-green-400 font-semibold text-base text-left">
+        <span className="text-themeColor font-semibold text-base text-left">
           Số điện thoại
         </span>
       </div>

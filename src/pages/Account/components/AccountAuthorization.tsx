@@ -69,19 +69,19 @@ const AccountAuthoziationModal: React.FC<CreateAccountFormProps> = ({ account })
     <div className="w-full h-[60vh] flex flex-col rounded-lg">
       <div className="h-12 w-full flex flex-row items-center border-b border-gray-300 px-4 rounded-t-lg">
         <div className="w-[30%] flex items-center">
-          <span className="text-base text-green-600 font-semibold">Tên khu vực</span>
+          <span className="text-base text-themeColor font-semibold">Tên khu vực</span>
         </div>
 
         <div className="w-[30%] flex items-center">
-          <span className="text-base text-green-600 font-semibold">Địa chỉ</span>
+          <span className="text-base text-themeColor font-semibold">Địa chỉ</span>
         </div>
 
         <div className="w-[20%] flex items-center">
-          <span className="text-base text-green-600 font-semibold">Thành phố</span>
+          <span className="text-base text-themeColor font-semibold">Thành phố</span>
         </div>
 
         <div className="w-[20%] flex items-center justify-end">
-          <span className="text-base text-green-600 font-semibold">Vai trò</span>
+          <span className="text-base text-themeColor font-semibold">Vai trò</span>
         </div>
       </div>
 
@@ -105,7 +105,7 @@ const AccountAuthoziationModal: React.FC<CreateAccountFormProps> = ({ account })
             </div>
             <div className="w-[20%] flex items-center justify-end">
               <select
-                className="bg-white border border-gray-300 text-gray-800 text-sm rounded px-2 py-1 shadow-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition duration-200"
+                className="bg-white border border-gray-300 text-gray-800 text-sm rounded px-2 py-1 shadow-sm focus:outline-none focus:border-themeColor focus:ring-1 focus:ring-themeColor transition duration-200"
                 value={building.role}
                 onChange={(e) => handleRoleChange(building.id, e.target.value)}
               >

@@ -230,7 +230,7 @@ const CreateBuildingForm: React.FC<CreateBuildingFormProps> = ({
                 onClick={() => setSubDetails(item.id)}
                 className={`h-full px-5 flex justify-center items-center font-semibold text-sm cursor-pointer ${
                   subDetails === item.id
-                    ? "text-green-500 border-b-2 border-green-500"
+                    ? "text-themeColor border-b-2 border-themeColor"
                     : "text-gray-500"
                 }`}
               >
@@ -254,7 +254,7 @@ const CreateBuildingForm: React.FC<CreateBuildingFormProps> = ({
                           borderColor: paidServiceList.some(
                             (s) => s.serviceId === service.id!
                           )
-                            ? "#4ade80"
+                            ? "#001eb4"
                             : "transparent",
                         }}
                       >
@@ -318,7 +318,7 @@ const CreateBuildingForm: React.FC<CreateBuildingFormProps> = ({
           </button>
           <button
             type="submit"
-            className="px-4 py-2 bg-green-600 text-white rounded-lg"
+            className="px-4 py-2 bg-themeColor text-white rounded-lg"
           >
             Tạo mới tòa nhà
           </button>
