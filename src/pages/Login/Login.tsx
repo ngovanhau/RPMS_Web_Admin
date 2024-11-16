@@ -6,8 +6,8 @@ import useAuthStore from "@/stores/userStore";
 
 const Login: React.FC = () => {
     const { setUserData } = useAuthStore();
-    const [username, setUsername] = useState("string");
-    const [password, setPassword] = useState("string");
+    const [username, setUsername] = useState("");
+    const [password, setPassword] = useState("");
     const [error, setError] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();
@@ -36,7 +36,7 @@ const Login: React.FC = () => {
         try {
             const response = await information(username);
             setUserData(response);
-            if (response.role === "ADMIN") {
+            if (response.role === "ADMIN" || response.role === "MANAGEMENT") {
                 navigate("/Dashboard");
             } else {
                 localStorage.removeItem("authToken");
@@ -48,25 +48,25 @@ const Login: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-            <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-lg border border-green-100">
-                <h2 className="text-3xl font-semibold text-green-500 text-center mb-6">Đăng nhập</h2>
-                <div className="mb-4">
+        <div className="min-h-screen flex items-center justify-center bg-gray-100">
+            <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md mx-4 md:mx-0">
+                <h2 className="text-3xl font-bold text-green-500 text-center mb-6">Đăng nhập</h2>
+                <div className="mb-5">
                     <input
                         type="text"
                         placeholder="Username"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
-                        className="bg-gray-50 w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:border-green-400"
+                        className="bg-gray-50 w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-green-400 focus:bg-white transition duration-200"
                     />
                 </div>
-                <div className="relative mb-4">
+                <div className="relative mb-5">
                     <input
                         type={showPassword ? "text" : "password"}
                         placeholder="Password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="bg-gray-50 w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:border-green-400"
+                        className="bg-gray-50 w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-green-400 focus:bg-white transition duration-200"
                     />
                     <span
                         className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500"
@@ -78,10 +78,16 @@ const Login: React.FC = () => {
                 {error && <p className="text-red-500 text-center mb-4">{error}</p>}
                 <button
                     onClick={handleLogin}
-                    className="w-full p-3 bg-green-400 text-white rounded-md hover:bg-green-500 transition duration-200 font-medium"
+                    className="w-full p-3 bg-green-400 text-white rounded-lg hover:bg-green-500 transition duration-300 font-semibold shadow-md"
                 >
                     Đăng nhập
                 </button>
+                <p className="text-center text-gray-500 text-sm mt-4">
+                    Quên mật khẩu?{" "}
+                    <a href="/reset-password" className="text-green-400 hover:text-green-500 font-medium">
+                        Khôi phục mật khẩu
+                    </a>
+                </p>
             </div>
         </div>
     );

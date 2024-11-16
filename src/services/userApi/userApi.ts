@@ -1,5 +1,5 @@
 import api from "../axios";
-
+import useAuthStore from "@/stores/userStore";
 export const login = async (username: string, password: string): Promise<any> => {
     try {
         const response = await api.post("/identityusers/login", {
@@ -23,6 +23,7 @@ export const information = async (username: string) => {
     try {
         const response = await api.get("/identityusers/information?username=" + username);
         if (response.status === 200) {
+            useAuthStore.getState().setUserData(response.data.data)
             return response.data.data;
         } else {
             console.error("Lấy thông tin người dùng thất bại:", response.data);
@@ -53,3 +54,5 @@ export const changepassword = async (username: string, oldPassword: string, newP
         return null;
     }
 };
+
+

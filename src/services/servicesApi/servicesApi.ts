@@ -34,3 +34,14 @@ export const createService = async (serviceData: Service): Promise<any> => {
       console.error("Failed to update service:", error);
     }
   };
+
+
+  export const getallService = async () => {
+    try {
+      const response = await api.get(`/service/serviceall`)
+      useServiceStore.getState().setServices(response.data.data)
+      // console.log("get thành công all service:" , response.data.data);
+    } catch(error) {
+      console.log("Failed to get all service:", error);
+    }
+  }

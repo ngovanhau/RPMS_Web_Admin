@@ -183,9 +183,9 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
         <button
           type="submit"
           className={`${
-            isEdit ? "bg-yellow-500" : "bg-green-500"
+            isEdit ? "bg-yellow-500" : "bg-themeColor"
           } text-white py-2 px-6 rounded-md shadow hover:${
-            isEdit ? "bg-yellow-600" : "bg-green-600"
+            isEdit ? "bg-yellow-600" : "bg-themeColor"
           } transition`}
         >
           {isEdit ? "Chỉnh sửa" : "Thêm mới"}

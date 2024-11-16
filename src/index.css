@@ -23,16 +23,16 @@ html, body {
   @apply font-semibold text-gray-600 text-sm cursor-pointer
 }
 .sideBarItemTextAct {
-  @apply font-semibold text-green-500 text-sm cursor-pointer
+  @apply font-semibold text-themeColor text-sm cursor-pointer
 }
 
 .sideBarItemText:hover {
-  @apply font-semibold text-green-500
+  @apply font-semibold text-themeColor
 }
 
 
 .item-sidebar:hover {
-  @apply text-green-500 cursor-pointer; /* Thay đổi nền và con trỏ khi hover */
+  @apply text-themeColor cursor-pointer; /* Thay đổi nền và con trỏ khi hover */
 }
 
 .itemDropDown-Profile {
@@ -41,6 +41,9 @@ html, body {
 
 .text-global {
   @apply text-[15px] text-gray-800
+}
+.text-global-green {
+  @apply text-[15px] text-green-400
 }
 .text-global-size {
   @apply text-[15px]
@@ -56,4 +59,11 @@ html, body {
 .scrollbar-hide {
   scrollbar-width: none; /* Ẩn thanh trượt trên Firefox */
   -ms-overflow-style: none; /* Ẩn thanh trượt trên IE 10+ */
+}
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;  
+  overflow: hidden;
 }

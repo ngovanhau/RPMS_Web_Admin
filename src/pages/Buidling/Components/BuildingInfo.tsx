@@ -31,7 +31,7 @@ const BuildingInfo: React.FC<BuildingInfoProps> = ({ building, isSelected, onSel
         </svg>
       </div>
       <div className="w-[66%] h-full flex flex-col justify-center items-start">
-        <span className="text-green-400 text-base font-bold">
+        <span className="text-themeColor text-base font-bold">
           {building.building_name}
         </span>
         <span className="text-[12px] text-gray-600 font-semibold">
@@ -46,7 +46,7 @@ const BuildingInfo: React.FC<BuildingInfoProps> = ({ building, isSelected, onSel
       {
         isSelected &&
         (
-          <div className="w-[1%] h-full bg-green-400"></div>
+          <div className="w-[1%] h-full bg-themeColor"></div>
         )
       }
             {

@@ -3,7 +3,7 @@
 import HeaderServiceRow from "./components/HeaderServiceRow";
 import ServiceForm from "./components/ServiceForm";
 import CustomModal from "@/components/Modal/Modal";
-import ServiceRow from "@/components/ServicesRow/ServicesRow";
+import ServiceRow from "./components/ServicesRow/ServicesRow";
 import api from "@/services/axios";
 import { createService } from "@/services/servicesApi/servicesApi";
 import useServiceStore from "@/stores/servicesStore";
@@ -88,14 +88,14 @@ const DashBoardService: React.FC = () => {
         <div className="flex flex-1 flex-col py-4 px-4 w-full bg-white">
           <div className="flex flex-row justify-between items-center pb-4 border-b">
             <div className="flex flex-row items-center gap-6">
-              <div className="py-1 px-2 rounded-[6px] flex justify-center items-center bg-green-500">
-                <span className="text-base text-white font-bold">0</span>
+              <div className="py-1 px-2 rounded-[6px] flex justify-center items-center bg-themeColor">
+                <span className="text-base text-white font-bold">{services.length}</span>
               </div>
-              <span className="text-base">0 Đã chọn</span>
+              <span className="text-base">{services.length} dịch vụ</span>
             </div>
             <div>
               <div
-                className="bg-green-400 flex flex-row justify-center items-center gap-2 text-base h-12 text-white py-2 w-44 rounded-[6px] shadow hover:bg-green-500 transition duration-300"
+                className="bg-themeColor flex flex-row justify-center items-center gap-2 text-base h-12 text-white py-2 w-44 rounded-[6px] shadow hover:bg-themeColor transition duration-300"
                 title="Thêm dịch vụ"
                 onClick={() => {
                   setIsEdit(false);
