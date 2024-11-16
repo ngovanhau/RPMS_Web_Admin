@@ -13,11 +13,14 @@ import DashBoardContract from "./pages/Contract/Contract";
 import DashBoardAccount from "./pages/Account/Account";
 import DashBoardPermission from "./pages/Permission/Permission";
 import DashBoardDeposit from "./pages/Deposit/Deposit";
+import DashBoardRoomStatement from "./pages/RoomStatement/RoomStatement";
+import DashBoardInvoice from "./pages/Invoice/Invoice";
 
 const App: React.FC = () => {
     return (
         <Router>
             <Routes>
+                
                 {/* Route Login nằm ngoài layout */}
                 <Route path="/" element={<Login />} />
                 
@@ -34,6 +37,10 @@ const App: React.FC = () => {
                     <Route path="/Account" element={<DashBoardAccount/>}/>
                     <Route path="/Permission" element={<DashBoardPermission/>}/>
                     <Route path="/Deposit" element={<DashBoardDeposit/>}/>
+                    <Route path="/RoomStatement" element={<DashBoardRoomStatement/>}/>
+                    <Route path="/Invoice" element={<DashBoardInvoice/>}/>
+
+
                     
                 </Route>
             </Routes>

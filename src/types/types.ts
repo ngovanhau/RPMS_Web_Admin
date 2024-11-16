@@ -153,4 +153,52 @@ export interface User {
     updatedAt?: Date;
   }
   
+  export interface ServiceMeterReadings {
+    id: string; // UUID
+    building_name: string | null; // varchar(255)
+    building_id: string | null; // UUID
+    room_name: string | null; // varchar(255)
+    room_id: string | null; // UUID
+    status: number; // int
+    recorded_by: string | null; // varchar(255)
+    recordid: string | null; // UUID
+    record_date: Date; // timestamp with time zone
+    electricity_old: number; // numeric
+    electricity_new: number; // numeric
+    electricity_price: number; // numeric
+    electricity_cost: number; // numeric
+    water_old: number; // numeric
+    water_new: number; // numeric
+    water_price: number; // numeric
+    water_cost: number; // numeric
+    confirmation_status: boolean; // boolean
+    total_amount: number; // numeric
+    CreatedAt?: Date; // timestamp with time zone
+    UpdatedAt?: Date; // timestamp with time zone
+  }
   
+
+
+  export interface Bill {
+    id: string; // UUID
+    bill_name?: string; // Optional, varchar(255)
+    status: number;
+    status_payment: number;
+    building_id: string; // UUID
+    customer_name?: string; // Optional, varchar(255)
+    customer_id: string; // UUID
+    date?: string; // ISO string for timestamp with time zone
+    roomid: string; // UUID
+    roomname?: string; // Optional, varchar(255)
+    payment_date?: string; // ISO string for timestamp with time zone
+    due_date?: string; // ISO string for timestamp with time zone
+    cost_room: number;
+    cost_service: number;
+    total_amount: number;
+    penalty_amount: number;
+    discount: number;
+    final_amount: number;
+    note?: string; // Optional, varchar(255)
+    createdAt?: string; // ISO string for timestamp with time zone
+    updatedAt?: string; // ISO string for timestamp with time zone
+}

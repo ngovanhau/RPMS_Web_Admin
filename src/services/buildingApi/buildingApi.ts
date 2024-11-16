@@ -110,6 +110,15 @@ export const addRoom = async (room: Room) => {
   }
 };
 
+export const getAllRoom = async () => {
+  try {
+    const response = await api.get(`/room/roomall`)
+    return response
+  } catch (error) {
+    console.log(error);
+  }
+}
+
 export const editRoom = async (room: Room) => {
   try {
     const response = await api.put(`/room/update?id=${room.id}`, room);
@@ -127,7 +136,6 @@ export const getBuildingByUserId = async (userId: string) => {
     const response = await api.get(
       `/building/getbuildingbyuserid?id=${userId}`
     );
-    // Update buildingByUserId in Zustand store
     useBuildingStore.getState().setBuildings(response.data.data);
     return response;
   } catch (error) {
@@ -135,6 +143,8 @@ export const getBuildingByUserId = async (userId: string) => {
     throw error;
   }
 };
+
+
 
 export const createPermissionByBuildingId = async ({
   id,

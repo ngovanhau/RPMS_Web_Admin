@@ -60,3 +60,10 @@ html, body {
   scrollbar-width: none; /* Ẩn thanh trượt trên Firefox */
   -ms-overflow-style: none; /* Ẩn thanh trượt trên IE 10+ */
 }
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;  
+  overflow: hidden;
+}
