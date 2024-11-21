@@ -17,6 +17,7 @@ import DashBoardRoomStatement from "./pages/RoomStatement/RoomStatement";
 import DashBoardInvoice from "./pages/Invoice/Invoice";
 import DashBoardProblem from "./pages/Problem/Problem";
 import DashBoardCashFlow from "./pages/Cashflow/Cashflow";
+import DashBoardBooking from "./pages/Booking/Booking";
 const App: React.FC = () => {
     return (
         <Router>
@@ -42,9 +43,7 @@ const App: React.FC = () => {
                     <Route path="/Invoice" element={<DashBoardInvoice/>}/>
                     <Route path="/Problem" element={<DashBoardProblem/>}/>
                     <Route path="/Income-expense" element={<DashBoardCashFlow/>}/>
-                    
-
-                    
+                    <Route path="/Booking" element={<DashBoardBooking/>}/>
                 </Route>
             </Routes>
         </Router>

@@ -67,3 +67,9 @@ html, body {
   -webkit-box-orient: vertical;  
   overflow: hidden;
 }
+
+select {
+  width: 100%; /* Đảm bảo select có chiều rộng bằng khung chứa */
+  max-width: 100%; /* Giới hạn chiều rộng tối đa */
+  box-sizing: border-box; /* Đảm bảo padding không làm tăng kích thước */
+}

@@ -9,3 +9,13 @@ export const getAllTransaction = async () => {
         console.log(error)
     }
 }
+
+export const getTransactionByBuildingId = async ( buildingId : string ) => {
+    try {
+        const response = await api.get(`/incomeexpensegroup/getincomeexpensegroupbybuildingid?id=${buildingId}`)
+        useTransactionStore.getState().clearTransactions()
+        useTransactionStore.getState().setTransactions(response.data.data)
+    } catch (error) {
+        console.log(error)
+    }
+}

@@ -240,3 +240,15 @@ export interface Transaction {
   note: string;
   image: string; // URL or base64-encoded string
 };
+
+
+export interface Booking {
+  id: string;
+  roomid: string;
+  customername: string;
+  phone: string;
+  email: string;
+  date: string; 
+  status: number; 
+  note: string;
+};
