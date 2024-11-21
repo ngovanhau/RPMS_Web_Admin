@@ -50,7 +50,7 @@ const Login: React.FC = () => {
     return (
         <div className="min-h-screen flex items-center justify-center bg-gray-100">
             <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md mx-4 md:mx-0">
-                <h2 className="text-3xl font-bold text-green-500 text-center mb-6">Đăng nhập</h2>
+                <h2 className="text-3xl font-bold text-blue-500 text-center mb-6">Đăng nhập</h2>
                 <div className="mb-5">
                     <input
                         type="text"
@@ -78,13 +78,13 @@ const Login: React.FC = () => {
                 {error && <p className="text-red-500 text-center mb-4">{error}</p>}
                 <button
                     onClick={handleLogin}
-                    className="w-full p-3 bg-green-400 text-white rounded-lg hover:bg-green-500 transition duration-300 font-semibold shadow-md"
+                    className="w-full p-3 bg-blue-400 text-white rounded-lg hover:bg-blue-500 transition duration-300 font-semibold shadow-md"
                 >
                     Đăng nhập
                 </button>
                 <p className="text-center text-gray-500 text-sm mt-4">
                     Quên mật khẩu?{" "}
-                    <a href="/reset-password" className="text-green-400 hover:text-green-500 font-medium">
+                    <a href="/reset-password" className="text-blue-400 hover:text-green-500 font-medium">
                         Khôi phục mật khẩu
                     </a>
                 </p>

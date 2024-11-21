@@ -35,7 +35,7 @@ const Profile: React.FC = () => {
 
                         {/* Trạng Thái */}
                         <label className="text-gray-700 font-semibold">Trạng Thái :</label>
-                        <span className={`inline-block w-fit px-2 py-0.5 text-xs font-semibold rounded ${status === 'Deleted' ? 'bg-red-500 text-white' : 'bg-green-500 text-white'}`}>
+                        <span className={`inline-block w-fit px-2 py-0.5 text-xs font-semibold rounded ${status === 'Deleted' ? 'bg-red-500 text-white' : 'bg-blue-500 text-white'}`}>
                             {status === 'Deleted' ? 'Đã Xóa' : 'Hoạt động'}
                         </span>
                     </div>
