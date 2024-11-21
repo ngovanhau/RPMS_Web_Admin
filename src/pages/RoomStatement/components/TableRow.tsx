@@ -1,5 +1,7 @@
 import React from "react";
 import { ServiceMeterReadings } from "@/types/types";
+import { Edit, FileText, Trash } from "lucide-react";
+
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -10,11 +12,17 @@ import { MoreHorizontal } from "lucide-react";
 
 interface TableRowProps {
   ServiceMeterReadings: ServiceMeterReadings;
-  onEdit: (serviceMeterReadings : ServiceMeterReadings) => void;
+  onEdit: (serviceMeterReadings: ServiceMeterReadings) => void;
   onDelete: (id: string) => void;
+  onCreateBill: (serviceMeterReadings: ServiceMeterReadings) => void; 
 }
 
-const TableRow: React.FC<TableRowProps> = ({ ServiceMeterReadings, onEdit, onDelete }) => {
+const TableRow: React.FC<TableRowProps> = ({
+  ServiceMeterReadings,
+  onEdit,
+  onDelete,
+  onCreateBill,
+}) => {
   return (
     <tr className="border-b h-12 hover:bg-gray-100">
       <td className="p-2 text-[#001eb4]">
@@ -24,11 +32,21 @@ const TableRow: React.FC<TableRowProps> = ({ ServiceMeterReadings, onEdit, onDel
               <MoreHorizontal className="w-5 h-5 text-[#001eb4]" />
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="start">
+          <DropdownMenuContent align="start" className="bg-white">
             <DropdownMenuItem onClick={() => onEdit(ServiceMeterReadings)}>
+              <Edit className="mr-2 h-4 w-4 text-blue-500" />
               Sửa
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => onDelete(ServiceMeterReadings?.id)}>
+            <DropdownMenuItem
+              onClick={() => onCreateBill(ServiceMeterReadings)} // Gọi hàm tạo hóa đơn
+            >
+              <FileText className="mr-2 h-4 w-4 text-green-500" />
+              Tạo hóa đơn
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => onDelete(ServiceMeterReadings?.id)}
+            >
+              <Trash className="mr-2 h-4 w-4 text-red-500" />
               Xóa
             </DropdownMenuItem>
           </DropdownMenuContent>

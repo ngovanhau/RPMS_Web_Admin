@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { Building, Room, ServiceMeterReadings } from "@/types/types";
+import { Bill, Building, Room, ServiceMeterReadings } from "@/types/types";
 import TableRow from "./components/TableRow";
 import { useBuildingStore } from "@/stores/buildingStore";
 import useAuthStore from "@/stores/userStore";
@@ -9,6 +9,7 @@ import {
   getAllRoom,
   getBuildingByUserId,
   getRoomByBuildingId,
+  getRoomById,
 } from "@/services/buildingApi/buildingApi";
 import {
   createServicemeter,
@@ -23,6 +24,7 @@ import { HiSearch, HiBell, HiPlus } from "react-icons/hi";
 import CustomModal from "@/components/Modal/Modal";
 import MeterReadingForm from "./components/CreateForm";
 import EditMeterReadingForm from "./components/EditForm";
+import { createBill } from "@/services/invoiceApi/invoiceApi";
 
 const DashBoardRoomStatement: React.FC = () => {
   const { toast } = useToast(); // Sử dụng hook useToast
@@ -49,7 +51,7 @@ const DashBoardRoomStatement: React.FC = () => {
   const [createFormOpen, setCreateFormOpen] = useState<boolean>(false);
   const [editFormOpen, setEditFormOpen] = useState<boolean>(false);
   const [selectedMeterReading, setSelectedMeterReading] =
-  useState<ServiceMeterReadings | null>(null);
+    useState<ServiceMeterReadings | null>(null);
 
   useEffect(() => {
     fetchInitialData();
@@ -86,7 +88,7 @@ const DashBoardRoomStatement: React.FC = () => {
   const handleDelete = async (serviceId: string) => {
     try {
       const response = await deleteServicemeter(serviceId);
-      
+
       if (!response.status) {
         // Nếu response không thành công, hiển thị thông báo lỗi và kết thúc.
         toast({
@@ -96,16 +98,16 @@ const DashBoardRoomStatement: React.FC = () => {
         });
         return;
       }
-  
+
       // Nếu xóa thành công, tiếp tục xử lý cập nhật.
       if (selectedBuilding) {
         await getServicemeterByBuildingId(selectedBuilding.id);
-        
+
         if (selectedRoom) {
           await getServicemeterByRoomId(selectedRoom.id);
         }
       }
-  
+
       // Thông báo thành công sau khi hoàn tất.
       toast({
         title: "Thành công",
@@ -122,7 +124,6 @@ const DashBoardRoomStatement: React.FC = () => {
       });
     }
   };
-  
 
   const handleEdit = (serviceMeterReading: ServiceMeterReadings) => {
     setSelectedMeterReading(serviceMeterReading); // Đặt dữ liệu chỉ số cần chỉnh sửa
@@ -187,7 +188,7 @@ const DashBoardRoomStatement: React.FC = () => {
         if (selectedRoom) {
           await getServicemeterByRoomId(selectedRoom?.id);
         }
-        setCreateFormOpen(false)
+        setCreateFormOpen(false);
         // Thông báo thành công khi ghi chỉ số
         toast({
           title: "Thành công",
@@ -206,11 +207,72 @@ const DashBoardRoomStatement: React.FC = () => {
     [selectedRoom, toast]
   );
 
-
-
-  const handleEditSubmit = async (updatedMeterReading: ServiceMeterReadings) => {
+  const handleCreateBill = async (serviceMeterReading: ServiceMeterReadings) => {
     try {
-      const response = await editServicemeter(updatedMeterReading)
+      console.log("Tạo hóa đơn cho:", serviceMeterReading);
+  
+      // Lấy thông tin phòng từ API
+      const response = await getRoomById(serviceMeterReading.room_id);
+  
+      // Kiểm tra response và dữ liệu trả về
+      if (!response || !response.data || !response.data.data) {
+        throw new Error("Không thể lấy thông tin phòng");
+      }
+  
+      const roomData: Room = response.data.data;
+  
+      // Ngày hiện tại
+      const currentDate = new Date().toISOString();
+  
+      // Tạo đối tượng hóa đơn từ dữ liệu ServiceMeterReadings và Room
+      const newBill: Bill = {
+        id: serviceMeterReading.id, // Sử dụng ID từ ServiceMeterReadings
+        bill_name: `Hóa đơn ${serviceMeterReading.room_name || "không rõ"}`, // Đặt tên hóa đơn
+        status: 1, // Ví dụ: trạng thái mới tạo
+        status_payment: 0, // Ví dụ: chưa thanh toán
+        building_id: serviceMeterReading.building_id || "", // ID tòa nhà
+        customer_name: roomData.nameCustomer || "Không rõ", // Lấy từ Room
+        customer_id: roomData.customerId || "", // Lấy từ Room
+        date: currentDate, // Ngày tạo hóa đơn
+        roomid: serviceMeterReading.room_id || "", // ID phòng
+        roomname: serviceMeterReading.room_name || "", // Tên phòng
+        payment_date: currentDate, // Ngày thanh toán
+        due_date: currentDate, // Ngày đến hạn
+        cost_room: roomData.room_price || 0, // Giá phòng từ Room
+        cost_service:
+          serviceMeterReading.electricity_cost + serviceMeterReading.water_cost, // Tổng chi phí dịch vụ
+        total_amount: serviceMeterReading.total_amount, // Tổng số tiền
+        penalty_amount: 0, // Phạt (nếu có)
+        discount: 0, // Giảm giá (nếu có)
+        final_amount: serviceMeterReading.total_amount, // Tổng cuối cùng
+        note: `Hóa đơn tạo từ ${serviceMeterReading.recorded_by || "hệ thống"}`, // Ghi chú
+        createdAt: currentDate, // Ngày tạo
+        updatedAt: currentDate, // Ngày cập nhật
+      };
+      await createBill(newBill)
+  
+      // Thông báo thành công
+      toast({
+        title: "Thành công",
+        description: "Hóa đơn đã được tạo thành công!",
+        type: "foreground",
+      });
+    } catch (error) {
+      console.error("Lỗi khi tạo hóa đơn:", error);
+      toast({
+        title: "Lỗi",
+        description: "Không thể tạo hóa đơn. Vui lòng thử lại!",
+        type: "foreground",
+      });
+    }
+  };
+  
+
+  const handleEditSubmit = async (
+    updatedMeterReading: ServiceMeterReadings
+  ) => {
+    try {
+      const response = await editServicemeter(updatedMeterReading);
       if (!response?.status) {
         toast({
           title: "Lỗi",
@@ -219,16 +281,16 @@ const DashBoardRoomStatement: React.FC = () => {
         });
         return;
       }
-  
+
       // Nếu xóa thành công, tiếp tục xử lý cập nhật.
       if (selectedBuilding) {
         await getServicemeterByBuildingId(selectedBuilding.id);
-        
+
         if (selectedRoom) {
           await getServicemeterByRoomId(selectedRoom.id);
         }
       }
-  
+
       // Thông báo thành công sau khi hoàn tất.
       toast({
         title: "Thành công",
@@ -319,9 +381,11 @@ const DashBoardRoomStatement: React.FC = () => {
                 serviceMeterReading ? (
                   <tbody>
                     <TableRow
+                      key={serviceMeterReading.id}
                       ServiceMeterReadings={serviceMeterReading}
                       onDelete={() => handleDelete(serviceMeterReading.id)}
                       onEdit={() => handleEdit(serviceMeterReading)}
+                      onCreateBill={(data) => handleCreateBill(data)} // Truyền đúng kiểu hàm
                     />
                   </tbody>
                 ) : (
@@ -339,11 +403,12 @@ const DashBoardRoomStatement: React.FC = () => {
                 <tbody>
                   {servicemeterList.map((serviceMeterReading) => (
                     <TableRow
-                    key={serviceMeterReading.id}
-                    ServiceMeterReadings={serviceMeterReading}
-                    onDelete={() => handleDelete(serviceMeterReading.id)}
-                    onEdit={() => handleEdit(serviceMeterReading)}
-                  />
+                      key={serviceMeterReading.id}
+                      ServiceMeterReadings={serviceMeterReading}
+                      onDelete={() => handleDelete(serviceMeterReading.id)}
+                      onEdit={() => handleEdit(serviceMeterReading)}
+                      onCreateBill={(data) => handleCreateBill(data)} // Truyền đúng kiểu hàm
+                    />
                   ))}
                 </tbody>
               ) : (
@@ -384,8 +449,8 @@ const DashBoardRoomStatement: React.FC = () => {
         }
       />
 
-           {/* Modal chỉnh sửa */}
-           <CustomModal
+      {/* Modal chỉnh sửa */}
+      <CustomModal
         onClose={() => setEditFormOpen(false)}
         header="Chỉnh sửa chỉ số đồng hồ"
         isOpen={editFormOpen}

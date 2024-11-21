@@ -35,6 +35,30 @@ export interface User {
     utilities: string;
     building_note?: string;
   }
+  export interface Room {
+    id: string;
+    room_name?: string;
+    status?: number;
+    room_price?: number;
+    floor?: number;
+    number_of_bedrooms?: number;
+    number_of_living_rooms?: number;
+    acreage?: number;
+    limited_occupancy?: number;
+    deposit?: number;
+    renter?: number;
+    roomservice?: ServiceInfo[];
+    imageUrls?: string[];
+    utilities?: string;
+    interior?: string;
+    describe?: string;
+    note?: string;
+    building_Id?: string;
+    CreatedAt?: Date;
+    UpdatedAt?: Date;
+    customerId?: string;
+    nameCustomer?: string
+  }
 
 
 
@@ -63,28 +87,7 @@ export interface User {
   }
 
 
-  export interface Room {
-      id: string;
-      room_name?: string;
-      status?: number;
-      room_price?: number;
-      floor?: number;
-      number_of_bedrooms?: number;
-      number_of_living_rooms?: number;
-      acreage?: number;
-      limited_occupancy?: number;
-      deposit?: number;
-      renter?: number;
-      roomservice?: ServiceInfo[];
-      imageUrls?: string[];
-      utilities?: string;
-      interior?: string;
-      describe?: string;
-      note?: string;
-      building_Id?: string;
-      CreatedAt?: Date;
-      UpdatedAt?: Date;
-    }
+
 
     export interface Tenant {
       id?: string;
@@ -202,3 +205,38 @@ export interface User {
     createdAt?: string; // ISO string for timestamp with time zone
     updatedAt?: string; // ISO string for timestamp with time zone
 }
+
+export interface Problem  {
+  id: string; // UUID
+  room_name?: string; // Optional, because it might be null
+  problem?: string; // Optional
+  decription?: string; // Optional
+  image?: string[]; // Optional
+  fatal_level?: number; // Optional, assuming it can be null
+  status?: number; // Optional, assuming it can be null
+  createdAt?: string; // Optional, assuming it can be null
+  updatedAt?: string; // Optional, assuming it can be null
+};
+
+
+export interface TransactionGroup {
+  id: string; // Unique identifier for the transaction group
+  type: number; // Represents the type of the transaction group (e.g., 0 for default)
+  name: string; // Name of the transaction group
+  image?: string; // URL or path to an image associated with the transaction group
+  note: string; // Additional notes or comments
+};
+
+
+export interface Transaction {
+  id: string;
+  date: string; // ISO 8601 format
+  amount: number;
+  transactiongroupid: string;
+  transactiongroupname: string;
+  paymentmethod: string;
+  contractid: string;
+  contractname: string;
+  note: string;
+  image: string; // URL or base64-encoded string
+};
