@@ -9,6 +9,8 @@ import { Contract } from "@/types/types";
 import { FiMoreVertical } from "react-icons/fi";
 import { FiTrash, FiEdit2 } from "react-icons/fi";
 import { getbyidTenant } from "@/services/tenantApi/tenant";
+import { MoreHorizontal } from "lucide-react";
+
 
 type ContractRowProps = {
   contract: Contract;
@@ -55,7 +57,7 @@ export const ContractRow: React.FC<ContractRowProps> = ({
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button>
-              <FiMoreVertical className="w-6 h-6" />
+              <MoreHorizontal/>
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="bg-white ml-32">

@@ -179,6 +179,8 @@ const DashBoardDeposit: React.FC = () => {
             deposits={filteredDeposits}
             statusMap={statusMap}
             onStatusChange={handleStatusChange}
+            roomList={roomList}
+            customerList={customerList}
           />
         </div>
       </div>

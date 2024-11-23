@@ -28,7 +28,7 @@ const DashBoardCashFlow: React.FC = () => {
 
       {/* Main Content */}
       <div className="flex h-[95%] p-4 overflow-hidden">
-        <div className="flex flex-col w-full rounded-[8px] bg-white p-4 space-y-4">
+        <div className="flex flex-col w-full rounded-[8px] bg-white p-4 pt-4 space-y-4">
           {/* Option Selector */}
           <OptionSelector
             showBuildingSelector={false}

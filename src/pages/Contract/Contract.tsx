@@ -115,7 +115,7 @@ const DashBoardContract: React.FC = () => {
             <ContractRow
               key={contract?.id}
               contract={contract}
-              // onClick={() => handleRowClick(contract)}
+              onClick={() => handleRowClick(contract)}
               onDelete={() => handleDelete(contract.id)}
             />
           ))}

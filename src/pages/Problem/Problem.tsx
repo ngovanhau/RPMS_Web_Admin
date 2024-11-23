@@ -99,7 +99,6 @@ const DashBoardProblem: React.FC = () => {
       await getRoomByBuildingId(selectedBuilding.id);
       await fetchProblemByBuildingId(selectedBuilding.id);
       setBuilding(selectedBuilding);
-      // await fetchProblemsByBuildingId(selectedBuilding.id)
     }
   };
 

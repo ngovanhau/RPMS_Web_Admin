@@ -1,19 +1,21 @@
 import React, { useEffect, useState } from "react";
-import { Transaction } from "@/types/types";
+import { Contract, Transaction } from "@/types/types";
 import { getAllTransactionGroup } from "@/services/transactiongroupApi/transactiongroupApi";
 import useTransactionGroupStore from "@/stores/transactiongroupStore";
 
 interface NewTransactionFormProps {
   onSubmit: (transaction: Partial<Transaction>) => void;
   onCancel: () => void;
+  contractList: Contract[]; // Contract list passed as a prop
 }
 
 const NewTransactionForm: React.FC<NewTransactionFormProps> = ({
   onSubmit,
   onCancel,
+  contractList,
 }) => {
   const [formData, setFormData] = useState<Partial<Transaction>>({
-    id: "",
+    id: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
     date: "",
     amount: 0,
     transactiongroupid: "",
@@ -24,6 +26,7 @@ const NewTransactionForm: React.FC<NewTransactionFormProps> = ({
     note: "",
     image: "",
   });
+
   const transactionGroupList = useTransactionGroupStore(
     (state) => state.transactionGroups
   );
@@ -127,24 +130,19 @@ const NewTransactionForm: React.FC<NewTransactionFormProps> = ({
         </label>
         <select
           name="paymentmethod"
-          value={formData.paymentmethod || ""}
+          value={formData.paymentmethod || ""} 
           onChange={(e) => {
             const selectedValue = e.target.value;
             setFormData((prev) => ({
               ...prev,
-              paymentmethod:
-                selectedValue === "bank"
-                  ? "0"
-                  : selectedValue === "cash"
-                  ? "1"
-                  : "",
+              paymentmethod: selectedValue, 
             }));
           }}
           className="w-full p-2 border rounded"
         >
           <option value="">Chọn phương thức</option>
-          <option value="cash">Tiền mặt</option>
-          <option value="bank">Chuyển khoản</option>
+          <option value="1">Tiền mặt</option> 
+          <option value="0">Chuyển khoản</option> 
         </select>
       </div>
 
@@ -152,14 +150,31 @@ const NewTransactionForm: React.FC<NewTransactionFormProps> = ({
         <label className="block font-medium text-gray-700">
           Hợp đồng liên quan
         </label>
-        <input
-          type="text"
+        <select
           name="contractid"
           value={formData.contractid || ""}
-          onChange={handleInputChange}
-          placeholder="Nhập ID hợp đồng"
+          onChange={(e) => {
+            const selectedId = e.target.value;
+            const selectedContract = contractList.find(
+              (contract) => contract.id === selectedId
+            );
+            setFormData((prev) => ({
+              ...prev,
+              contractid: selectedId,
+              contractname: selectedContract
+                ? selectedContract.contract_name
+                : "",
+            }));
+          }}
           className="w-full p-2 border rounded"
-        />
+        >
+          <option value="">Chọn hợp đồng</option>
+          {contractList.map((contract) => (
+            <option key={contract.id} value={contract.id}>
+              {contract.contract_name}
+            </option>
+          ))}
+        </select>
       </div>
 
       <div>

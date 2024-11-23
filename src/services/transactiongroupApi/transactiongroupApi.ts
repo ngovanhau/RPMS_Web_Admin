@@ -22,3 +22,4 @@ export const createTransactionGroup = async ( data : TransactionGroup ) => {
         console.log(error)
     }
 }
+
