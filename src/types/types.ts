@@ -122,7 +122,7 @@ export interface User {
     // service?: ServiceInfo[];
     service?: string;
     clause?: string;
-    image?: string;
+    image: string;
     customerName?: string | undefined;
   }
   

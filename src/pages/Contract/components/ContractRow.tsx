@@ -1,46 +1,31 @@
-import React, { useState, useEffect } from "react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import React, { useEffect } from "react";
 import { Contract } from "@/types/types";
-import { FiMoreVertical } from "react-icons/fi";
-import { FiTrash, FiEdit2 } from "react-icons/fi";
 import { getbyidTenant } from "@/services/tenantApi/tenant";
-import { MoreHorizontal } from "lucide-react";
-
+import { FiTrash, FiEdit2 } from "react-icons/fi";
 
 type ContractRowProps = {
   contract: Contract;
   onClick?: () => void; // Hàm xử lý khi click vào hàng
   onDelete: (id: string) => void; // Hàm xóa hợp đồng nhận id hợp đồng
+  index: number; // Thứ tự
 };
 
-export const ContractRow: React.FC<ContractRowProps> = ({
+const ContractRow: React.FC<ContractRowProps> = ({
   contract,
   onClick,
   onDelete,
+  index,
 }) => {
-
   useEffect(() => {
     if (contract?.customerId) {
       fetchUserData(contract.customerId);
     }
-  }, [contract.customerId]); 
-  
+  }, [contract.customerId]);
 
   const fetchUserData = async (userId: string) => {
     if (contract !== null) {
       await getbyidTenant(userId);
     }
-  };
-
-
-  // Hàm xử lý xóa hợp đồng
-  const handleDelete = () => {
-    onDelete(contract.id); // Gọi hàm xóa với id của hợp đồng
   };
 
   const formatDate = (date: string | Date) => {
@@ -49,59 +34,18 @@ export const ContractRow: React.FC<ContractRowProps> = ({
   };
 
   return (
-    <div
-      className="flex flex-row w-full h-16 cursor-pointer border-b"
+    <tr
+      className="border-b cursor-pointer hover:bg-gray-100"
       onClick={onClick}
     >
-      <div className="w-[5%] flex items-center justify-start">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button>
-              <MoreHorizontal/>
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="bg-white ml-32">
-            <DropdownMenuItem onClick={handleDelete}>
-              <FiTrash className="mr-2" /> Xóa
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <FiEdit2 className="mr-2" /> Hiệu chỉnh
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-      <div className="w-[20%] flex items-center justify-start">
-        <span className="text-gray-700 text-base text-left">
-          {contract.customerName}
-        </span>
-      </div>
-      <div className="w-[15%] flex items-center justify-start">
-        <span className="text-gray-700 text-base text-left">
-          {contract.room}
-        </span>
-      </div>
-      <div className="w-[15%] flex items-center justify-start">
-        <span className="text-gray-700 text-base text-left">
-          {formatDate(contract.start_day)}
-        </span>
-      </div>
-      <div className="w-[15%] flex items-center justify-start">
-        <span className="text-gray-700 text-base text-left">
-          {formatDate(contract.end_day)}
-        </span>
-      </div>
-
-      <div className="w-[15%] flex items-center justify-start">
-        <span className="text-gray-700 text-base text-left">
-          {contract.room_fee.toLocaleString()} VND
-        </span>
-      </div>
-      <div className="w-[15%] flex items-center justify-start">
-        <span className="text-gray-700 text-base text-left">
-          {contract.deposit.toLocaleString()} VND
-        </span>
-      </div>
-    </div>
+      <td className="py-2 px-4 border border-gray-300 h-12">{index}</td>
+      <td className="py-2 px-4 border border-gray-300 h-12">{contract.customerName}</td>
+      <td className="py-2 px-4 border border-gray-300 h-12">{contract.room}</td>
+      <td className="py-2 px-4 border border-gray-300 h-12">{formatDate(contract.start_day)}</td>
+      <td className="py-2 px-4 border border-gray-300 h-12">{formatDate(contract.end_day)}</td>
+      <td className="py-2 px-4 border border-gray-300 h-12">{contract.room_fee.toLocaleString()} VND</td>
+      <td className="py-2 px-4 border border-gray-300 h-12">{contract.deposit.toLocaleString()} VND</td>
+    </tr>
   );
 };
 

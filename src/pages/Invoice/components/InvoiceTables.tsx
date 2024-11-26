@@ -78,7 +78,7 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({ bills, onEdit , onDelete}) 
     // Container có chiều rộng cố định và cho phép scroll
     <div className="w-full max-w-[82vw] overflow-x-auto">
       <table className="w-full table-auto text-sm text-left"> {/* Thay từ text-base xuống text-sm */}
-        <thead className="text-sm bg-blue-100 text-blue-700 h-12">
+        <thead className="text-sm bg-themeColor text-white h-12">
           <tr>
             {[
               "Mã hóa đơn",
@@ -101,7 +101,7 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({ bills, onEdit , onDelete}) 
             ].map((header, index) => (
               <th
                 key={index}
-                className="px-4 py-2 whitespace-nowrap text-center"
+                className="border border-gray-300 px-4  py-2 whitespace-nowrap text-center"
               >
                 {header}
               </th>
@@ -181,44 +181,44 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({ bills, onEdit , onDelete}) 
                     )}
                   </div>
                 </td>
-                <td className="px-4 py-2 whitespace-nowrap text-sm">
+                <td className="border border-gray-300 px-4  py-2 whitespace-nowrap text-sm">
                   {bill.bill_name || "-"}
                 </td>
-                <td className="px-4 py-2 whitespace-nowrap text-sm">
+                <td className="border border-gray-300 px-4  py-2 whitespace-nowrap text-sm">
                   {bill.customer_name || "-"}
                 </td>
-                <td className="px-4 py-2 whitespace-nowrap text-sm">
+                <td className="border border-gray-300 px-4  py-2 whitespace-nowrap text-sm">
                   {bill.roomname || "-"}
                 </td>
-                <td className="px-4 py-2 whitespace-nowrap text-sm">
+                <td className="border border-gray-300 px-4  py-2 whitespace-nowrap text-sm">
                   {formatDate(bill.date)}
                 </td>
-                <td className="px-4 py-2 whitespace-nowrap text-sm">
+                <td className="border border-gray-300 px-4  py-2 whitespace-nowrap text-sm">
                   {formatDate(bill.due_date)}
                 </td>
-                <td className="px-4 py-2 whitespace-nowrap text-sm">
+                <td className="border border-gray-300 px-4  py-2 whitespace-nowrap text-sm">
                   {formatCurrency(bill.cost_room)}
                 </td>
-                <td className="px-4 py-2 whitespace-nowrap text-sm">
+                <td className="border border-gray-300 px-4  py-2 whitespace-nowrap text-sm">
                   {formatCurrency(bill.cost_service)}
                 </td>
-                <td className="px-4 text-red-400 font-bold py-2 whitespace-nowrap text-sm">
+                <td className="border border-gray-300 px-4  text-red-400 font-bold py-2 whitespace-nowrap text-sm">
                   {formatCurrency(bill.total_amount)}
                 </td>
-                <td className="px-4 py-2 whitespace-nowrap text-sm">
+                <td className="border border-gray-300 px-4  py-2 whitespace-nowrap text-sm">
                   {formatCurrency(bill.penalty_amount)}
                 </td>
-                <td className="px-4 py-2 whitespace-nowrap text-sm">
+                <td className="border border-gray-300 px-4  py-2 whitespace-nowrap text-sm">
                   {bill.discount !== undefined && bill.discount !== null
                     ? formatPercentage(bill.discount)
                     : "-"}
                 </td>
 
-                <td className="px-4 py-2 font-bold whitespace-nowrap text-sm">
+                <td className="border border-gray-300 px-4  py-2 font-bold whitespace-nowrap text-sm">
                   {formatCurrency(calculateFinalAmount(bill))}
                 </td>
 
-                <td className="px-4 py-2 whitespace-nowrap text-sm">
+                <td className="border border-gray-300 px-4  py-2 whitespace-nowrap text-sm">
                   <span
                     className={`px-2 py-1 text-xs font-semibold rounded-full text-white ${
                       getStatusBadge(bill.status).className
@@ -230,7 +230,7 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({ bills, onEdit , onDelete}) 
 
                 {/* Cột "Đã thanh toán" */}
                 <td
-                  className={`px-4 py-2 font-bold whitespace-nowrap text-center ${
+                  className={`border border-gray-300 px-4  py-2 font-bold whitespace-nowrap text-center ${
                     isPaid ? "text-red-500" : "text-sm"
                   }`}
                 >
@@ -241,7 +241,7 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({ bills, onEdit , onDelete}) 
 
                 {/* Cột "Tiền nợ" */}
                 <td
-                  className={`px-4 py-2 font-bold whitespace-nowrap text-center ${
+                  className={`border border-gray-300 px-4  py-2 font-bold whitespace-nowrap text-center ${
                     !isPaid ? "text-red-500" : "text-sm"
                   }`}
                 >
@@ -250,7 +250,7 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({ bills, onEdit , onDelete}) 
                     : formatCurrency(0)}
                 </td>
 
-                <td className="px-4 py-2 min-w-[200px] text-sm">
+                <td className="border border-gray-300 px-4  py-2 min-w-[200px] text-sm">
                   {bill.note || "-"}
                 </td>
               </tr>

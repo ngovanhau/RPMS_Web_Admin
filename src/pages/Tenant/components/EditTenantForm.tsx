@@ -39,7 +39,7 @@ const EditTenantForm: React.FC<EditTenantFormProps> = ({
       console.error("Failed to fetch rooms:", error);
     }
   };
-  console.log(tenant);
+
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -90,7 +90,6 @@ const EditTenantForm: React.FC<EditTenantFormProps> = ({
     event.preventDefault();
     try {
       await updateTenant(editableTenant);
-      console.log("Updated tenant:", editableTenant);
 
       onSuccess();
       onClose();

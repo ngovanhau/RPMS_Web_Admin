@@ -297,7 +297,7 @@ const DashBoardBooking: React.FC = () => {
         onEdit={handleEdit}
         onDelete={handleDelete}
       />
-      ;
+      
     </div>
   );
 };

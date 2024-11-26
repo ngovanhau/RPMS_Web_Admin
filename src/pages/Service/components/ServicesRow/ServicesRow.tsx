@@ -43,7 +43,7 @@ const ServiceRow: React.FC<ServiceRowProps> = ({
 
   return (
     <div className="flex flex-row w-full h-16 cursor-pointer">
-      <div className="w-[4%] flex items-center justify-start">
+      <div className="w-[4%] border border-gray-300 px-4 flex items-center justify-start">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button>
@@ -56,27 +56,28 @@ const ServiceRow: React.FC<ServiceRowProps> = ({
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-      <div className="w-[25%] flex items-center justify-start">
+
+      <div className="w-[25%] border border-gray-300 px-4 flex items-center justify-start">
         <span className="text-gray-600 font-semibold text-[15px] text-left">
           {service.service_name}
         </span>
       </div>
-      <div className="w-[15%] flex items-center justify-start">
+      <div className="w-[15%] border border-gray-300 px-4 flex items-center justify-start">
         <span className="text-gray-600 font-semibold text-[15px] text-left">
           {service.unitMeasure}
         </span>
       </div>
-      <div className="w-[15%] flex items-center justify-start">
+      <div className="w-[15%] border border-gray-300 px-4 flex items-center justify-start">
         <span className="text-gray-600 font-semibold text-[15px] text-left">
           {service.service_cost}
         </span>
       </div>
-      <div className="w-[15%] flex items-center justify-start">
+      <div className="w-[15%] border border-gray-300 px-4 flex items-center justify-start">
         <span className="text-gray-600 font-semibold text-[15px] text-left">
           {service.updatedAt ? formatDate(service.updatedAt) : "N/A"}
         </span>
       </div>
-      <div className="w-[24%] flex items-center justify-start">
+      <div className="w-[26%] border border-gray-300 px-4 flex items-center justify-start">
         <span className="text-gray-600 font-semibold text-[15px] text-left">
           {service.note}
         </span>

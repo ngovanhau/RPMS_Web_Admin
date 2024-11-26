@@ -38,7 +38,7 @@ const TenantForm: React.FC<TenantFormProps> = ({ onSuccess, onClose }) => {
   const fetchAvailableRooms = async () => {
     try {
       const response = await getroombystatus(0);
-      setRooms(response.data); // Assuming response.data contains the list of rooms
+      setRooms(response.data); 
     } catch (error) {
       console.error("Failed to fetch rooms:", error);
     }
@@ -87,8 +87,7 @@ const TenantForm: React.FC<TenantFormProps> = ({ onSuccess, onClose }) => {
     const tenantData = choose_room ? tenant : otherTenantData;
   
     try {
-      await createTenant(tenantData); // Gửi tenantData thay vì tenant
-      console.log("Tenant created:", tenantData);
+      await createTenant(tenantData); 
       onSuccess();
       onClose();
     } catch (error) {

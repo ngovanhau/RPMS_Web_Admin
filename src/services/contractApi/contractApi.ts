@@ -33,6 +33,7 @@ export const getAllContract = async () => {
 
 export const createContract = async (contract: Contract) => {
   try {
+    console.log("Đây là contract được tạo : ", contract)
     const response = await api.post(`/contract/create/`, contract);
     console.log(response);
   } catch (error) {

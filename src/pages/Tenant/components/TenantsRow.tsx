@@ -40,7 +40,7 @@ const TenantRow: React.FC<TenantsRowProps> = ({
 
   return (
     <div className="flex flex-row w-full h-16 cursor-pointer">
-      <div className="w-[4%] flex items-center justify-start">
+      <div className="w-[4%] border border-gray-300 px-4  flex items-center justify-start">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button>
@@ -55,27 +55,27 @@ const TenantRow: React.FC<TenantsRowProps> = ({
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-      <div className="w-[25%] flex items-center justify-start">
+      <div className="w-[25%] border border-gray-300 px-4  flex items-center justify-start">
         <span className="text-gray-600 font-semibold text-[15px] text-left">
           {tenant.customer_name}
         </span>
       </div>
-      <div className="w-[15%] flex items-center justify-start">
+      <div className="w-[15%] border border-gray-300 px-4  flex items-center justify-start">
         <span className="text-gray-600 font-semibold text-[15px] text-left">
           {tenant.roomName}
         </span>
       </div>
-      <div className="w-[15%] flex items-center justify-start">
+      <div className="w-[15%] border border-gray-300 px-4  flex items-center justify-start">
         <span className="text-gray-600 font-semibold text-[15px] text-left">
           {tenant.phone_number}
         </span>
       </div>
-      <div className="w-[15%] flex items-center justify-start">
+      <div className="w-[15%] border border-gray-300 px-4  flex items-center justify-start">
         <span className="text-gray-600 font-semibold text-[15px] text-left">
           {tenant.cccd}
         </span>
       </div>
-      <div className="w-[24%] flex items-center justify-start">
+      <div className="w-[26%] border border-gray-300 px-4  flex items-center justify-start">
         <span className="text-gray-600 font-semibold text-[15px] text-left">
           {/* {tenant.date_of_birth instanceof Date
             ? tenant.date_of_birth.toISOString().split("T")[0]
