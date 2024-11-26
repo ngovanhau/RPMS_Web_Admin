@@ -49,3 +49,9 @@
   -webkit-box-orient: vertical;  
   overflow: hidden;
 }
+
+select {
+  width: 100%; 
+  max-width: 100%; 
+  box-sizing: border-box;
+}

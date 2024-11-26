@@ -22,8 +22,7 @@ export const getAllContract = async () => {
     const response = await api.get(`/contract/contractall`);
     useContractStore.getState().clearContracts(); // Clear existing contracts
     useContractStore.getState().addContracts(response.data.data); // Add new contracts
-    useContractStore.getState().removeDuplicateContracts(); // Ensure no duplicates
-    console.log(response.data.data); // Log the data
+    useContractStore.getState().removeDuplicateContracts(); 
     return response;
   } catch (error) {
     console.error(`Error fetching Contract:`, error);
@@ -34,6 +33,7 @@ export const getAllContract = async () => {
 
 export const createContract = async (contract: Contract) => {
   try {
+    console.log("Đây là contract được tạo : ", contract)
     const response = await api.post(`/contract/create/`, contract);
     console.log(response);
   } catch (error) {
@@ -51,3 +51,14 @@ export const deleteContract = async (id: string) => {
     throw error;
   }
 };
+
+export const getContractByBuildingId = async ( id : string ) => {
+  try {
+    const response = await api.get(`/contract/getcontractbybuildingid?id=${id}`)
+    useContractStore.getState().clearContracts(); // Clear existing contracts
+    useContractStore.getState().addContracts(response.data.data);
+    return response.data
+  } catch (error) {
+    console.log(error)
+  }
+}

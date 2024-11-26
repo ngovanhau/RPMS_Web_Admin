@@ -105,7 +105,7 @@ const Sidebar: React.FC = () => {
               />
             ))}
 
-            <Collapsible>
+            {/* <Collapsible>
               <CollapsibleTrigger className="item-sidebar items-center cursor-pointer text-themeColor">
                 <div className="w-10">
                   <MdOutlineReceiptLong size={20} className="text-themeColor" />
@@ -137,7 +137,7 @@ const Sidebar: React.FC = () => {
                   </li>
                 </ul>
               </CollapsibleContent>
-            </Collapsible>
+            </Collapsible> */}
           </div>
         </div>
 

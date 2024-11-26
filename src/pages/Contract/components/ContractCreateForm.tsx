@@ -11,6 +11,7 @@ import { getroombystatus } from "@/services/tenantApi/tenant";
 import { Room } from "@/types/types";
 import { getCustomerNoRoom } from "@/services/contractApi/contractApi";
 import useTenantStore from "@/stores/tenantStore";
+import { uploadImage } from "@/services/imageApi/imageApi";
 
 interface CreateContractFormProps {
   onSubmit: (contract: Contract) => void;
@@ -31,13 +32,13 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({
     room_fee: 0,
     deposit: 0,
     customerId: "",
-    service: '7e2d6bcc-0350-4474-bb71-03c5b33cb2bb',
+    service: "7e2d6bcc-0350-4474-bb71-03c5b33cb2bb",
     clause: "",
-    image: "",
+    image: "ContractRow.tsx",
     customerName: "",
   });
   const [listRoom, setListRoom] = useState<Room[]>([]);
-
+  const [uploading, setUploading] = useState(false); // Trạng thái đang tải ảnh
 
   // Access services from the store
   const services = useServiceStore.getState().services;
@@ -49,25 +50,6 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({
     const { name, value } = e.target;
     setContract((prevState) => ({ ...prevState, [name]: value }));
   };
-
-  // const handleServiceChange = (
-  //   selectedOptions: MultiValue<{
-  //     value: string;
-  //     label: string;
-  //     serviceId: string;
-  //     serviceName: string;
-  //   }>
-  // ) => {
-  //   const updatedServices: ServiceInfo[] = selectedOptions.map((option) => ({
-  //     serviceId: option.serviceId,
-  //     serviceName: option.serviceName,
-  //   }));
-
-  //   setContract((prevState) => ({
-  //     ...prevState,
-  //     service: updatedServices,
-  //   }));
-  // };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -82,7 +64,10 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({
     }));
   };
 
-  const handleCustomerChange = (selectedCustomer: { value: string; label: string }) => {
+  const handleCustomerChange = (selectedCustomer: {
+    value: string;
+    label: string;
+  }) => {
     setContract((prevState) => ({
       ...prevState,
       customerId: selectedCustomer.value,
@@ -94,14 +79,14 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({
     const fetchData = async () => {
       try {
         await getallService();
-        await getCustomerNoRoom()
-        const responseRoom = await getroombystatus(0); 
-        setListRoom(responseRoom.data)
+        await getCustomerNoRoom();
+        const responseRoom = await getroombystatus(0);
+        setListRoom(responseRoom.data);
       } catch (error) {
         console.error("Error fetching room data:", error);
       }
     };
-  
+
     fetchData();
   }, []);
 
@@ -112,24 +97,36 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({
     serviceId: service.id,
     serviceName: service.service_name,
   }));
-    // Tạo danh sách tùy chọn cho phòng
-    const roomOptions = listRoom.map((room) => ({
-      value: room.id,
-      label: room.room_name || "Phòng không tên",
-    }));
+  // Tạo danh sách tùy chọn cho phòng
+  const roomOptions = listRoom.map((room) => ({
+    value: room.id,
+    label: room.room_name || "Phòng không tên",
+  }));
 
-      // Tạo danh sách tùy chọn cho khách hàng
+  // Tạo danh sách tùy chọn cho khách hàng
   const customerOptions = listCustomer.map((customer) => ({
     value: customer.id || "",
     label: customer.customer_name,
   }));
 
+  const handleUploadImage = async (file: File) => {
+    setUploading(true);
+    try {
+      const imageUrl = await uploadImage(file);
+      setContract((prevState) => ({
+        ...prevState,
+        image: imageUrl,
+      }));
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      alert("Tải ảnh lên thất bại. Vui lòng thử lại.");
+    } finally {
+      setUploading(false);
+    }
+  };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="space-y-6 bg-white p-8 rounded-lg shadow-lg max-w-3xl mx-auto"
-    >
+    <form onSubmit={handleSubmit} className="space-y-6 bg-white p-8 mx-auto">
       <h2 className="text-2xl font-bold text-gray-700 mb-6 text-center">
         Tạo Hợp Đồng Mới
       </h2>
@@ -318,16 +315,29 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({
         </div>
         <div>
           <label className="block text-sm font-semibold text-gray-600 mb-1">
-            Ảnh (URL)
+            Ảnh Hợp Đồng
           </label>
           <input
-            type="text"
-            name="image"
-            value={contract.image || ""}
-            onChange={handleChange}
+            type="file"
+            accept="image/*"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) handleUploadImage(file);
+            }}
             className="border rounded-lg p-3 w-full focus:ring-2 focus:ring-blue-400 focus:outline-none"
-            placeholder="URL ảnh hợp đồng"
           />
+          {uploading && (
+            <p className="text-blue-500 text-sm">Đang tải ảnh...</p>
+          )}
+          {contract.image && (
+            <div className="mt-4">
+              <img
+                src={contract.image}
+                alt="Hợp Đồng"
+                className="w-full h-32 object-cover rounded-lg"
+              />
+            </div>
+          )}
         </div>
       </div>
 

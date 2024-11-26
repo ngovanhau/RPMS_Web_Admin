@@ -1,4 +1,4 @@
-import { FaTachometerAlt, FaClipboardList, FaMoneyBill, FaBolt, FaFileInvoiceDollar ,FaLock, FaBuilding, FaDoorOpen, FaConciergeBell, FaUserFriends, FaFileContract, FaUser } from 'react-icons/fa';
+import { FaTachometerAlt, FaClipboardList, FaPiggyBank, FaMoneyBill, FaBolt, FaFileInvoiceDollar ,FaLock, FaBuilding, FaDoorOpen, FaConciergeBell, FaUserFriends, FaFileContract, FaUser, FaCalendarAlt } from 'react-icons/fa';
 export const sidebarItems = [
   {
     type: "dashboard",
@@ -16,6 +16,11 @@ export const sidebarItems = [
     icon: FaDoorOpen,
   },
   {
+    type: "Booking",
+    label: "Khách hẹn xem",
+    icon: FaCalendarAlt, 
+  },
+  {
     type: "Tenant",
     label: "Người thuê",
     icon: FaUserFriends,
@@ -29,6 +34,11 @@ export const sidebarItems = [
     type: "service",
     label: "Dịch vụ",
     icon: FaConciergeBell,
+  },
+  {
+    type: "problem",
+    label: "Sự cố",
+    icon: FaBolt,
   },
   {
     type: "roomstatement",
@@ -45,7 +55,11 @@ export const sidebarItems = [
     label: "Hóa đơn",
     icon: FaFileInvoiceDollar,
   },
-  
+  {
+    type: "income-expense",
+    label: "Thu chi",
+    icon: FaPiggyBank, 
+  },
   {
     type: "Permission",
     label: "Phân quyền",

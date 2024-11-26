@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { FaSearch, FaPlus, FaBell } from "react-icons/fa"; // Import icon từ react-icons
 import HeaderAccountRow from "./components/HeaderAccountRow";
 import AccountRow from "./components/AccountRow";
 import CreateAccountModal from "./components/CreateAccountForm";
@@ -12,12 +13,11 @@ import {
 } from "@/services/accountApi/accountApi";
 import useAccountStore from "@/stores/accountStore";
 import AccountAuthoziationModal from "./components/AccountAuthorization";
+
 const DashBoardAccount: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [selectedAccount, setSelectedAccount] = useState<User | null>(null); // Thêm state cho account được chọn
-
-  // Gọi `listAccount` từ `zustand` store
 
   const accountList = useAccountStore((state) => state.accounts);
 
@@ -35,6 +35,7 @@ const DashBoardAccount: React.FC = () => {
       alert("Error creating account. Please try again.");
     }
   };
+
   const handleDeleteAccount = async (accountId: string) => {
     const confirmed = window.confirm(
       "Bạn có chắc chắn muốn xóa tài khoản này?"
@@ -42,7 +43,7 @@ const DashBoardAccount: React.FC = () => {
     if (confirmed) {
       try {
         await deleteAccount(accountId);
-        await getAllAccount(); // Cập nhật lại danh sách sau khi xóa
+        await getAllAccount();
       } catch (error) {
         console.error("Failed to delete account:", error);
         alert("Error deleting account. Please try again.");
@@ -51,7 +52,6 @@ const DashBoardAccount: React.FC = () => {
   };
 
   const handleRowClick = async (account: User) => {
-    // Lấy quyền của tài khoản nếu cần
     setSelectedAccount(account);
     setIsAuthModalOpen(true);
   };
@@ -59,38 +59,6 @@ const DashBoardAccount: React.FC = () => {
   return (
     <div className="flex flex-col flex-1 bg-gray-100 w-full overflow-y-hidden">
       <div className="h-[5%] flex flex-row px-6 gap-4 items-center justify-start border-b bg-white w-full">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          strokeWidth="1.5"
-          stroke="currentColor"
-          className="size-6"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
-          />
-        </svg>
-        <input
-          className="w-full border-none focus:outline-none"
-          placeholder="Tìm kiếm bằng tên tòa nhà"
-        />
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          strokeWidth="1.5"
-          stroke="currentColor"
-          className="size-6"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0"
-          />
-        </svg>
       </div>
 
       <div className="flex h-[95%] p-4 overflow-hidden">
@@ -110,26 +78,13 @@ const DashBoardAccount: React.FC = () => {
                 title="Thêm Mới"
                 onClick={() => setIsModalOpen(true)}
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth="1.5"
-                  stroke="currentColor"
-                  className="size-6"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-                  />
-                </svg>
+                <FaPlus size={20} />
                 <span>Thêm</span>
               </button>
             </div>
           </div>
           <HeaderAccountRow />
-          {/* Account Rows */}
+
           {accountList.map((account, index) => (
             <AccountRow
               key={index}

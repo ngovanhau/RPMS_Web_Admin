@@ -6,7 +6,8 @@ interface OptionSelectorProps {
   selectedOption: string;
   buildings: Building[];
   onOptionChange: (option: string) => void;
-  onBuildingChange: (event: React.ChangeEvent<HTMLSelectElement>) => void;
+  onBuildingChange?: (event: React.ChangeEvent<HTMLSelectElement>) => void;
+  showBuildingSelector?: boolean; // Thêm prop để kiểm soát hiển thị
 }
 
 const OptionSelector: React.FC<OptionSelectorProps> = ({
@@ -15,8 +16,10 @@ const OptionSelector: React.FC<OptionSelectorProps> = ({
   buildings,
   onOptionChange,
   onBuildingChange,
+  showBuildingSelector = true, // Mặc định là true
 }) => (
   <div className="flex justify-between items-center border-b pb-4 mb-4">
+    {/* Danh sách nút lựa chọn */}
     <div className="flex gap-4">
       {options.map((option) => (
         <button
@@ -32,23 +35,27 @@ const OptionSelector: React.FC<OptionSelectorProps> = ({
         </button>
       ))}
     </div>
-    <div className="flex items-center gap-2">
-      <label htmlFor="building-select" className="font-medium text-sm">
-        Tòa nhà
-      </label>
-      <select
-        id="building-select"
-        className="w-64 border border-gray-300 rounded px-2 py-1 focus:outline-none text-sm text-gray-700 hover:bg-gray-100 hover:text-themeColor"
-        onChange={onBuildingChange}
-      >
-        <option value="">Chọn tòa nhà</option>
-        {buildings.map((building, index) => (
-          <option key={index} value={building.building_name}>
-            {building.building_name}
-          </option>
-        ))}
-      </select>
-    </div>
+
+    {/* Hiển thị phần chọn tòa nhà nếu `showBuildingSelector` là true */}
+    {showBuildingSelector && (
+      <div className="flex items-center gap-2">
+        <label htmlFor="building-select" className="font-medium text-sm">
+          Tòa nhà
+        </label>
+        <select
+          id="building-select"
+          className="w-64 border border-gray-300 rounded px-2 py-1 focus:outline-none text-sm text-gray-700 hover:bg-gray-100 hover:text-themeColor"
+          onChange={onBuildingChange}
+        >
+          <option value="">Chọn tòa nhà</option>
+          {buildings.map((building, index) => (
+            <option key={index} value={building.building_name}>
+              {building.building_name}
+            </option>
+          ))}
+        </select>
+      </div>
+    )}
   </div>
 );
 
