@@ -32,7 +32,6 @@ const CreateBuildingForm: React.FC<CreateBuildingFormProps> = ({
   const [subDetails, setSubDetails] = useState<number>(0);
   const subDetailsLabel = [
     { id: 0, label: "DỊCH VỤ CÓ PHÍ" },
-    { id: 1, label: "DỊCH VỤ MIỄN PHÍ" },
     { id: 2, label: "TIỆN ÍCH TÒA NHÀ" },
     { id: 3, label: "MÔ TẢ" },
     { id: 4, label: "LƯU Ý TÒA NHÀ" },
@@ -258,7 +257,7 @@ const CreateBuildingForm: React.FC<CreateBuildingFormProps> = ({
           </div>
           <div className="flex-1 w-full py-5 flex justify-start items-start">
             {subDetails === 0 && (
-              <div className="h-56 w-full flex flex-col">
+              <div className=" w-full flex flex-col">
                 <div className="flex-1 w-full py-5 flex justify-start items-start">
                   <div className="h-full w-full flex flex-row flex-wrap">
                     {serviceList.map((service) => (
@@ -295,13 +294,6 @@ const CreateBuildingForm: React.FC<CreateBuildingFormProps> = ({
                   </div>
                 </div>
               </div>
-            )}
-            {subDetails === 1 && (
-              <textarea
-                {...register("free_service")}
-                placeholder="Nhập dịch vụ miễn phí"
-                className="h-full w-full shadow-xl align-text-top text-sm outline-none p-2 rounded-xl border resize-none"
-              />
             )}
             {subDetails === 2 && (
               <textarea
