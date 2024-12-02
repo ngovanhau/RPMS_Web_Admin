@@ -63,10 +63,11 @@ const Sidebar: React.FC = () => {
         <div className="w-[70%] h-[8%] flex items-center justify-start">
           <DropdownMenu>
             <DropdownMenuTrigger className="flex flex-row gap-4 items-center">
-              <img
-                src="https://i.ibb.co/sqPnpsZ/hau.jpg"
-                className="h-10 w-10 object-cover rounded-full bg-red-400"
-              />
+            <img
+              src={userData?.avata || 'https://i.ibb.co/CmYyjRt/453178253-471506465671661-2781666950760530985-n.png'}
+              className="h-10 w-10 object-cover rounded-full bg-red-400"
+            />
+
               <div className="flex flex-col text-left">
                 <span className="font-bold text-sm text-themeColor">{userData?.lastName}</span>
 

@@ -280,7 +280,7 @@ const DashBoardBuilding: React.FC = () => {
 
           <div className="flex-1 flex flex-row justify-between h-full  mt-2 rounded-[8px]  overflow-hidden">
             <div className="h-full w-[59%] p-3 pt-4 rounded-[8px] flex flex-col  overflow-hidden bg-white">
-              <span className="text-global font-semibold">Dịch vụ có phí</span>
+              <span className="text-global font-semibold">Dịch vụ</span>
               <div className="flex flex-row rounded-[8px] flex-wrap overflow-hidden mt-2">
                 {building?.fee_based_service &&
                 building.fee_based_service.length > 0 ? (

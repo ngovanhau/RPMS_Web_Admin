@@ -13,7 +13,8 @@ export interface User {
     salts?: string;
     phone?:string;
     status?:string;
-    userId?:string
+    userId?:string;
+    avata?: string
   }
 
   export interface Building {

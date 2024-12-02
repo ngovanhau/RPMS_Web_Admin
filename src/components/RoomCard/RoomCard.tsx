@@ -47,7 +47,7 @@ const RoomCard: React.FC<RoomCardProps> = ({ room, onSelect }) => {
             </span>
           )}
         </span>
-        <span className="text-[12px]">Vấn đề: 1</span>
+        <span className="text-[12px]">Vấn đề: 0</span>
       </div>
     </div>
   );

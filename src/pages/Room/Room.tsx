@@ -407,7 +407,7 @@ const DashBoardRoom: React.FC = () => {
 
           <div className="flex-1 flex flex-row justify-between h-full  mt-2 rounded-[8px]  overflow-hidden">
             <div className=" h-full max-h-[860px] w-[59%] flex-col  overflow-y-scroll p-4  bg-white">
-              <span className="text-global font-semibold">Dịch vụ có phí</span>
+              <span className="text-global font-semibold">Dịch vụ</span>
               <div className="flex flex-row rounded-[8px] flex-wrap overflow-hidden mt-2">
                 {room?.roomservice && room.roomservice.length > 0 ? (
                   room.roomservice.map((service) => (
@@ -423,7 +423,7 @@ const DashBoardRoom: React.FC = () => {
                           <div className="text-gray-700 font-semibold text-sm">
                             {service.serviceName}
                           </div>
-                          <div className="text-red-500 text-sm">3.500/Kwh</div>
+                          <div className="text-red-500 text-sm"></div>
                         </div>
                       </div>
                     </div>
