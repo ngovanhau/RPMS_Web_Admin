@@ -18,9 +18,11 @@ import DashBoardInvoice from "./pages/Invoice/Invoice";
 import DashBoardProblem from "./pages/Problem/Problem";
 import DashBoardCashFlow from "./pages/Cashflow/Cashflow";
 import DashBoardBooking from "./pages/Booking/Booking";
+import { Toaster } from "./components/ui/toaster";
 const App: React.FC = () => {
     return (
         <Router>
+                            <Toaster />
             <Routes>
                 
                 {/* Route Login nằm ngoài layout */}
@@ -28,6 +30,7 @@ const App: React.FC = () => {
                 
                 {/* DashboardLayout bao bọc các tuyến đường khác */}
                 <Route element={<DashboardLayout />}>
+
                     <Route path="Dashboard" element={<DashboardHome />} />
                     <Route path="Service" element={<DashBoardService />} />
                     <Route path="/building" element={<DashBoardBuidling />} />

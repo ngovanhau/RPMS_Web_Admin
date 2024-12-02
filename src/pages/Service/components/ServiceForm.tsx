@@ -60,7 +60,6 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
         
       } else {
         await createService(service);
-        console.log("Creating new service...");
       }
       onSuccess(); // Gọi callback sau khi tạo hoặc cập nhật thành công
       onClose(); // Đóng modal

@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { Building, Room } from "@/types/types";
 import { getallService } from "@/services/servicesApi/servicesApi";
 import useServiceStore from "@/stores/servicesStore";
-
+import { uploadImage } from "@/services/imageApi/imageApi";
 interface CreateRoomFormProps {
   isOpen: boolean;
   onClose: () => void;
@@ -34,6 +34,9 @@ const CreateRoomForm: React.FC<CreateRoomFormProps> = ({
     { serviceId: string; serviceName: string | null }[]
   >([]);
   const [selectedSubDetail, setSelectedSubDetail] = useState<Number>(0);
+  const [imageFiles, setImageFiles] = useState<File[]>([]);  // State để lưu trữ file ảnh
+  const [imageUrls, setImageUrls] = useState<string[]>([]); 
+  
   const subDetailsLabel = [
     { id: 0, label: "DỊCH VỤ" },
     { id: 1, label: "ẢNH PHÒNG" },
@@ -48,20 +51,33 @@ const CreateRoomForm: React.FC<CreateRoomFormProps> = ({
     }
   }, [isOpen, reset]);
 
-  const handleFormSubmit = (data: Room) => {
+  const handleFormSubmit = async (data: Room) => {
     // Đẩy danh sách dịch vụ vào trường roomservice
     const roomServices = paidServiceList.map((service) => ({
       serviceId: service.serviceId,
       serviceName: service.serviceName,
     }));
     data.roomservice = roomServices;
+    const uploadedImageUrls = await Promise.all(
+      imageFiles.map((file) => uploadImage(file))
+    );
 
+    // Cập nhật imageUrls vào data
+    data.imageUrls = uploadedImageUrls;
     // Cập nhật building_Id nếu có building được truyền vào
     data.building_Id = building?.id || "";
 
     // Gọi hàm onSubmit với dữ liệu đã cập nhật
-    onSubmit(data);
+    console.log(data)
+    // onSubmit(data);
     onClose();
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const files = Array.from(e.target.files);
+      setImageFiles((prevFiles) => [...prevFiles, ...files]);
+    }
   };
 
   useEffect(() => {
@@ -280,6 +296,25 @@ const CreateRoomForm: React.FC<CreateRoomFormProps> = ({
                     </div>
                   ))}
                 </div>
+              </div>
+            </div>
+          )}
+          {selectedSubDetail === 1 && (
+            <div className="py-4">
+              <label className="block text-gray-700">Chọn ảnh phòng</label>
+              <input
+                type="file"
+                multiple
+                accept="image/*"
+                onChange={handleImageChange}
+                className="w-full border border-gray-300 p-2 rounded-lg"
+              />
+              <div className="mt-4">
+                {imageFiles.map((file, index) => (
+                  <div key={index} className="flex items-center mb-2">
+                    <span className="text-gray-700">{file.name}</span>
+                  </div>
+                ))}
               </div>
             </div>
           )}

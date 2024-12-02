@@ -102,7 +102,6 @@ export const deleteRoom = async (roomId: string | null) => {
 export const addRoom = async (room: Room) => {
   try {
     const response = await api.post("/room/create", room);
-    console.log("Room created:", response);
     return response;
   } catch (error) {
     console.error("Failed to add room:", error);
@@ -122,7 +121,6 @@ export const getAllRoom = async () => {
 export const editRoom = async (room: Room) => {
   try {
     const response = await api.put(`/room/update?id=${room.id}`, room);
-    console.log("Room updated:", response);
     return response;
   } catch (error) {
     console.error("Failed to update room", error);
@@ -136,7 +134,8 @@ export const getBuildingByUserId = async (userId: string) => {
     const response = await api.get(
       `/building/getbuildingbyuserid?id=${userId}`
     );
-    useBuildingStore.getState().setBuildings(response.data.data);
+    const buildingsData = sortBuildingsByName(response.data.data);
+    useBuildingStore.getState().setBuildings(buildingsData);
     return response;
   } catch (error) {
     console.error("Error fetching buildings by userId:", error);
@@ -165,3 +164,13 @@ export const createPermissionByBuildingId = async ({
     throw error;
   }
 };
+
+
+export const clearPermision = async ( id : string ) => {
+  try {
+    const response = await api.delete(`/permision/delete?id=${id}`)
+    return response.data
+  } catch (error) {
+    console.log(error)
+  }
+}

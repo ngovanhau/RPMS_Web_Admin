@@ -43,10 +43,14 @@ const Transactions: React.FC<TransactionsProps> = () => {
     setError(null);
     try {
       if (userData?.role === "ADMIN") {
+        console.log('Role : ', userData?.role)
         await getAllBuildings();
         await getAllTransaction();
-      } else if (userData?.role === "MANAGEMENT") {
+      } else {
+        if(userData){
+        console.log('Role : ', userData?.role)
         await getBuildingByUserId(userData?.id);
+        }
       }
     } catch (error: any) {
       console.error("Error fetching initial data:", error);
@@ -178,11 +182,11 @@ const Transactions: React.FC<TransactionsProps> = () => {
   return (
     <div className="">
       {/* Display Loading Indicator */}
-      {loading && (
+      {/* {loading && (
         <div className="fixed inset-0 flex items-center justify-center bg-opacity-50 bg-gray-800 z-50">
           <div className="loader"></div>
         </div>
-      )}
+      )} */}
 
       {/* Display Error Message */}
       {error && (
@@ -222,7 +226,7 @@ const Transactions: React.FC<TransactionsProps> = () => {
             ))}
           </select>
 
-          <select
+{ rooms.length > 0 && <select
             className="p-2 border rounded w-48"
             value={selectedRoom?.id || ""}
             onChange={(event) => {
@@ -238,7 +242,7 @@ const Transactions: React.FC<TransactionsProps> = () => {
                 {room.room_name}
               </option>
             ))}
-          </select>
+          </select>}
         </div>
 
         {/* Other Filters */}

@@ -45,7 +45,8 @@ export const createContract = async (contract: Contract) => {
 export const deleteContract = async (id: string) => {
   try {
     const response = await api.delete(`/contract/delete?id=${id}`);
-    return response;
+    console.log(response.data)
+    return response.data;
   } catch (error) {
     console.error("Error delete contract :", error);
     throw error;
@@ -58,6 +59,24 @@ export const getContractByBuildingId = async ( id : string ) => {
     useContractStore.getState().clearContracts(); // Clear existing contracts
     useContractStore.getState().addContracts(response.data.data);
     return response.data
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+export const downloadContractPDF = async ( contractId : string ) => {
+  try {
+    const response = await api.get(`/contract/download-pdf/${contractId}`)
+    return response.data
+  } catch (error) {
+    console.log(error)
+  }
+} 
+
+export const updateContract = async ( contract : Contract ) => {
+  try {
+    const response = await api.put(`/contract/update?id=${contract.id}`, contract)
+    console.log(response.data)
   } catch (error) {
     console.log(error)
   }

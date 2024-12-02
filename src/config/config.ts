@@ -21,3 +21,15 @@ export const sortBuildingsByName = (buildings: Building[]): Building[] => {
     return 0;
   });
 };
+
+export const formatDateTime = (date: string | Date) => {
+  const d = new Date(date);
+  const day = d.getDate().toString().padStart(2, '0'); // Lấy ngày và thêm 0 nếu chỉ có 1 chữ số
+  const month = (d.getMonth() + 1).toString().padStart(2, '0'); // Lấy tháng (bắt đầu từ 0, nên cần cộng thêm 1)
+  const year = d.getFullYear();
+  return `${day}/${month}/${year}`;
+};
+
+export const formatNumber = (num: number): string => {
+  return num.toLocaleString();
+};

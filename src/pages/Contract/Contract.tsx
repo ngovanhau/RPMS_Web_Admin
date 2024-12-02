@@ -11,8 +11,18 @@ import {
   getAllContract,
   deleteContract,
   getCustomerNoRoom,
+  updateContract,
+  downloadContractPDF,
+  getContractByBuildingId,
 } from "@/services/contractApi/contractApi";
 import useContractStore from "@/stores/contractStore";
+import EditContractForm from "./components/ContractEditForm";
+import useAuthStore from "@/stores/userStore";
+import { useBuildingStore } from "@/stores/buildingStore";
+import {
+  getAllBuildings,
+  getBuildingByUserId,
+} from "@/services/buildingApi/buildingApi";
 
 const DashBoardContract: React.FC = () => {
   const [selectedContract, setSelectedContract] = useState<Contract | null>(
@@ -20,15 +30,45 @@ const DashBoardContract: React.FC = () => {
   );
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isOpenCreateModal, setIsOpenCreateModal] = useState(false);
+  const [isOpenEditModal, setIsOpenEditModal] = useState(false); // Separate state for Edit Modal
+  const [editContract, setEditContract] = useState<Contract | null>(null); // Store the contract to be edited
+  const [selectedBuildingId, setSelectedBuildingId] = useState<string | null>(
+    null
+  ); // State for selected building
   const contractData = useContractStore((state) => state.contracts);
+  const userData = useAuthStore((state) => state.userData);
+  const buildings = useBuildingStore((state) => state.buildings);
+  const setBuilding = useBuildingStore((state) => state.setBuilding);
+  const roomList = useBuildingStore((state) => state.roomList);
 
   useEffect(() => {
-    const fetchContracts = async () => {
-      await getAllContract();
-      await getCustomerNoRoom();
-    };
-    fetchContracts();
+    fetchInitialData();
   }, []);
+
+  const fetchInitialData = async () => {
+    try {
+      if (userData?.role === "ADMIN") {
+        await getAllBuildings()
+        await getAllContract();
+      } else if (userData?.role === "MANAGEMENT") {
+        const buildingsData = (await getBuildingByUserId(userData?.id || ""))
+          .data.data;
+        if (buildingsData.length > 0) {
+          setSelectedBuildingId(buildingsData[0].id);
+          setBuilding(buildingsData[0]);
+          // await getContractByBuildingId(buildingsData[0].id);
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching initial data:", error);
+    }
+  };
+
+  useEffect(() => {
+    if(selectedBuildingId){
+    getContractByBuildingId(selectedBuildingId);
+    }
+  }, [selectedBuildingId]);
 
   const handleRowClick = (contract: Contract) => {
     setSelectedContract(contract);
@@ -54,6 +94,41 @@ const DashBoardContract: React.FC = () => {
     }
   };
 
+  const handlePrint = async (contractId: string) => {
+    try {
+      const response = await downloadContractPDF(contractId);
+      const fileUrl = response.data.downloadLink;
+      const link = document.createElement("a");
+      link.href = fileUrl;
+      link.target = "_blank"; // Mở trong tab mới
+      link.rel = "noopener noreferrer"; // Bảo mật cho liên kết mở trong tab mới
+      link.click();
+    } catch (error) {
+      console.error("Error downloading the contract:", error);
+    }
+  };
+
+  const handleEdit = (contract: Contract) => {
+    setEditContract(contract); // Set the contract to be edited
+    setIsOpenEditModal(true); // Open the edit modal
+  };
+
+  const handleEditContract = async (contract: Contract) => {
+    await updateContract(contract);
+    await getAllContract(); // Refresh the contract list after saving
+    setIsOpenEditModal(false); // Close the modal
+  };
+
+  const handleBuildingChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedBuildingId(e.target.value);
+    const selectedBuilding = buildings.find(
+      (building) => building.id === e.target.value
+    );
+    if (selectedBuilding) {
+      setBuilding(selectedBuilding);
+    }
+  };
+
   return (
     <div className="flex flex-col flex-1 bg-gray-100 w-full overflow-y-hidden">
       <div className="h-[5%] flex flex-row px-6 gap-4 items-center justify-start border-b bg-white w-full"></div>
@@ -68,8 +143,24 @@ const DashBoardContract: React.FC = () => {
                 </span>
               </div>
               <span className="text-sm">{contractData.length} Hợp đồng</span>
+               {/* Building Selector */}
+               <div className="flex items-center gap-4">
+                <select
+                  className="p-2 border border-gray-300 rounded-md"
+                  value={selectedBuildingId || ""}
+                  onChange={handleBuildingChange}
+                >
+                  <option value="">Chọn tòa nhà</option>
+                  {buildings.map((building) => (
+                    <option key={building.id} value={building.id}>
+                      {building.building_name}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
             <div>
+             
               <div
                 onClick={() => setIsOpenCreateModal(true)}
                 className="bg-themeColor flex flex-row justify-center items-center gap-2 text-base h-12 text-white py-2 w-44 rounded-[6px] shadow hover:bg-themeColor transition duration-300 cursor-pointer"
@@ -86,21 +177,30 @@ const DashBoardContract: React.FC = () => {
             <thead>
               <tr className="bg-themeColor text-white h-12">
                 <th className="w-[5%] py-2 px-4 text-left border border-gray-300"></th>
-                <th className="w-[20%] py-2 px-4 text-left border border-gray-300">Tên người thuê</th>
-                <th className="w-[15%] py-2 px-4 text-left border border-gray-300">Phòng</th>
-                <th className="w-[15%] py-2 px-4 text-left border border-gray-300">Ngày bắt đầu</th>
-                <th className="w-[15%] py-2 px-4 text-left border border-gray-300">Ngày kết thúc</th>
-                <th className="w-[15%] py-2 px-4 text-left border border-gray-300">Giá thuê phòng</th>
-                <th className="w-[15%] py-2 px-4 text-left border border-gray-300">Tiền cọc</th>
+                <th className="w-[20%] py-2 px-4 text-left border border-gray-300">
+                  Tên người thuê
+                </th>
+                <th className="w-[15%] py-2 px-4 text-left border border-gray-300">
+                  Phòng
+                </th>
+                <th className="w-[15%] py-2 px-4 text-left border border-gray-300">
+                  Ngày bắt đầu
+                </th>
+                <th className="w-[15%] py-2 px-4 text-left border border-gray-300">
+                  Ngày kết thúc
+                </th>
+                <th className="w-[15%] py-2 px-4 text-left border border-gray-300">
+                  Giá thuê phòng
+                </th>
+                <th className="w-[15%] py-2 px-4 text-left border border-gray-300">
+                  Tiền cọc
+                </th>
               </tr>
             </thead>
             <tbody>
               {contractData.length === 0 ? (
                 <tr>
-                  <td
-                    colSpan={7}
-                    className="text-center text-gray-500 py-4"
-                  >
+                  <td colSpan={7} className="text-center text-gray-500 py-4">
                     Chưa có hợp đồng nào
                   </td>
                 </tr>
@@ -111,6 +211,8 @@ const DashBoardContract: React.FC = () => {
                     contract={contract}
                     onClick={() => handleRowClick(contract)}
                     onDelete={() => handleDelete(contract.id)}
+                    onEdit={() => handleEdit(contract)} // Pass the contract to edit
+                    onPrint={() => handlePrint(contract.id)}
                     index={index + 1}
                   />
                 ))
@@ -129,11 +231,25 @@ const DashBoardContract: React.FC = () => {
       )}
 
       <CustomModal
-        header="Create New Contract"
+        header="Tạo hợp đồng"
         isOpen={isOpenCreateModal}
         onClose={() => setIsOpenCreateModal(false)}
       >
         <CreateContractForm onSubmit={handleCreateContract} />
+      </CustomModal>
+
+      {/* Edit Contract Modal */}
+      <CustomModal
+        header="Sửa hợp đồng"
+        isOpen={isOpenEditModal} // Use separate modal state for editing
+        onClose={() => setIsOpenEditModal(false)}
+      >
+        {editContract && (
+          <EditContractForm
+            contract={editContract}
+            onSubmit={handleEditContract}
+          />
+        )}
       </CustomModal>
     </div>
   );

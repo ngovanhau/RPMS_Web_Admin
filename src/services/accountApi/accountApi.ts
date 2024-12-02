@@ -40,7 +40,7 @@ export const deleteAccount = async ( accountId : string) => {
 export const getPermissionById = async (id : string) => {
   try {
     const response = await api.get(`/permision/getpermisionmanagementbyid?id=${id}`)
-    console.log(response);
+    return response.data
   } catch (error) {
     console.log(error);
   }

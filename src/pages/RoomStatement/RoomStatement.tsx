@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import { Bill, Building, Room, ServiceMeterReadings } from "@/types/types";
 import TableRow from "./components/TableRow";
 import { useBuildingStore } from "@/stores/buildingStore";
@@ -50,6 +50,9 @@ const DashBoardRoomStatement: React.FC = () => {
   const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
   const [createFormOpen, setCreateFormOpen] = useState<boolean>(false);
   const [editFormOpen, setEditFormOpen] = useState<boolean>(false);
+  const hasFetchedBuildingsRef = useRef(false);
+  const [hasFetchedBuildings, setHasFetchedBuildings] = useState(false);
+  const [hasFetchedServiceMeters, setHasFetchedServiceMeters] = useState(false);
   const [selectedMeterReading, setSelectedMeterReading] =
     useState<ServiceMeterReadings | null>(null);
 
@@ -58,14 +61,15 @@ const DashBoardRoomStatement: React.FC = () => {
   }, []);
 
   const fetchInitialData = useCallback(async () => {
+    if (hasFetchedBuildingsRef.current) return; // Kiểm tra giá trị từ useRef
     try {
       if (userData?.role === "ADMIN") {
         const buildingsData = (await getAllBuildings())?.data.data;
         useBuildingStore.getState().setBuildings(buildingsData);
+        hasFetchedBuildingsRef.current = true; // Cập nhật useRef
         getALlServicemeterreadings();
       } else if (userData?.role === "MANAGEMENT") {
-        const buildingsData = (await getBuildingByUserId(userData?.id || ""))
-          ?.data.data;
+        const buildingsData = (await getBuildingByUserId(userData?.id || ""))?.data.data;
         useBuildingStore.getState().setBuildings(buildingsData);
         if (buildingsData.length > 0) {
           await handleBuildingSelect(buildingsData[0].id);
@@ -207,23 +211,25 @@ const DashBoardRoomStatement: React.FC = () => {
     [selectedRoom, toast]
   );
 
-  const handleCreateBill = async (serviceMeterReading: ServiceMeterReadings) => {
+  const handleCreateBill = async (
+    serviceMeterReading: ServiceMeterReadings
+  ) => {
     try {
       console.log("Tạo hóa đơn cho:", serviceMeterReading);
-  
+
       // Lấy thông tin phòng từ API
       const response = await getRoomById(serviceMeterReading.room_id);
-  
+
       // Kiểm tra response và dữ liệu trả về
       if (!response || !response.data || !response.data.data) {
         throw new Error("Không thể lấy thông tin phòng");
       }
-  
+
       const roomData: Room = response.data.data;
-  
+
       // Ngày hiện tại
       const currentDate = new Date().toISOString();
-  
+
       // Tạo đối tượng hóa đơn từ dữ liệu ServiceMeterReadings và Room
       const newBill: Bill = {
         id: serviceMeterReading.id, // Sử dụng ID từ ServiceMeterReadings
@@ -249,8 +255,8 @@ const DashBoardRoomStatement: React.FC = () => {
         createdAt: currentDate, // Ngày tạo
         updatedAt: currentDate, // Ngày cập nhật
       };
-      await createBill(newBill)
-  
+      await createBill(newBill);
+
       // Thông báo thành công
       toast({
         title: "Thành công",
@@ -266,7 +272,6 @@ const DashBoardRoomStatement: React.FC = () => {
       });
     }
   };
-  
 
   const handleEditSubmit = async (
     updatedMeterReading: ServiceMeterReadings
@@ -312,14 +317,7 @@ const DashBoardRoomStatement: React.FC = () => {
 
   return (
     <div className="flex flex-col flex-1 bg-gray-100 w-full overflow-y-hidden">
-      <div className="h-[5%] flex flex-row px-6 gap-4 items-center justify-start border-b bg-white w-full">
-        <HiSearch className="text-[#001eb4] size-6" />
-        <input
-          className="w-full border-none focus:outline-none"
-          placeholder="Tìm kiếm bằng tên tòa nhà"
-        />
-        <HiBell className="text-[#001eb4] size-6" />
-      </div>
+      <div className="h-[5%] flex flex-row px-6 gap-4 items-center justify-start border-b bg-white w-full"></div>
 
       <div className="flex h-[95%] p-6 overflow-hidden">
         <div className="flex flex-1 flex-col py-4 px-4 rounded-[8px] w-full bg-white">

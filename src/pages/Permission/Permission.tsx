@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { getAllBuildings } from "@/services/buildingApi/buildingApi";
+import { clearPermision, getAllBuildings } from "@/services/buildingApi/buildingApi";
 import { useBuildingStore } from "@/stores/buildingStore";
-import { FaSearch, FaBell } from "react-icons/fa";
+import { FaSearch, FaBell, FaTrash } from "react-icons/fa";
 import { Building, User } from "@/types/types";
 import { getUserByBuildingId } from "@/services/accountApi/accountApi";
 import useAccountStore from "@/stores/accountStore";
@@ -58,7 +58,6 @@ const DashBoardPermission: React.FC = () => {
       await updateRoleInDatabase(selectedBuilding.id, manager);
       await getUserByBuildingId(selectedBuilding.id);
       setSelectedManager(manager);
-      console.log("Quản lý đã được thêm thành công.");
 
       setIsModalOpen(false); // Đóng modal sau khi chọn quản lý
     } catch (error) {
@@ -84,17 +83,22 @@ const DashBoardPermission: React.FC = () => {
       console.error("Error during role update or permission creation:", error);
     }
   };
+  const handleDeleteManager = async (user: User) => {
+    try {
+      const response = await clearPermision(user.id)
+      if(response.isSuccess && selectedBuilding) {
+        await getUserByBuildingId(selectedBuilding.id);
+      }
+    } catch (error) {
+      console.log(error)
+    }
+    // Bạn có thể gọi API để xóa quản lý ở đây nếu cần
+    // Ví dụ: await deleteManager(user.id);
+  };
 
   return (
     <div className="flex flex-col flex-1 bg-gray-100 w-full overflow-y-hidden">
-      <div className="h-[5%] flex flex-row px-6 gap-4 items-center justify-start border-b-b bg-white w-full">
-        <FaSearch className="text-gray-500" size={20} />
-        <input
-          className="w-full border-none focus:outline-none"
-          placeholder="Tìm kiếm bằng tên tòa nhà"
-        />
-        <FaBell className="text-gray-500" size={20} />
-      </div>
+      <div className="h-[5%] flex flex-row px-6 gap-4 items-center justify-start border-b-b bg-white w-full"></div>
 
       <div className="flex h-[95%] p-6 overflow-hidden">
         <div className="flex flex-1 rounded-[8px] flex-col py-4 px-4 w-full bg-white">
@@ -144,49 +148,46 @@ const DashBoardPermission: React.FC = () => {
                     <table className="w-full text-left border-collapse gap-16">
                       <thead className="sticky top-0 bg-white">
                         <tr>
-                          <th className="border-b p-2 text-themeColor h-16">
+                          <th className="border border-gray-300 px-4 p-2 bg-themeColor text-white w-16 h-12">
+                            STT
+                          </th>
+                          <th className="border border-gray-300 px-4 p-2 bg-themeColor text-white h-12">
                             Tên đăng nhập
                           </th>
-                          <th className="border-b p-2 text-themeColor h-16">
-                            Họ
-                          </th>
-                          <th className="border-b p-2 text-themeColor h-16">
-                            Tên
-                          </th>
-                          <th className="border-b p-2 text-themeColor h-16">
-                            Vai trò
-                          </th>
-                          <th className="border-b p-2 text-themeColor h-16">
-                            Email
-                          </th>
-                          <th className="border-b p-2 text-themeColor h-16">
-                            Số điện thoại
-                          </th>
+                          <th className="border border-gray-300 w-36 px-4 p-2 bg-themeColor text-white h-12"></th>
                         </tr>
                       </thead>
                       <tbody>
-                        {accountManageByBuilding.map((user) => (
-                          <tr key={user.id}>
-                            <td className="border-b p-2 h-16">
-                              {user.username}
-                            </td>
-                            <td className="border-b p-2 h-16">
-                              {user.firstName}
-                            </td>
-                            <td className="border-b p-2 h-16">
-                              {user.lastName}
-                            </td>
-                            <td className="border-b p-2 h-16">
-                              {user.role || "N/A"}
-                            </td>
-                            <td className="border-b p-2 h-16">
-                              {user.email || "N/A"}
-                            </td>
-                            <td className="border-b p-2 h-16">
-                              {user.phone || "N/A"}
+                        {accountManageByBuilding.length === 0 ? (
+                          <tr>
+                            <td
+                              colSpan={2}
+                              className="text-center p-4 text-gray-500"
+                            >
+                              Chưa có quản lý nào được thêm
                             </td>
                           </tr>
-                        ))}
+                        ) : (
+                          accountManageByBuilding.map((user, index) => (
+                            <tr key={user.id}>
+                              <td className="border border-gray-300 px-4 h-12 w-16">
+                                {index + 1}
+                              </td>{" "}
+                              {/* Số thứ tự */}
+                              <td className="border border-gray-300 px-4 h-12">
+                                {user.username}
+                              </td>
+                              <td className="border border-gray-300 w-36 px-4 p-2 flex justify-center  text-white h-12">
+                              <button
+                                onClick={() => handleDeleteManager(user)}
+                                className="text-red-500 hover:text-red-700"
+                              >
+                                <FaTrash />
+                              </button>
+                              </td>
+                            </tr>
+                          ))
+                        )}
                       </tbody>
                     </table>
                   )}

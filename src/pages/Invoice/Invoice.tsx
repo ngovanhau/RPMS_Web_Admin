@@ -192,8 +192,7 @@ const DashBoardInvoice: React.FC = () => {
           setBuilding(selectedBuilding);
 
           // Fetch rooms for the selected building
-         await getRoomByBuildingId(buildingId);
-
+          await getRoomByBuildingId(buildingId);
 
           // Reset trạng thái room
           setSelectedRoom(null);

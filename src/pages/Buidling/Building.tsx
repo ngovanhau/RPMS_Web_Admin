@@ -32,6 +32,12 @@ import {
 import useAccountStore from "@/stores/accountStore";
 import useAuthStore from "@/stores/userStore";
 import { information } from "@/services/userApi/userApi";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const DashBoardBuilding: React.FC = () => {
   const buildings = useBuildingStore((state) => state.buildings);
@@ -48,20 +54,16 @@ const DashBoardBuilding: React.FC = () => {
   const [isOpenCreateBuildingForm, setIsOpenCreateBuildingForm] =
     useState(false);
 
-
   const fetchBuildings = async () => {
     try {
       if (userData?.username) {
         const response =
           userData?.role === "ADMIN"
             ? await getAllBuildings()
-            : await getBuildingByUserId(userData?.id || ""); // Ensure userId is not undefined
-
-        const buildingsData = sortBuildingsByName(response.data.data);
-        setSelectedBuildingId(buildingsData[0].id);
-
-        await getBuildingById(buildingsData[0].id);
-        await getRoomByBuildingId(buildingsData[0].id);
+            : await getBuildingByUserId(userData?.id || ""); 
+        setSelectedBuildingId(buildings[0].id);
+        await getBuildingById(buildings[0].id);
+        await getRoomByBuildingId(buildings[0].id);
         await getallService();
       } else {
         throw new Error("User data or username is missing");
@@ -71,7 +73,6 @@ const DashBoardBuilding: React.FC = () => {
     }
   };
 
-  
   useEffect(() => {
     fetchBuildings();
   }, []);
@@ -138,13 +139,7 @@ const DashBoardBuilding: React.FC = () => {
 
   return (
     <div className="flex flex-col flex-1 bg-gray-200 w-full overflow-y-hidden">
-      <div className="h-[5%] flex flex-row px-6 gap-4 items-center justify-start border-b-b bg-white w-full">
-        {/* Search bar with placeholder */}
-        <input
-          className="w-full border-none focus:outline-none text-sm"
-          placeholder="Tìm kiếm bằng tên tòa nhà"
-        />
-      </div>
+      <div className="h-[5%] flex flex-row px-6 gap-4 items-center justify-start border-b-b bg-white w-full"></div>
 
       <div className="flex h-[95%] flex-row justify-between bg-gray-200 p-4">
         <div className="w-[24%] h-full rounded-l-[8px] flex flex-col bg-white">
@@ -160,12 +155,25 @@ const DashBoardBuilding: React.FC = () => {
           </div>
           <div className="h-[10%] w-full flex justify-center items-center">
             <div
-              onClick={handleOpenCreateBuildingForm}
-              className="h-12 rounded-xl w-[90%] cursor-pointer bg-themeColor flex justify-center items-center"
+              onClick={
+                userData?.role === "ADMIN"
+                  ? handleOpenCreateBuildingForm
+                  : undefined
+              }
+              className={`h-12 rounded-xl w-[90%] cursor-pointer flex justify-center items-center ${
+                userData?.role === "ADMIN"
+                  ? "bg-themeColor"
+                  : "bg-gray-400 cursor-not-allowed"
+              }`}
             >
-              <span className="text-sm text-white font-semibold">
-                Thêm tòa nhà
-              </span>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger className="text-sm text-white font-semibold">Thêm tòa nhà</TooltipTrigger>
+                  <TooltipContent>
+                    <p>Add to library</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </div>
           </div>
         </div>
@@ -221,9 +229,9 @@ const DashBoardBuilding: React.FC = () => {
                 <FaMapMarkerAlt size={30} color="#001eb4" />
               </div>
               <div className="w-2/4 flex justify-center pl-4 items-start flex-col h-full ">
-                <span className="text-themeColor font-bold">Địa chỉ</span>
+                <span className="text-themeColor font-bold">Thành phố</span>
                 <span className="text-global ">
-                  {buildings.find((b) => b.id === selectedBuildingId)?.address}
+                  {buildings.find((b) => b.id === selectedBuildingId)?.city}
                 </span>
               </div>
               <div className="w-1/4 "></div>
@@ -247,12 +255,12 @@ const DashBoardBuilding: React.FC = () => {
                 <FaDollarSign size={30} color="#001eb4" />
               </div>
               <div className="w-2/4 flex justify-center pl-4 items-start flex-col h-full ">
-                <span className="text-themeColor font-bold">
-                  Chi phí thuê
-                </span>
-                <span className="text-global ">
-                  {building?.rental_costs} VND
-                </span>
+                <span className="text-themeColor font-bold">Chi phí thuê</span>
+                {/* <span className="text-global">
+                  {building?.rental_costs === ""
+                    ? "Liên hệ"
+                    : `${building?.rental_costs} VND`}
+                </span> */}
               </div>
               <div className="w-1/4 "></div>
             </div>
@@ -262,8 +270,10 @@ const DashBoardBuilding: React.FC = () => {
                 <FaUserTie size={30} color="#001eb4" />
               </div>
               <div className="w-3/4 flex justify-center pl-4 items-start flex-col h-full ">
-                <span className="text-themeColor font-bold">Quản lý</span>
-                <span className="text-global">Phạm Văn Hoàng</span>
+                <span className="text-themeColor font-bold">Số tầng</span>
+                <span className="text-global">
+                  {building?.number_of_floors}
+                </span>
               </div>
             </div>
           </div>

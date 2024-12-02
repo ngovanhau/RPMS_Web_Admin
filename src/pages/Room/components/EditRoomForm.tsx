@@ -5,6 +5,7 @@ import { Building, Room } from "@/types/types";
 import { getallService } from "@/services/servicesApi/servicesApi";
 import useServiceStore from "@/stores/servicesStore";
 import { ServiceInfo } from "@/types/types";
+import { uploadImage } from "@/services/imageApi/imageApi";
 
 interface EditRoomFormProps {
   isOpen: boolean;
@@ -35,6 +36,8 @@ const EditRoomForm: React.FC<EditRoomFormProps> = ({
 
   const [paidServiceList, setPaidServiceList] = useState<ServiceInfo[]>([]);
   const [selectedSubDetail, setSelectedSubDetail] = useState<Number>(0);
+  const [imageUrls, setImageUrls] = useState<string[]>(room?.imageUrls || []); // Để lưu các ảnh phòng
+
   const subDetailsLabel = [
     { id: 0, label: "DỊCH VỤ" },
     { id: 1, label: "ẢNH PHÒNG" },
@@ -48,43 +51,55 @@ const EditRoomForm: React.FC<EditRoomFormProps> = ({
       reset(room || {}); // Reset the form with existing room data if editing
       if (room) {
         setPaidServiceList(room.roomservice || []);
+        setImageUrls(room.imageUrls || []); // Cập nhật lại mảng ảnh khi mở modal
       }
     }
   }, [isOpen, room, reset]);
 
-  // const handleFormSubmit = (data: Room) => {
-  //   const roomServices = paidServiceList.map((service) => ({
-  //     serviceId: service.serviceId,
-  //     serviceName: service.serviceName,
-  //   }));
-  //   data.roomservice = roomServices;
-  //   data.building_Id = building?.id || "";
-
-  //   onSubmit(data);
-  //   onClose();
-  // };
   const handleFormSubmit = (data: Room) => {
     // Thay thế toàn bộ data.roomservice bằng paidServiceList
     data.roomservice = paidServiceList;
-  
+
     // Gán ID của building vào data nếu có
     data.building_Id = building?.id || "";
-  
+    data.imageUrls = imageUrls;
+
     // Gọi hàm onSubmit để gửi dữ liệu đã cập nhật
     onSubmit(data);
     onClose();
   };
-  
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files) {
+      try {
+        // Chuyển các tệp được chọn thành một mảng URL
+        const uploadedUrls = await Promise.all(
+          Array.from(files).map((file) => uploadImage(file)) // Gọi hàm uploadImage cho từng file
+        );
+
+        // Cập nhật lại mảng ảnh với các URL mới
+        setImageUrls((prevUrls) => [...prevUrls, ...uploadedUrls]);
+      } catch (error) {
+        console.error("Error uploading images:", error);
+      }
+    }
+  };
 
   useEffect(() => {
     getallService();
   }, []);
 
-  const handleServiceClick = (serviceId: string | null, serviceName: string | null) => {
+  const handleServiceClick = (
+    serviceId: string | null,
+    serviceName: string | null
+  ) => {
     if (serviceId === null) return;
-  
+
     setPaidServiceList((prevList) => {
-      const serviceExists = prevList.some((service) => service.serviceId === serviceId);
+      const serviceExists = prevList.some(
+        (service) => service.serviceId === serviceId
+      );
       if (serviceExists) {
         // Loại bỏ dịch vụ nếu đã có
         return prevList.filter((service) => service.serviceId !== serviceId);
@@ -97,7 +112,10 @@ const EditRoomForm: React.FC<EditRoomFormProps> = ({
 
   return (
     <CustomModal isOpen={isOpen} onClose={onClose} header="Sửa phòng">
-      <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
+      <form
+        onSubmit={handleSubmit(handleFormSubmit)}
+        className="space-y-4 h-[70vh]"
+      >
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-gray-700">Tên phòng *</label>
@@ -109,7 +127,9 @@ const EditRoomForm: React.FC<EditRoomFormProps> = ({
               placeholder="Nhập tên phòng"
             />
             {errors.room_name && (
-              <span className="text-red-500 text-sm">{errors.room_name.message}</span>
+              <span className="text-red-500 text-sm">
+                {errors.room_name.message}
+              </span>
             )}
           </div>
           <div>
@@ -120,7 +140,9 @@ const EditRoomForm: React.FC<EditRoomFormProps> = ({
               placeholder="Nhập tầng"
             />
             {errors.floor && (
-              <span className="text-red-500 text-sm">{errors.floor.message}</span>
+              <span className="text-red-500 text-sm">
+                {errors.floor.message}
+              </span>
             )}
           </div>
         </div>
@@ -167,11 +189,15 @@ const EditRoomForm: React.FC<EditRoomFormProps> = ({
               placeholder="Diện tích"
             />
             {errors.acreage && (
-              <span className="text-red-500 text-sm">{errors.acreage.message}</span>
+              <span className="text-red-500 text-sm">
+                {errors.acreage.message}
+              </span>
             )}
           </div>
           <div>
-            <label className="block text-gray-700">Giới hạn số người thuê *</label>
+            <label className="block text-gray-700">
+              Giới hạn số người thuê *
+            </label>
             <input
               {...register("limited_occupancy", {
                 required: "Vui lòng nhập giới hạn số người",
@@ -198,7 +224,9 @@ const EditRoomForm: React.FC<EditRoomFormProps> = ({
               placeholder="Tiền đặt cọc"
             />
             {errors.deposit && (
-              <span className="text-red-500 text-sm">{errors.deposit.message}</span>
+              <span className="text-red-500 text-sm">
+                {errors.deposit.message}
+              </span>
             )}
           </div>
           <div>
@@ -211,7 +239,9 @@ const EditRoomForm: React.FC<EditRoomFormProps> = ({
               placeholder="Giá phòng"
             />
             {errors.room_price && (
-              <span className="text-red-500 text-sm">{errors.room_price.message}</span>
+              <span className="text-red-500 text-sm">
+                {errors.room_price.message}
+              </span>
             )}
           </div>
           <div>
@@ -225,7 +255,9 @@ const EditRoomForm: React.FC<EditRoomFormProps> = ({
               <option value="0">Trống</option>
             </select>
             {errors.status && (
-              <span className="text-red-500 text-sm">{errors.status.message}</span>
+              <span className="text-red-500 text-sm">
+                {errors.status.message}
+              </span>
             )}
           </div>
         </div>
@@ -286,9 +318,41 @@ const EditRoomForm: React.FC<EditRoomFormProps> = ({
               </div>
             </div>
           )}
+          {/* Phần Ảnh Phòng */}
+          {selectedSubDetail === 1 && (
+            <div className="h-56 w-full flex flex-col">
+              <div className="flex-1 w-full py-5 flex justify-start items-start">
+                <div className="w-full flex flex-row flex-wrap">
+                  {imageUrls.length > 0 ? (
+                    imageUrls.map((url, index) => (
+                      <div key={index} className="h-24 w-24 mr-4 mb-4">
+                        <img
+                          className="object-cover h-full w-full rounded-lg"
+                          src={url}
+                          alt={`Room image ${index + 1}`}
+                        />
+                      </div>
+                    ))
+                  ) : (
+                    <p>Chưa có ảnh phòng</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Form upload ảnh */}
+              <div className="w-full mt-4">
+                <input
+                  type="file"
+                  onChange={handleImageUpload}
+                  className="w-full border border-gray-300 p-2 rounded-lg"
+                  multiple // Cho phép chọn nhiều ảnh
+                />
+              </div>
+            </div>
+          )}
         </div>
 
-        <div className="flex justify-end">
+        <div className="flex fixed bottom-[5%] right-[5%]">
           <button
             type="button"
             onClick={onClose}

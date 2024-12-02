@@ -148,7 +148,24 @@ const CreateBuildingForm: React.FC<CreateBuildingFormProps> = ({
             )}
           </div>
         </div>
+        
         <div className="grid grid-cols-2 gap-4">
+        <div>
+            <label className="block text-gray-700">Chi phí *</label>
+            <input
+              type="number"
+              {...register("rental_costs", {
+                required: "Vui lòng nhập chi phí",
+              })}
+              className="w-full border border-gray-300 p-2 rounded-lg"
+              placeholder="Nhập chi phí"
+            />
+            {errors.rental_costs && (
+              <span className="text-red-500 text-sm">
+                {errors.rental_costs.message}
+              </span>
+            )}
+          </div>
           <div>
             <label className="block text-gray-700">Ngày chốt tiền *</label>
             <input
@@ -183,6 +200,7 @@ const CreateBuildingForm: React.FC<CreateBuildingFormProps> = ({
               </span>
             )}
           </div>
+          
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div>

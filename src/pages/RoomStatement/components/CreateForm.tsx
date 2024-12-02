@@ -66,8 +66,8 @@ const MeterReadingForm: React.FC<MeterReadingFormProps> = ({ onSubmit, onCancel,
                 ...prevState,
                 electricity_price: reading.electricity_price || 0,
                 water_price: reading.water_price || 0,
-                electricity_old: reading.electricity_old,
-                water_old: reading.water_old
+                electricity_old: reading.electricity_new,
+                water_old: reading.water_new
             }));
         }
     }, [reading]);

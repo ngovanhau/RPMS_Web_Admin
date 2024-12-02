@@ -12,6 +12,7 @@ import { Room } from "@/types/types";
 import { getCustomerNoRoom } from "@/services/contractApi/contractApi";
 import useTenantStore from "@/stores/tenantStore";
 import { uploadImage } from "@/services/imageApi/imageApi";
+import Viewer from "react-viewer";
 
 interface CreateContractFormProps {
   onSubmit: (contract: Contract) => void;
@@ -32,14 +33,16 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({
     room_fee: 0,
     deposit: 0,
     customerId: "",
-    service: "7e2d6bcc-0350-4474-bb71-03c5b33cb2bb",
+    service: "",
     clause: "",
-    image: "ContractRow.tsx",
+    image: [] as string[], // Explicitly type image as string[]
     customerName: "",
   });
-  const [listRoom, setListRoom] = useState<Room[]>([]);
-  const [uploading, setUploading] = useState(false); // Trạng thái đang tải ảnh
 
+  const [listRoom, setListRoom] = useState<Room[]>([]);
+  const [uploading, setUploading] = useState<boolean[]>([]);
+  const [visible, setVisible] = useState(false); // Trạng thái xem ảnh
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
   // Access services from the store
   const services = useServiceStore.getState().services;
   const listCustomer = useTenantStore.getState().tenantsWithoutRoom;
@@ -109,22 +112,51 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({
     label: customer.customer_name,
   }));
 
-  const handleUploadImage = async (file: File) => {
-    setUploading(true);
-    try {
-      const imageUrl = await uploadImage(file);
-      setContract((prevState) => ({
-        ...prevState,
-        image: imageUrl,
-      }));
-    } catch (error) {
-      console.error("Error uploading image:", error);
-      alert("Tải ảnh lên thất bại. Vui lòng thử lại.");
-    } finally {
-      setUploading(false);
+  const handleUploadImage = async (files: FileList) => {
+    const filesArray = Array.from(files);
+    const newUploading = Array(filesArray.length).fill(false);
+    setUploading(newUploading); // Reset trạng thái upload
+
+    const imageUrls: string[] = [];
+    for (let i = 0; i < filesArray.length; i++) {
+      const file = filesArray[i];
+      newUploading[i] = true; // Đang tải ảnh
+      setUploading([...newUploading]);
+
+      try {
+        const imageUrl = await uploadImage(file); // Upload ảnh
+        imageUrls.push(imageUrl);
+        newUploading[i] = false; // Hoàn thành tải ảnh
+      } catch (error) {
+        console.error("Error uploading image:", error);
+        alert("Tải ảnh lên thất bại. Vui lòng thử lại.");
+      } finally {
+        setUploading([...newUploading]);
+      }
     }
+
+    setContract((prevState) => ({
+      ...prevState,
+      image: [...prevState.image!, ...imageUrls], // Đẩy URL ảnh vào mảng
+    }));
   };
 
+  // Xóa ảnh
+  const handleRemoveImage = (index: number) => {
+    const updatedImages = (contract.image || []).filter((_, i) => i !== index);
+    setContract((prevState) => ({
+      ...prevState,
+      image: updatedImages,
+    }));
+  };
+  const handleImageClick = (index: number) => {
+    setActiveImageIndex(index); // Lưu lại ảnh được bấm
+    setVisible(true); // Hiển thị viewer
+  };
+
+  const handleCloseViewer = () => {
+    setVisible(false); // Đóng viewer
+  };
   return (
     <form onSubmit={handleSubmit} className="space-y-6 bg-white p-8 mx-auto">
       <h2 className="text-2xl font-bold text-gray-700 mb-6 text-center">
@@ -277,29 +309,6 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({
             placeholder="Chọn khách hàng"
           />
         </div>
-        {/* Service Multiselect Dropdown */}
-        {/* <div>
-          <label className="block text-sm font-semibold text-gray-600 mb-1">
-            Dịch Vụ
-          </label>
-          <Select
-            isMulti
-            options={serviceOptions}
-            onChange={(selected) =>
-              handleServiceChange(
-                selected as MultiValue<{
-                  value: string;
-                  label: string;
-                  serviceId: string;
-                  serviceName: string;
-                }>
-              )
-            }
-            className="border rounded-lg w-full focus:ring-2 focus:ring-blue-400 focus:outline-none"
-            placeholder="Chọn dịch vụ"
-          />
-        </div> */}
-
         <div>
           <label className="block text-sm font-semibold text-gray-600 mb-1">
             Điều Khoản
@@ -320,22 +329,51 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({
           <input
             type="file"
             accept="image/*"
+            multiple
             onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (file) handleUploadImage(file);
+              const files = e.target.files;
+              if (files) {
+                handleUploadImage(files);
+              }
             }}
             className="border rounded-lg p-3 w-full focus:ring-2 focus:ring-blue-400 focus:outline-none"
           />
-          {uploading && (
-            <p className="text-blue-500 text-sm">Đang tải ảnh...</p>
+          {uploading.length > 0 && (
+            <div className="mt-2">
+              <p className="text-blue-500 text-sm">
+                Đã tải lên{" "}
+                {uploading.filter((isUploading) => !isUploading).length} ảnh
+              </p>
+            </div>
           )}
-          {contract.image && (
-            <div className="mt-4">
-              <img
-                src={contract.image}
-                alt="Hợp Đồng"
-                className="w-full h-32 object-cover rounded-lg"
-              />
+        </div>
+      </div>
+
+      <div className="w-full flex justify-end">
+        <div className="w-[50%] flex justify-start flex-col">
+          <text>Ảnh hợp đồng</text>
+          {Array.isArray(contract.image) && contract.image.length > 0 && (
+            <div className="mt-6 grid grid-cols-3 gap-6">
+              {contract.image.map((imageUrl, index) => (
+                <div
+                  key={index}
+                  className="relative w-full h-32 overflow-hidden rounded-lg border-2 border-gray-300 shadow-lg flex items-center justify-center"
+                >
+                  <img
+                    src={imageUrl}
+                    alt={`Uploaded image ${index + 1}`}
+                    className="w-full h-full object-cover rounded-md"
+                    onClick={() => handleImageClick(index)} // Bấm vào ảnh
+                  />
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveImage(index)}
+                    className="absolute top-2 right-2 bg-red-600 text-white rounded-full p-3 text-xs hover:bg-red-700 w-8 h-8 flex items-center justify-center"
+                  >
+                    X
+                  </button>
+                </div>
+              ))}
             </div>
           )}
         </div>
@@ -349,6 +387,13 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({
           Xác Nhận
         </button>
       </div>
+      {/* React Viewer - Hiển thị ảnh khi người dùng bấm vào ảnh */}
+      <Viewer
+        visible={visible}
+        onClose={handleCloseViewer}
+        images={(contract.image ?? []).map((url) => ({ src: url, alt: "" }))} // Sử dụng ?? để gán giá trị mặc định là mảng rỗng
+        activeIndex={activeImageIndex}
+      />
     </form>
   );
 };

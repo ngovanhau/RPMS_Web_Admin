@@ -45,3 +45,12 @@ export const createService = async (serviceData: Service): Promise<any> => {
       console.log("Failed to get all service:", error);
     }
   }
+
+  export const getServiceByRoomId = async ( roomId : string ) => {
+    try {
+      const response = await api.get(`/service/getservicebyroomid?Roomid=${roomId}`)
+      return response.data
+    } catch (error) {
+      throw error
+    }
+  } 

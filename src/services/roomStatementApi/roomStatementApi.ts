@@ -6,8 +6,8 @@ import useServiceMeterReadingsStore from "@/stores/roomStatementStore";
 
 export const getALlServicemeterreadings = async () => {
     try {
-        useServiceMeterReadingsStore.getState().clearReadings()
         const response = await api.get(`/servicemeterreadings/serviceall`)
+        useServiceMeterReadingsStore.getState().clearReadings()
         useServiceMeterReadingsStore.getState().setReadings(response.data.data)
         return response
     } catch (error) {
@@ -18,8 +18,8 @@ export const getALlServicemeterreadings = async () => {
 
 export const getServicemeterByRoomId = async ( roomId : string) => {
     try {
-        useServiceMeterReadingsStore.getState().clearReadings()
         const response = await api.get(`/servicemeterreadings/getservicebyroomid?id=${roomId}`)
+        useServiceMeterReadingsStore.getState().clearReadings()
         useServiceMeterReadingsStore.getState().setReading(response.data.data)
         return response
     } catch (error) {
@@ -30,8 +30,8 @@ export const getServicemeterByRoomId = async ( roomId : string) => {
 
 export const getServicemeterByBuildingId = async ( buildingId : string ) => {
     try {
-        useServiceMeterReadingsStore.getState().clearReadings()
         const response = await api.get(`/servicemeterreadings/getlistservicebybuildingid?id=${buildingId}`)
+        useServiceMeterReadingsStore.getState().clearReadings()
         useServiceMeterReadingsStore.getState().setReadings(response.data.data)
         return response
     } catch (error) {

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { TransactionGroup } from "@/types/types";
+import { uploadImage } from "@/services/imageApi/imageApi";
 
 interface TransactionGroupFormProps {
   initialData?: TransactionGroup; // Dữ liệu ban đầu cho chỉnh sửa
@@ -14,20 +15,43 @@ const TransactionGroupForm: React.FC<TransactionGroupFormProps> = ({
 }) => {
   const [formData, setFormData] = useState<TransactionGroup>(
     initialData || {
-      id: "",
+      id: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
       type: 0,
       name: "",
-      image: "",
+      image: "", // This will hold the image URL after uploading
       note: "",
     }
   );
 
+  const [loading, setLoading] = useState<boolean>(false); // Loading state to prevent multiple submissions
+
+  // Handle form field changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
       [name]: name === "type" ? parseInt(value) : value,
     }));
+  };
+
+  // Handle file change (image upload)
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setLoading(true);
+      try {
+        // Assuming `uploadImage` returns a URL for the uploaded image
+        const imageUrl = await uploadImage(file);
+        setFormData((prev) => ({
+          ...prev,
+          image: imageUrl, // Set the image URL in the form data
+        }));
+      } catch (error) {
+        console.error("Error uploading image:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
   };
 
   const handleSubmit = () => {
@@ -68,13 +92,22 @@ const TransactionGroupForm: React.FC<TransactionGroupFormProps> = ({
       <div>
         <label className="block text-sm font-medium text-gray-700">Hình ảnh</label>
         <input
-          type="text"
+          type="file"
           name="image"
-          value={formData.image}
-          onChange={handleChange}
-          placeholder="Nhập URL hình ảnh"
+          accept="image/*"
+          onChange={handleFileChange}
           className="mt-1 p-2 border rounded w-full"
         />
+        {formData.image && (
+          <div className="mt-2">
+            <img
+              src={formData.image}
+              alt="Preview"
+              className="w-32 h-32 object-cover rounded"
+            />
+          </div>
+        )}
+        {loading && <p>Đang tải hình ảnh...</p>} {/* Show loading text during upload */}
       </div>
 
       <div>

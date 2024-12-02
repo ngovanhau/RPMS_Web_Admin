@@ -23,3 +23,12 @@ export const createTransactionGroup = async ( data : TransactionGroup ) => {
     }
 }
 
+
+export const deleteTransactionGroup = async ( id : string ) => {
+    try {
+        const response = await api.delete(`/transactiongroup/delete?id=${id}`)
+        return response.data
+    } catch (error) {
+        console.log(error)
+    }
+}

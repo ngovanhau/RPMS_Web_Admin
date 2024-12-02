@@ -10,6 +10,7 @@ import {
   deleteRoom,
   addRoom,
   editRoom,
+  getBuildingByUserId,
 } from "@/services/buildingApi/buildingApi";
 import { Check, ChevronsUpDown } from "lucide-react";
 
@@ -32,19 +33,34 @@ import { useBuildingStore } from "@/stores/buildingStore";
 import React, { useEffect, useState } from "react";
 import BuildingForm from "../Buidling/Components/BuildingForm";
 import CreateRoomForm from "../Room/components/CreateRoomForm";
-import { Building, Room } from "@/types/types";
+import { Building, Contract, Room } from "@/types/types";
 import { sortBuildingsByName } from "@/config/config";
 import RoomCard from "@/components/RoomCard/RoomCard";
 import { getRoomById } from "@/services/buildingApi/buildingApi";
 import EditRoomForm from "./components/EditRoomForm";
+import { FaBuilding, FaDollarSign, FaHome } from "react-icons/fa";
+import useAuthStore from "@/stores/userStore";
+import {
+  getPermissionById,
+  getUserByBuildingId,
+} from "@/services/accountApi/accountApi";
+import { FaEdit, FaTrashAlt } from "react-icons/fa"; // Importing icons from react-icons
+import { getContractByBuildingId } from "@/services/contractApi/contractApi";
+import useContractStore from "@/stores/contractStore";
+import ContractItem from "./components/DetailContractComponent";
+import Viewer from "react-viewer";
 
 const DashBoardRoom: React.FC = () => {
+  const userInfo = useAuthStore((state) => state.userData);
   const buildings = useBuildingStore((state) => state.buildings);
   const building = useBuildingStore((state) => state.building);
   const roomList = useBuildingStore((state) => state.roomList);
-  console.log(roomList);
   const setBuilding = useBuildingStore((state) => state.setBuilding);
   const room = useBuildingStore((state) => state.room);
+  const contractList = useContractStore((state) => state.contracts);
+  const [selectedContract, setSelectedContract] = useState<Contract | null>(
+    null
+  );
   const [selectedBuildingId, setSelectedBuildingId] = useState<string | null>(
     null
   );
@@ -54,6 +70,8 @@ const DashBoardRoom: React.FC = () => {
   const [value, setValue] = React.useState("");
   const [isOpenRoomForm, setIsOpenRoomForm] = useState(false);
   const [isOpenCreateRoomForm, setIsOpenCreateRoomForm] = useState(false);
+  const [visible, setVisible] = useState(false); // Xử lý trạng thái hiển thị ảnh lớn
+  const [currentIndex, setCurrentIndex] = useState(0); // Lưu chỉ số ảnh hiện tại
 
   const handleOpenUpdateRoomForm = () => {
     setIsOpenRoomForm(true);
@@ -68,6 +86,7 @@ const DashBoardRoom: React.FC = () => {
       setSelectedBuildingId(id);
       await getBuildingById(id);
       await getRoomByBuildingId(id);
+      await getContractByBuildingId(id);
       setOpen(false);
     } catch (err) {
       setError("Failed to fetch building details");
@@ -76,8 +95,19 @@ const DashBoardRoom: React.FC = () => {
 
   const handleClickRoomCard = async (roomId: string) => {
     try {
+      setSelectedContract(null);
       setSelectedRoomId(roomId);
       await getRoomById(roomId);
+
+      const foundContract = contractList.find(
+        (contract) => contract.roomId === roomId
+      );
+
+      if (foundContract) {
+        setSelectedContract(foundContract);
+      } else {
+        console.log("No contract found for this room");
+      }
     } catch (error) {
       setError("Failed to fetch room");
     }
@@ -95,7 +125,6 @@ const DashBoardRoom: React.FC = () => {
 
   const handleCreateRoom = async (room: Room) => {
     try {
-      console.log("Data room tạo nè : ", room);
       await addRoom(room);
       await getRoomByBuildingId(selectedBuildingId);
       setIsOpenCreateRoomForm(false);
@@ -104,16 +133,19 @@ const DashBoardRoom: React.FC = () => {
     }
   };
 
-  
-
   useEffect(() => {
     const fetchBuildings = async () => {
       try {
-        const response = await getAllBuildings();
-        const buildingsData = sortBuildingsByName(response.data.data);
-        setSelectedBuildingId(buildingsData[0].id);
-        await getBuildingById(buildingsData[0].id);
-        await getRoomByBuildingId(buildingsData[0].id);
+        if (userInfo?.role === "ADMIN") {
+          await getAllBuildings();
+          setSelectedBuildingId(buildings[0].id);
+          await getBuildingById(buildings[0].id);
+          await getRoomByBuildingId(buildings[0].id);
+        } else {
+          if (userInfo) {
+            await getBuildingByUserId(userInfo.id);
+          }
+        }
       } catch (err) {
         setError("Failed to load buildings");
       }
@@ -143,14 +175,7 @@ const DashBoardRoom: React.FC = () => {
 
   return (
     <div className="flex flex-col flex-1 bg-gray-200 w-full overflow-y-hidden">
-      <div className="h-[5%] flex flex-row px-6 gap-4 items-center justify-start border-b-b bg-white w-full">
-        {/* Search bar with placeholder */}
-        <input
-          className="w-full border-none focus:outline-none text-sm"
-          placeholder="Tìm kiếm bằng tên tòa nhà"
-        />
-      </div>
-
+      <div className="h-[5%] flex flex-row px-6 gap-4 items-center justify-start border-b-b bg-white w-full"></div>
       <div className="flex h-[95%] flex-row justify-between bg-gray-200 p-4">
         <div className="w-[24%] h-full rounded-l-[8px] flex flex-col bg-white">
           <div className="h-[90%] relative  w-full overflow-y-scroll scrollbar-hide border-b">
@@ -359,57 +384,29 @@ const DashBoardRoom: React.FC = () => {
             </div>
 
             <div className="h-full w-[18%] bg-white flex flex-row justify-center items-center rounded-[8px] overflow-hidden">
-              <div className="w-1/4 h-full flex justify-center items-center  ">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={1.5}
-                  stroke="#001eb4"
-                  className="size-8"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3.75h.008v.008h-.008v-.008Zm0 3h.008v.008h-.008v-.008Zm0 3h.008v.008h-.008v-.008Z"
-                  />
-                </svg>
+              <div className="w-1/4 h-full flex justify-center items-center">
+                <FaDollarSign size={24} color="#001eb4" />
               </div>
-              <div className="w-2/4 flex justify-center pl-4 items-start flex-col h-full ">
-                <span className="text-themeColor font-bold">
-                  Chi phí thuê
-                </span>
-                <span className="text-global ">{room?.room_price} VND</span>
+              <div className="w-2/4 flex justify-center pl-4 items-start flex-col h-full">
+                <span className="text-themeColor font-bold">Chi phí thuê</span>
+                <span className="text-global">{room?.room_price} VND</span>
               </div>
-              <div className="w-1/4 "></div>
+              <div className="w-1/4"></div>
             </div>
 
             <div className="h-full w-[18%] bg-white flex flex-row justify-center items-center rounded-[8px] overflow-hidden">
-              <div className="w-1/4 h-full flex justify-center items-center  ">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={1.5}
-                  stroke="#001eb4"
-                  className="size-8"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3.75h.008v.008h-.008v-.008Zm0 3h.008v.008h-.008v-.008Zm0 3h.008v.008h-.008v-.008Z"
-                  />
-                </svg>
+              <div className="w-1/4 h-full flex justify-center items-center">
+                <FaHome size={30} color="#001eb4" /> {/* Icon mới */}
               </div>
               <div className="w-3/4 flex justify-center pl-4 items-start flex-col h-full ">
-                <span className="text-themeColor font-bold">Quản lý</span>
-                <span className="text-global">Phạm Văn Hoàng</span>
+                <span className="text-themeColor font-bold">Tầng</span>
+                <span className="text-global">{room?.floor}</span>
               </div>
             </div>
           </div>
 
           <div className="flex-1 flex flex-row justify-between h-full  mt-2 rounded-[8px]  overflow-hidden">
-            <div className=" h-full max-h-[760px] w-[59%] flex-col  overflow-y-scroll p-4  bg-white">
+            <div className=" h-full max-h-[860px] w-[59%] flex-col  overflow-y-scroll p-4  bg-white">
               <span className="text-global font-semibold">Dịch vụ có phí</span>
               <div className="flex flex-row rounded-[8px] flex-wrap overflow-hidden mt-2">
                 {room?.roomservice && room.roomservice.length > 0 ? (
@@ -440,7 +437,6 @@ const DashBoardRoom: React.FC = () => {
                 )}
               </div>
 
-
               <span className="text-global mt-4 font-semibold">
                 Tiện ích tòa nhà
               </span>
@@ -456,14 +452,62 @@ const DashBoardRoom: React.FC = () => {
                 </span>
 
                 <span className="text-global mt-4 font-semibold">Lưu ý</span>
-                <span className="text-gray-700 text-sm mt-2">
-                  {room?.note}
-                </span>
+                <span className="text-gray-700 text-sm mt-2">{room?.note}</span>
               </div>
               <div className="h-[300px]"></div>
             </div>
 
-            <div className="h-full w-[38.5%] bg-white rounded-[8px]  overflow-hidden "></div>
+            <div className="h-[800px] w-[38.5%] flex-col bg-white rounded-[8px] overflow-scroll">
+              {selectedContract ? (
+                <ContractItem contract={selectedContract} />
+              ) : (
+                <div className="p-2 w-full">
+                  <div className="h-full py-4 border-2 flex justify-center items-center rounded-[8px] border-themeColor hover:border-blue-200 transition-all duration-200">
+                    <p>Phòng này chưa có hợp đồng.</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Kiểm tra và hiển thị ảnh của phòng */}
+              {room && room.imageUrls && room.imageUrls.length > 0 ? (
+                <>
+                  {/* Hiển thị Viewer nếu ảnh được chọn */}
+                  <Viewer
+                    visible={visible}
+                    onClose={() => setVisible(false)}
+                    images={room.imageUrls.map((url) => ({
+                      src: url,
+                      alt: "",
+                    }))}
+                    activeIndex={currentIndex}
+                  />
+
+                  {/* Grid ảnh: mỗi hàng 2 ảnh */}
+                  <div className="grid grid-cols-2 gap-4 p-4">
+                    {room.imageUrls.map((url, index) => (
+                      <div key={index} className="overflow-hidden rounded-lg">
+                        <img
+                          src={url}
+                          alt={`room-image-${index}`}
+                          onClick={() => {
+                            setCurrentIndex(index);
+                            setVisible(true);
+                          }}
+                          className="w-full cursor-pointer transition-transform transform hover:scale-105"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                  <div className="h-[100px]"></div>
+                </>
+              ) : (
+                <div className="p-2 w-full">
+                  <div className="h-full py-4 border-2 flex justify-center items-center rounded-[8px] border-themeColor hover:border-blue-200 transition-all duration-200">
+                    <p>Phòng này chưa có ảnh.</p>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
