@@ -157,12 +157,7 @@ const DashBoardProblem: React.FC = () => {
   return (
     <div className="flex flex-col flex-1 bg-gray-100 w-full overflow-y-hidden">
       <div className="h-[5%] flex flex-row px-6 gap-4 items-center justify-start border-b bg-white w-full">
-        <FaSearch className="size-4 text-themeColor" />
-        <input
-          className="w-full text-sm border-none focus:outline-none"
-          placeholder="Tìm kiếm bằng tên tòa nhà"
-        />
-        <FaBell className="size-4 text-themeColor" />
+
       </div>
 
       <div className="flex h-[95%] p-4 overflow-hidden">

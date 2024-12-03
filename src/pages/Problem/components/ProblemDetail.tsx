@@ -167,7 +167,7 @@ const ProblemCard: React.FC<ProblemCardProps> = ({ problem, onClose }) => {
           />
 
           <div className="grid grid-cols-2 gap-4 border-t pt-4">
-            <div>
+            {/* <div>
               <h4 className="text-sm text-gray-500">Ngày tạo:</h4>
               <p className="text-sm text-gray-600">
                 {formatDate(problem.createdAt)}
@@ -178,7 +178,7 @@ const ProblemCard: React.FC<ProblemCardProps> = ({ problem, onClose }) => {
               <p className="text-sm text-gray-600">
                 {formatDate(problem.updatedAt)}
               </p>
-            </div>
+            </div> */}
           </div>
           {isEdited && (
             <div className="text-right">

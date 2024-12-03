@@ -6,7 +6,6 @@ import { Contract } from "@/types/types";
 import { formatNumber, formatDateTime } from "@/config/config";
 
 const ContractItem: React.FC<{ contract: Contract }> = ({ contract }) => {
-  console.log(contract)
   return (
     <div className=" w-full p-2">
       <Card className="h-full border-2 border-themeColor hover:border-blue-200 transition-all duration-200">
@@ -82,7 +81,7 @@ const ContractItem: React.FC<{ contract: Contract }> = ({ contract }) => {
             </div>
 
             {/* Phần dịch vụ */}
-            {contract.service && (
+            {/* {contract.service && (
               <div className="border-t border-gray-100 pt-3">
                 <h3 className="text-xs font-medium text-gray-600 mb-1">Dịch vụ bao gồm</h3>
                 <div className="flex flex-wrap gap-2">
@@ -93,7 +92,7 @@ const ContractItem: React.FC<{ contract: Contract }> = ({ contract }) => {
                   ))}
                 </div>
               </div>
-            )}
+            )} */}
           </div>
         </CardContent>
       </Card>
