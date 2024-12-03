@@ -56,8 +56,9 @@ export const deleteContract = async (id: string) => {
 export const getContractByBuildingId = async ( id : string ) => {
   try {
     const response = await api.get(`/contract/getcontractbybuildingid?id=${id}`)
-    useContractStore.getState().clearContracts(); // Clear existing contracts
+    useContractStore.getState().clearContracts(); 
     useContractStore.getState().addContracts(response.data.data);
+    useContractStore.getState().removeDuplicateContracts(); 
     return response.data
   } catch (error) {
     console.log(error)

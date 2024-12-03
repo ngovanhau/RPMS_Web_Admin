@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Contract, Transaction } from "@/types/types";
 import { getAllTransactionGroup } from "@/services/transactiongroupApi/transactiongroupApi";
 import useTransactionGroupStore from "@/stores/transactiongroupStore";
+import { getAllContract } from "@/services/contractApi/contractApi";
 
 interface NewTransactionFormProps {
   onSubmit: (transaction: Partial<Transaction>) => void;
@@ -21,7 +22,7 @@ const NewTransactionForm: React.FC<NewTransactionFormProps> = ({
     transactiongroupid: "",
     transactiongroupname: "",
     paymentmethod: "",
-    contractid: "",
+    contractid: "550e8400-e29b-41d4-a716-446655440000",
     contractname: "",
     note: "",
     image: "",
@@ -37,6 +38,8 @@ const NewTransactionForm: React.FC<NewTransactionFormProps> = ({
 
   const fetchInitialData = async () => {
     await getAllTransactionGroup();
+    await getAllContract()
+    
   };
 
   const handleInputChange = (

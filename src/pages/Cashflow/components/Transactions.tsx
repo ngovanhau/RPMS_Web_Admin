@@ -32,24 +32,27 @@ const Transactions: React.FC<TransactionsProps> = () => {
   const setTransactions = useTransactionStore((state) => state.setTransactions);
   const contractList = useContractStore((state) => state.contracts);
   const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
-  const [selectedBuildingId, setSelectedBuildingId] = useState<string | null>(null);
+  const [selectedBuildingId, setSelectedBuildingId] = useState<string | null>(
+    null
+  );
   const [isModalOpen, setIsModalOpen] = useState(false); // State for modal
   const [loading, setLoading] = useState<boolean>(false); // State for loading
   const [error, setError] = useState<string | null>(null); // State for error messages
-
   // Fetch initial data based on user role
+
   const fetchInitialData = async () => {
     setLoading(true);
-    setError(null);
     try {
       if (userData?.role === "ADMIN") {
-        console.log('Role : ', userData?.role)
         await getAllBuildings();
-        await getAllTransaction();
+        // await getAllTransaction();
       } else {
-        if(userData){
-        console.log('Role : ', userData?.role)
-        await getBuildingByUserId(userData?.id);
+        if (userData?.role !== "ADMIN" && userData) {
+          await getBuildingByUserId(userData.id);
+          // Ensure buildings are fetched before setting selectedBuildingId
+          if (buildings.length > 0) {
+            setSelectedBuildingId(buildings[0].id);
+          }
         }
       }
     } catch (error: any) {
@@ -64,13 +67,8 @@ const Transactions: React.FC<TransactionsProps> = () => {
   const fetchTransactions = async (buildingId: string | null = selectedBuildingId) => {
     if (!buildingId) return;
     setLoading(true);
-    setError(null);
     try {
-      if (userData?.role === "ADMIN") {
-        await getAllTransaction();
-      } else if (userData?.role === "MANAGEMENT") {
-        await getTransactionByBuildingId(buildingId);
-      }
+        await getTransactionByBuildingId(buildingId); 
     } catch (error: any) {
       console.error("Error fetching transactions:", error);
       setError("Failed to fetch transactions.");
@@ -78,8 +76,7 @@ const Transactions: React.FC<TransactionsProps> = () => {
       setLoading(false);
     }
   };
-
-  // Automatically select the first building when buildings are updated
+  
   useEffect(() => {
     if (
       userData?.role === "MANAGEMENT" &&
@@ -88,7 +85,6 @@ const Transactions: React.FC<TransactionsProps> = () => {
     ) {
       const firstBuilding = buildings[0];
       setSelectedBuildingId(firstBuilding.id);
-      fetchRooms(firstBuilding.id);
       fetchTransactions(firstBuilding.id);
       getContractByBuildingId(firstBuilding.id)
         .then(() => {
@@ -101,37 +97,24 @@ const Transactions: React.FC<TransactionsProps> = () => {
     }
   }, [buildings, userData?.role, selectedBuildingId]);
 
-  // Fetch rooms by building ID
-  const fetchRooms = async (buildingId: string) => {
-    setLoading(true);
-    setError(null);
-    try {
-      await getRoomByBuildingId(buildingId);
-    } catch (error: any) {
-      console.error("Error fetching rooms:", error);
-      setError("Failed to fetch rooms.");
-    } finally {
-      setLoading(false);
-    }
-  };
 
-  // Handle building selection
+
   const handleBuildingSelect = async (
     event: React.ChangeEvent<HTMLSelectElement>
   ) => {
     const buildingId = event.target.value;
     setSelectedBuildingId(buildingId);
-    setSelectedRoom(null); // Reset selected room when building changes
     try {
-      await fetchRooms(buildingId);
-      await fetchTransactions(buildingId);
+      // For selected building, fetch contracts (if needed)
       await getContractByBuildingId(buildingId);
+      fetchTransactions(buildingId);  // Trigger transaction fetch for this building
     } catch (error: any) {
       console.error("Error handling building selection:", error);
       setError("Failed to select building.");
     }
   };
-
+  
+  
   // Open and close modal
   const handleCreateTransaction = () => {
     setIsModalOpen(true);
@@ -147,11 +130,7 @@ const Transactions: React.FC<TransactionsProps> = () => {
     setError(null);
     try {
       await createTransaction(transaction);
-      await fetchTransactions(); // Refresh transactions after creation
-      // If contracts need to be updated as well:
-      if (selectedBuildingId) {
-        await getContractByBuildingId(selectedBuildingId);
-      }
+      await fetchTransactions(); // Refresh the data after creating transaction
       setIsModalOpen(false);
     } catch (error: any) {
       console.error("Error creating transaction:", error);
@@ -160,34 +139,80 @@ const Transactions: React.FC<TransactionsProps> = () => {
       setLoading(false);
     }
   };
+  
+  
 
+  // Handle updating a transaction
   const handleUpdateTransaction = async (updatedTransaction: Transaction) => {
-    await updateTransaction(updatedTransaction)
-    if(selectedBuildingId){
-    await getTransactionByBuildingId(selectedBuildingId)
+    setLoading(true);
+    setError(null);
+    try {
+      await updateTransaction(updatedTransaction);
+      await fetchTransactions(); // Refresh the data after updating transaction
+    } catch (error: any) {
+      console.error("Error updating transaction:", error);
+      setError("Failed to update transaction.");
+    } finally {
+      setLoading(false);
     }
   };
-  const handleDeleteTransaction = async ( transactionId : string ) => {
-    await deleteTransaction(transactionId)
-    if(selectedBuildingId){
-      await getTransactionByBuildingId(selectedBuildingId)
+  
+    // Handle deleting a transaction
+    const handleDeleteTransaction = async (transactionId: string) => {
+      setLoading(true);
+      setError(null);
+      try {
+        await deleteTransaction(transactionId);
+        await fetchTransactions(); // Refresh the data after deleting transaction
+      } catch (error: any) {
+        console.error("Error deleting transaction:", error);
+        setError("Failed to delete transaction.");
+      } finally {
+        setLoading(false);
       }
-  }
+    };
+    
 
-  // Fetch initial data when component mounts
-  useEffect(() => {
-    fetchInitialData();
-  }, []);
+    useEffect(() => {
+      const initializeBuilding = async () => {
+        if (
+          userData?.role === "MANAGEMENT" &&
+          buildings.length > 0 &&
+          !selectedBuildingId
+        ) {
+          const firstBuilding = buildings[0];
+          setSelectedBuildingId(firstBuilding.id);
+          // Không gọi fetchTransactions ở đây
+          try {
+            await getContractByBuildingId(firstBuilding.id);
+          } catch (error) {
+            console.error("Error fetching contracts:", error);
+            setError("Failed to fetch contracts.");
+          }
+        }
+      };
+      initializeBuilding();
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [buildings, userData?.role]);
+    
+  
+    // Fetch initial data when component mounts
+    useEffect(() => {
+      fetchInitialData();
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+  
+    useEffect(() => {
+      if (!selectedBuildingId && buildings.length > 0) {
+        const firstBuilding = buildings[0];
+        setSelectedBuildingId(firstBuilding.id);
+        fetchTransactions(firstBuilding.id);
+      }
+    }, [buildings, selectedBuildingId]); 
+    
 
   return (
     <div className="">
-      {/* Display Loading Indicator */}
-      {/* {loading && (
-        <div className="fixed inset-0 flex items-center justify-center bg-opacity-50 bg-gray-800 z-50">
-          <div className="loader"></div>
-        </div>
-      )} */}
-
       {/* Display Error Message */}
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
@@ -225,35 +250,17 @@ const Transactions: React.FC<TransactionsProps> = () => {
               </option>
             ))}
           </select>
-
-{ rooms.length > 0 && <select
-            className="p-2 border rounded w-48"
-            value={selectedRoom?.id || ""}
-            onChange={(event) => {
-              const roomId = event.target.value;
-              const room = rooms.find((r) => r.id === roomId) || null;
-              setSelectedRoom(room);
-            }}
-            disabled={!selectedBuildingId || rooms.length === 0}
-          >
-            <option value="">Phòng</option>
-            {rooms?.map((room) => (
-              <option key={room.id} value={room.id}>
-                {room.room_name}
-              </option>
-            ))}
-          </select>}
         </div>
 
         {/* Other Filters */}
-        <select className="p-2 border rounded w-48">
-          <option value="">Loại thu/chi</option>
-          {/* Add options as needed */}
-        </select>
       </div>
 
       {/* Transactions Table */}
-      <TransactionsTable onDeleteTransaction={handleDeleteTransaction} onUpdateTransaction={handleUpdateTransaction} transactions={transactionList} />
+      <TransactionsTable
+        onDeleteTransaction={handleDeleteTransaction}
+        onUpdateTransaction={handleUpdateTransaction}
+        transactions={transactionList}
+      />
 
       {/* Fixed Button */}
       <div
@@ -264,7 +271,11 @@ const Transactions: React.FC<TransactionsProps> = () => {
       </div>
 
       {/* Custom Modal */}
-      <CustomModal header="Tạo giao dịch" isOpen={isModalOpen} onClose={handleModalClose}>
+      <CustomModal
+        header="Tạo giao dịch"
+        isOpen={isModalOpen}
+        onClose={handleModalClose}
+      >
         <NewTransactionForm
           contractList={contractList}
           onSubmit={handleFormSubmit}
