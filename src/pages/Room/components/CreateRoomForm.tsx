@@ -68,8 +68,7 @@ const CreateRoomForm: React.FC<CreateRoomFormProps> = ({
     data.building_Id = building?.id || "";
 
     // Gọi hàm onSubmit với dữ liệu đã cập nhật
-    console.log(data)
-    // onSubmit(data);
+    onSubmit(data);
     onClose();
   };
 

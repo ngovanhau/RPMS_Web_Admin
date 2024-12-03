@@ -34,7 +34,7 @@ import React, { useEffect, useState } from "react";
 import BuildingForm from "../Buidling/Components/BuildingForm";
 import CreateRoomForm from "../Room/components/CreateRoomForm";
 import { Building, Contract, Room } from "@/types/types";
-import { sortBuildingsByName } from "@/config/config";
+import { formatNumber, sortBuildingsByName } from "@/config/config";
 import RoomCard from "@/components/RoomCard/RoomCard";
 import { getRoomById } from "@/services/buildingApi/buildingApi";
 import EditRoomForm from "./components/EditRoomForm";
@@ -261,7 +261,8 @@ const DashBoardRoom: React.FC = () => {
 
         <div className="w-[75%] h-full flex-col rounded-[8px]  overflow-hidden">
           {error ? (
-            <div className="text-red-500">{error}</div>
+            // <div className="text-red-500">{error}</div>
+            <></>
           ) : (
             <div className="h-[75px] items-center flex flex-row rounded-[8px] w-full px-3 bg-white">
               <div className="w-[5%]">
@@ -389,7 +390,7 @@ const DashBoardRoom: React.FC = () => {
               </div>
               <div className="w-2/4 flex justify-center pl-4 items-start flex-col h-full">
                 <span className="text-themeColor font-bold">Chi phí thuê</span>
-                <span className="text-global">{room?.room_price} VND</span>
+                <span className="text-global text-sm">{room?.room_price}</span>
               </div>
               <div className="w-1/4"></div>
             </div>

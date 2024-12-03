@@ -5,7 +5,7 @@ import useBookingStore from "@/stores/bookingStore";
 export const getAllBooking = async () => {
     try {
         const response = await api.get(`/booking/bookingall`)
-        useBookingStore.getState().clearBookings()
+        // useBookingStore.getState().clearBookings()
         useBookingStore.getState().setBookings(response.data.data)
         return response.data
     } catch (error) {
@@ -24,7 +24,7 @@ export const createBooking = async (booking : Booking) => {
 export const getBookingByBuildingId = async ( buildingId : string ) => {
     try {
         const response = await api.get(`/booking/getbookingbybuildingid?id=${buildingId}`)
-        useBookingStore.getState().clearBookings()
+        // useBookingStore.getState().clearBookings()
         useBookingStore.getState().setBookings(response.data.data)
         return response.data
     } catch (error) {
@@ -52,7 +52,6 @@ export const updateBookingById = async ( booking : Booking ) => {
 export const deleteBookingById = async ( bookingId : string ) => {
     try {
         const response = await api.delete(`booking/delete?id=${bookingId}`)
-        console.log(response.data.data)
         return response.data
     } catch (error) {
         console.log(error)

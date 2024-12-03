@@ -33,3 +33,10 @@ export const formatDateTime = (date: string | Date) => {
 export const formatNumber = (num: number): string => {
   return num.toLocaleString();
 };
+
+export const formatNumberToNumber = (num: number | undefined): number => {
+  // Sử dụng giá trị mặc định 0 nếu num là undefined
+  const validNum = num ?? 0;
+  const formattedString = validNum.toLocaleString();
+  return parseFloat(formattedString.replace(/,/g, ''));
+};
