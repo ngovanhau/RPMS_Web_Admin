@@ -1,11 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -17,14 +12,16 @@ import {
 import SidebarItem from "./components/ItemSideBar";
 import { sidebarItems as initialSidebarItems } from "./data/sidebarConfig";
 import useAuthStore from "@/stores/userStore";
-import { FaUser, FaSignOutAlt, FaChevronDown, FaFileInvoiceDollar } from "react-icons/fa";
-import { MdOutlineReceiptLong, MdGroup } from "react-icons/md"; 
-import logo from '../../assets/logo.png'
+import { FaUser, FaSignOutAlt, FaChevronDown, FaFileInvoiceDollar, FaChevronUp } from "react-icons/fa";
+import { MdGroup } from "react-icons/md"; 
+import logo from '../../assets/logo.png';
+import './Sidebar.css';
 
-const Sidebar: React.FC = () => {
+  const Sidebar: React.FC = () => {
   const { userData, clearUserData } = useAuthStore();
   const [selectedPage, setSelectedPage] = useState<string>("dashboard");
   const navigate = useNavigate();
+  const [expandedItems, setExpandedItems] = useState<string[]>([]);
 
   // Filter sidebar items based on user role
   const sidebarItems = initialSidebarItems.filter(
@@ -51,102 +48,108 @@ const Sidebar: React.FC = () => {
   const handleChangePass = () => {
     navigate("/Changepass");
   };
+   // Toggle expand/collapse for a large item
+   const toggleExpand = (type: string) => {
+    setExpandedItems(prev => prev.includes(type)
+      ? prev.filter(item => item !== type)
+      : [...prev, type]
+    );
+  };
 
   return (
-    <div className="flex flex-col h-full w-full">
-      <div className="h-[5%] flex items-center justify-start px-10 border-r border-b">
-        <img className="h-8 w-8" src={logo} />
-        <span className="text-xl text-themeColor ml-5 font-bold">RPMS</span>
+    <div className="flex flex-col h-full w-full border-2">
+      <div className="h-[5%] flex items-center justify-start px-10">
+        <img className="h-10 w-10 " src={logo} />
       </div>
 
       <div className="h-[95%] flex-col flex items-center justify-start">
-        <div className="w-[70%] h-[8%] flex items-center justify-start">
+        <div className="w-[80%] h-[8%] flex items-center justify-start">
           <DropdownMenu>
-            <DropdownMenuTrigger className="flex flex-row gap-4 items-center">
+            <DropdownMenuTrigger className="flex flex-row gap-8 ml-2 items-center">
             <img
               src={userData?.avata || 'https://i.ibb.co/CmYyjRt/453178253-471506465671661-2781666950760530985-n.png'}
               className="h-10 w-10 object-cover rounded-full bg-red-400"
             />
 
               <div className="flex flex-col text-left">
-                <span className="font-bold text-sm text-themeColor">{userData?.lastName}</span>
+                <span className="font-bold text-sm">{userData?.lastName}</span>
 
               </div>
             </DropdownMenuTrigger>
-
             <DropdownMenuContent className="w-[200px] bg-white rounded-xl border border-themeColor">
-              <DropdownMenuLabel className="text-themeColor">My Account</DropdownMenuLabel>
+              <DropdownMenuLabel>My Account</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem className="itemDropDown-Profile" onClick={handleProfile}>
-                <FaUser className="mr-2 text-themeColor" />
+                <FaUser className="mr-2" />
                 <span className="text-[13px]">Thông tin tài khoản</span>
               </DropdownMenuItem>
               <DropdownMenuItem className="itemDropDown-Profile">
-                <FaFileInvoiceDollar className="mr-2 text-themeColor" />
+                <FaFileInvoiceDollar className="mr-2" />
                 <span className="text-[13px]">Tài liệu hướng dẫn</span>
               </DropdownMenuItem>
               <DropdownMenuItem className="itemDropDown-Profile" onClick={handleChangePass}>
-                <MdGroup className="mr-2 text-themeColor" />
+                <MdGroup className="mr-2" />
                 <span className="text-[13px]">Đổi mật khẩu</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem className="itemDropDown-Profile" onClick={handleSignOut} >
+              <FaSignOutAlt className="size-6" />
+              <span className="text-sm font-semibold">Đăng xuất</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
 
         <div className="flex h-[86%] w-full justify-center py-5">
-          <div className="flex flex-col w-[70%] gap-8 justify-start items-start">
+          <div className="flex flex-col w-[70%] gap-4 justify-start items-start">
             {sidebarItems.map((item) => (
-              <SidebarItem
-                key={item.type}
-                type={item.type}
-                label={item.label}
-                selectedPage={selectedPage}
-                handlePageChange={handlePageChange}
-                Icon={item.icon}
-              />
-            ))}
+              <div key={item.type} className="w-full">
+                {/* Nếu có mục con thì sẽ hiển thị Collapsible */}
+                {item.children ? (
+                  <div>
+                    <div
+                      className="flex items-center justify-between cursor-pointer py-2"
+                      onClick={() => toggleExpand(item.type)}
+                    >
+                      <div className="flex items-center gap-4">
+                        <item.icon size={20} />
+                        <span className="text-sm">{item.label}</span>
+                      </div>
+                      <span>
+                        {expandedItems.includes(item.type) ? <FaChevronUp /> : <FaChevronDown />}
+                      </span>
+                    </div>
 
-            {/* <Collapsible>
-              <CollapsibleTrigger className="item-sidebar items-center cursor-pointer text-themeColor">
-                <div className="w-10">
-                  <MdOutlineReceiptLong size={20} className="text-themeColor" />
+                    {/* Hiển thị mục con nếu mục lớn được mở rộng */}
+                  {expandedItems.includes(item.type) && (
+                    <div className="ml-2 mt-2">
+                      {item.children.map((child) => (
+                        <SidebarItem
+                          key={child.type}
+                          type={child.type}
+                          label={child.label}
+                          selectedPage={selectedPage}
+                          handlePageChange={handlePageChange}
+                          Icon={child.icon}
+                          className="gap-12" // Thêm margin-bottom cho mục con
+                        />
+                      ))}
+                    </div>
+                  )}
                 </div>
-                <span className="sideBarItemText">Thu chi</span>
-                <FaChevronDown className="h-4 w-4 transform transition-transform text-themeColor" />
-              </CollapsibleTrigger>
-              <CollapsibleContent className="pl-14 pt-6">
-                <ul className="flex flex-col gap-6">
-                  <li
-                    onClick={() => handlePageChange("accounting/transaction")}
-                    className={`${
-                      selectedPage === "accounting/transaction"
-                        ? "sideBarItemTextAct text-themeColor"
-                        : "sideBarItemText hover:text-themeColor"
-                    }`}
-                  >
-                    Đã thanh lý
-                  </li>
-                  <li
-                    onClick={() => handlePageChange("accounting/transactionGroup")}
-                    className={`${
-                      selectedPage === "accounting/transactionGroup"
-                        ? "sideBarItemTextAct text-themeColor"
-                        : "sideBarItemText hover:text-themeColor"
-                    }`}
-                  >
-                    Nhóm giao dịch
-                  </li>
-                </ul>
-              </CollapsibleContent>
-            </Collapsible> */}
+              ) : (
+                <SidebarItem
+                  key={item.type}
+                  type={item.type}
+                  label={item.label}
+                  selectedPage={selectedPage}
+                  handlePageChange={handlePageChange}
+                  Icon={item.icon}
+                  className=""
+                />
+              )}
+              </div>
+            ))}
           </div>
-        </div>
-
-        <div className="flex h-[8%] w-[60%] self-center justify-start items-start">
-          <button className="flex items-center text-red-500 gap-4 hover:text-red-700" onClick={handleSignOut}>
-            <FaSignOutAlt className="size-6" />
-            <span className="text-sm font-semibold">Đăng xuất</span>
-          </button>
         </div>
       </div>
     </div>
