@@ -16,6 +16,7 @@ import Viewer from "react-viewer";
 import { Upload, message } from "antd";
 import ImgCrop from "antd-img-crop";
 import type { UploadFile, UploadProps } from "antd";  
+import { getRoomById } from "@/services/buildingApi/buildingApi";
 
 interface CreateContractFormProps {
   onSubmit: (contract: Contract) => void;
@@ -65,11 +66,13 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({
     onSubmit(contract as Contract);
   };
 
-  const handleRoomChange = (selectedRoom: { value: string; label: string }) => {
+  const handleRoomChange = async (selectedRoom: { value: string; label: string }) => {
+    const response = await getRoomById(selectedRoom.value)
     setContract((prevState) => ({
       ...prevState,
       room: selectedRoom.label,
       roomId: selectedRoom.value,
+      room_fee: response?.data.data.room_price
     }));
   };
 
@@ -277,8 +280,9 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({
             Phí Phòng (VND)
           </label>
           <input
-            type="number"
+            type="text"
             name="room_fee"
+            disabled
             value={contract.room_fee || ""}
             onChange={handleChange}
             className="border rounded-lg p-3 w-full focus:ring-2 focus:ring-blue-400 focus:outline-none"

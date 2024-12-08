@@ -91,19 +91,19 @@ const ContractRow: React.FC<ContractRowProps> = ({
           >
             <ul className="list-none p-2">
               <li 
-                className="flex items-center p-2 cursor-pointer hover:bg-gray-100 text-green-500" 
+                className="flex items-center p-2 cursor-pointer hover:bg-gray-100 text-gray-600" 
                 onClick={(e) => handleMenuItemClick(e, () => onEdit(contract))}
               >
                 <FiEdit2 className="mr-2" /> Sửa
               </li>
               <li 
-                className="flex items-center p-2 cursor-pointer hover:bg-gray-100 text-red-500" 
+                className="flex items-center p-2 cursor-pointer hover:bg-gray-100 text-gray-600" 
                 onClick={(e) => handleMenuItemClick(e, () => onDelete(contract.id))}
               >
                 <FiTrash className="mr-2" /> Xóa
               </li>
               <li 
-                className="flex items-center p-2 cursor-pointer hover:bg-gray-100 text-themeColor" 
+                className="flex items-center p-2 cursor-pointer hover:bg-gray-100 text-gray-600" 
                 onClick={(e) => handleMenuItemClick(e, () => onPrint(contract.id))}
               >
                 <FiPrinter className="mr-2" /> In

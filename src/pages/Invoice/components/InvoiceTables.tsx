@@ -15,6 +15,7 @@ interface InvoiceTableProps {
   bills: Bill[];
   onEdit: (bill: Bill) => void; 
   onDelete: (id: string) => void;
+  onApproved: (bill: Bill) => void;
 }
 
 
@@ -29,7 +30,7 @@ const formatPercentage = (value: number) => {
 
 
 
-const InvoiceTable: React.FC<InvoiceTableProps> = ({ bills, onEdit , onDelete}) => {
+const InvoiceTable: React.FC<InvoiceTableProps> = ({ bills, onEdit, onApproved , onDelete}) => {
   const formatCurrency = (amount: number) =>
     new Intl.NumberFormat("vi-VN", {
       style: "currency",
@@ -125,7 +126,7 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({ bills, onEdit , onDelete}) 
                             <TooltipTrigger>
                               <AiOutlineCheck
                                 className="h-4 w-4 text-green-500 hover:text-green-700 cursor-pointer" 
-                                // onClick={() => handleApprove(bill.id)}
+                                onClick={() => onApproved(bill)}
                               />
                             </TooltipTrigger>
                             <TooltipContent>
@@ -167,7 +168,7 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({ bills, onEdit , onDelete}) 
                       <TooltipProvider>
                         <Tooltip>
                           <TooltipTrigger>
-                            <AiOutlineDelete className="h-4 w-4 text-red-500 opacity-50 cursor-not-allowed" /> {/* Kích thước icon: h-4 w-4 */}
+                            <AiOutlineDelete className="h-4 w-4 text-red-500 opacity-50 cursor-not-allowed" />
                           </TooltipTrigger>
                           <TooltipContent>
                             <p>Xóa</p>

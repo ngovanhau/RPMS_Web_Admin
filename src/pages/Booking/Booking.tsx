@@ -52,7 +52,7 @@ const DashBoardBooking: React.FC = () => {
   const filteredBookings = bookings.filter(
     (item) => statusMap[item.status] === selectedOption
   );
-
+  
   const fetchInitialData = async () => {
     try {
       if (userData?.role === "ADMIN") {
@@ -175,7 +175,7 @@ const DashBoardBooking: React.FC = () => {
           {/* Table */}
           <div className="overflow-y-auto max-h-[70vh] border border-gray-200 rounded-md">
             <table className="w-full border-collapse">
-              <thead className="sticky top-0 bg-themeColor text-white z-10">
+              <thead className="sticky top-0 bg-themeColor text-white z-10 h-15">
                 <tr>
                   <th className="border border-gray-300 p-2"></th>
                   <th className="border border-gray-300 p-2">Tên khách hàng</th>

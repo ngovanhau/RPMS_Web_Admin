@@ -25,6 +25,7 @@ import {
   getBuildingByUserId,
   getRoomByBuildingId,
 } from "@/services/buildingApi/buildingApi";
+import { createNotification } from "@/services/notificationApi/notificationApi";
 
 const DashBoardInvoice: React.FC = () => {
   const { toast } = useToast();
@@ -181,7 +182,7 @@ const DashBoardInvoice: React.FC = () => {
         return;
       }
       setSelectedBuildingId(buildingId);
-      
+
       try {
         const selectedBuilding = buildings.find(
           (building) => building.id === buildingId
@@ -213,11 +214,11 @@ const DashBoardInvoice: React.FC = () => {
       if (!roomId) {
         setSelectedRoom(null);
         setSelectedRoomId(null);
-        await fetchBills(); 
+        await fetchBills();
         return;
       }
       setSelectedRoomId(roomId);
-  
+
       try {
         const selectedRoom = roomList.find((room) => room.id === roomId);
         if (selectedRoom) {
@@ -236,7 +237,6 @@ const DashBoardInvoice: React.FC = () => {
     },
     [roomList, fetchBills, toast]
   );
-  
 
   // Hàm xóa hóa đơn
   const handleDelete = async (id: string) => {
@@ -266,14 +266,43 @@ const DashBoardInvoice: React.FC = () => {
     }
   };
 
+  const handleApprove = async ( bill: Bill) => {
+    try {
+      const updatedBill = { ...bill, status: 1 }; 
+      const response = await editBill(updatedBill);
+      if (response?.data.isSuccess) {
+        toast({
+          title: "Thành công",
+          description: "Duyệt hóa đơn thành công.",
+          type: "foreground",
+        });
+        await createNotification( response?.data.data.customer_id, response?.data.data.bill_name, "Vui lòng kiểm tra hóa đơn hoặc liên hệ quản lý tòa nhà!", false)
+        await fetchBills(); 
+      } else {
+        toast({
+          title: "Lỗi",
+          description: "Không thể duyệt hóa đơn. Vui lòng thử lại!",
+          type: "background",
+        });
+      }
+    } catch (error) {
+      console.error("Lỗi khi duyệt hóa đơn", error);
+      toast({
+        title: "Lỗi",
+        description: "Đã xảy ra lỗi khi duyệt hóa đơn. Vui lòng thử lại!",
+        type: "background",
+      });
+    }
+  }
+
   // Hàm fetch initial data based on user role
   const fetchInitialData = useCallback(async () => {
     try {
       if (userData?.role === "ADMIN") {
-        await getAllBuildings()
+        await getAllBuildings();
         await fetchBills();
       } else if (userData?.role === "MANAGEMENT") {
-          await getBuildingByUserId(userData?.id || "")
+        await getBuildingByUserId(userData?.id || "");
         if (buildings.length > 0) {
           const firstBuildingId = buildings[0].id;
           // Fetch và set danh sách phòng
@@ -292,10 +321,10 @@ const DashBoardInvoice: React.FC = () => {
       });
     }
   }, [userData]);
-  
+
   useEffect(() => {
-    if(selectedBuildingId){
-    getBillByBuildingId(selectedBuildingId)
+    if (selectedBuildingId) {
+      getBillByBuildingId(selectedBuildingId);
     }
   }, [selectedBuildingId]);
 
@@ -306,9 +335,7 @@ const DashBoardInvoice: React.FC = () => {
   return (
     <div className="flex flex-col flex-1 w-full bg-gray-100 h-screen overflow-auto">
       {/* Header */}
-      <div className="flex flex-row px-6 gap-4 items-center justify-between border-b bg-white w-full h-[5%] shadow-md">
-
-      </div>
+      <div className="flex flex-row px-6 gap-4 items-center justify-between border-b bg-white w-full h-[5%] shadow-md"></div>
 
       {/* Main Content */}
       <div className="flex flex-1 p-6 overflow-auto">
@@ -376,6 +403,7 @@ const DashBoardInvoice: React.FC = () => {
 
           {/* Bảng hiển thị hóa đơn */}
           <InvoiceTable
+            onApproved={handleApprove}
             onDelete={handleDelete}
             bills={bills}
             onEdit={handleEdit}

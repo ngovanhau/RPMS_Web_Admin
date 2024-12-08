@@ -19,6 +19,9 @@ import { useBuildingStore } from "@/stores/buildingStore";
 import { getRoomByBuildingId } from "@/services/buildingApi/buildingApi";
 import { getServiceByRoomId } from "@/services/servicesApi/servicesApi";
 import { getServiceMeterReadingByRoomId } from "@/services/invoiceApi/invoiceApi";
+import { getContractByBuildingId } from "@/services/contractApi/contractApi";
+import useContractStore from "@/stores/contractStore";
+import { getServicemeterByRoomId } from "@/services/roomStatementApi/roomStatementApi";
 
 interface CreateBillFormProps {
   isOpen: boolean;
@@ -35,6 +38,7 @@ const CreateBillForm: React.FC<CreateBillFormProps> = ({
 }) => {
   const buildings = useBuildingStore((state) => state.buildings);
   const rooms = useBuildingStore((state) => state.roomList);
+  const contracts = useContractStore((state) => state.contracts);
 
   const [bill, setBill] = useState<Partial<Bill>>({
     bill_name: "",
@@ -64,6 +68,12 @@ const CreateBillForm: React.FC<CreateBillFormProps> = ({
   );
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [customerError, setCustomerError] = useState<string>("");
+  const [serviceMeterReadingData, setServiceMeterReadingData] =
+    useState<ServiceMeterReadings | null>(null);
+
+  const [serviceCost, setServiceCost] = useState<number | null>(0);
+  const [electricityMoney, setElectricityMoney] = useState<number | null>(0);
+  const [waterMoney, setWaterMoney] = useState<number | null>(0);
 
   useEffect(() => {
     if (serviceMeterReading) {
@@ -160,6 +170,7 @@ const CreateBillForm: React.FC<CreateBillFormProps> = ({
 
       // Fetch rooms for the selected building
       await getRoomByBuildingId(selectedBuildingId);
+      await getContractByBuildingId(selectedBuildingId);
       setBill((prev) => ({
         ...prev,
         building_id: selectedBuildingId,
@@ -171,7 +182,7 @@ const CreateBillForm: React.FC<CreateBillFormProps> = ({
       }));
       setCustomerError("");
     } catch (error) {
-      console.error("Error fetching rooms:", error);
+      console.log("Error fetching rooms:", error);
       alert("Đã xảy ra lỗi khi tải phòng cho tòa nhà này.");
       setBill((prev) => ({
         ...prev,
@@ -191,58 +202,68 @@ const CreateBillForm: React.FC<CreateBillFormProps> = ({
   // Handle room selection change with logging and setting cost_room, customer_id, nameCustomer
   const handleRoomChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
     const { name, value } = e.target;
-  
-    // Lưu trữ tên phòng đã chọn
+
+    // Find the selected room based on the selected value
     const selectedRoom = rooms.find((room) => room.id === value);
-  
+    const contract = contracts.find(
+      (contract) => contract.roomId === selectedRoom?.id
+    );
+
     if (selectedRoom) {
-      console.log("Selected Room:", selectedRoom);
-  
-      // Giữ nguyên trạng thái phòng đã chọn nếu API lỗi
-      setBill((prev) => ({
-        ...prev,
-        [name]: value,
-        roomname: selectedRoom.room_name, // Tên phòng vẫn được giữ
-        cost_room: selectedRoom.room_price || 0,
-        customer_id: selectedRoom.customerId || "",
-        customer_name: selectedRoom.nameCustomer || "",
-      }));
-  
       try {
-        // Lấy dữ liệu dịch vụ và chỉ số công tơ
-        const response = await getServiceByRoomId(selectedRoom.id);
-        if (response.isSuccess) {
-          const totalServiceCost = response.data.reduce(
+        // Fetch service meter readings
+        const serviceMeterReading = await getServicemeterByRoomId(
+          selectedRoom.id
+        );
+        setServiceMeterReadingData(serviceMeterReading?.data.data);
+
+        // Initialize total service cost
+        let totalServiceCost = 0;
+
+        // Fetch services related to the room
+        const serviceResponse = await getServiceByRoomId(selectedRoom.id);
+        if (serviceResponse.isSuccess) {
+          const serviceCost = serviceResponse.data.reduce(
             (total: number, item: Service) => {
-              return total + (item.service_cost || 0); // Kiểm tra service_cost
+              return total + (item.service_cost || 0);
             },
             0
           );
-          setBill((prev) => ({
-            ...prev,
-            cost_service: Number(prev.cost_service || 0) + totalServiceCost,
-          }));
+          totalServiceCost += serviceCost;
+          setServiceCost(serviceCost);
         }
-  
-        const dataReading = await getServiceMeterReadingByRoomId(selectedRoom.id);
+
+        // Fetch service meter readings related to the room
+        const dataReading = await getServiceMeterReadingByRoomId(
+          selectedRoom.id
+        );
         if (dataReading.isSuccess) {
-          setBill((prev) => ({
-            ...prev,
-            cost_service: Number(prev.cost_service || 0) + Number(dataReading.total_amount || 0),
-          }));
+          totalServiceCost += Number(dataReading.data.total_amount || 0);
+          setElectricityMoney(dataReading?.data?.electricity_cost);
+          setWaterMoney(dataReading?.data?.water_cost);
         }
+        // Update the bill state with the total service cost and other details
+        setBill((prev) => ({
+          ...prev,
+          [name]: value,
+          roomname: selectedRoom.room_name, // Keep the room name
+          cost_room: selectedRoom.room_price || 0,
+          customer_id: contract?.customerId || "",
+          customer_name: contract?.customerName || "",
+          cost_service: totalServiceCost, // Set the total service cost
+        }));
       } catch (error) {
-        // Xử lý lỗi API, không thay đổi phòng đã chọn
-        console.error("Lỗi khi lấy thông tin dịch vụ hoặc công tơ:", error);
+        // Handle API errors without changing the selected room
+        console.error("Error fetching service or meter information:", error);
         setCustomerError("Có lỗi khi tải thông tin dịch vụ và công tơ.");
+
+        // Optionally, you might want to reset some state here if necessary
       }
     } else {
-      console.log("Không tìm thấy phòng hoặc phòng không tồn tại.");
+      console.warn("Selected room not found.");
       setCustomerError("");
     }
   };
-  
-  
 
   // Calculate total amount (cost_room + cost_service)
   const calculateTotalAmount = () => {
@@ -422,6 +443,7 @@ const CreateBillForm: React.FC<CreateBillFormProps> = ({
           <div className="space-y-2">
             <Label htmlFor="customer_name">Tên khách hàng</Label>
             <Input
+              disabled
               id="customer_name"
               name="customer_name"
               value={bill.customer_name}
@@ -455,9 +477,68 @@ const CreateBillForm: React.FC<CreateBillFormProps> = ({
           {/* Cost Service */}
           <div className="space-y-2">
             <Label htmlFor="cost_service">Chi phí dịch vụ (VNĐ)</Label>
-            <Input
+            <table className="min-w-full bg-white border">
+              <thead>
+                <tr>
+                  <th className="py-2 px-4 border-b text-left">Loại Chi Phí</th>
+                  <th className="py-2 px-4 border-b text-left">Chỉ số</th>
+                  <th className="py-2 px-4 border-b text-left">Đơn giá</th>
+                  <th className="py-2 px-4 border-b text-right">
+                    Số Tiền (VNĐ)
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {/* Tiền Dịch Vụ */}
+                <tr>
+                  <td className="py-2 px-4 border-b">Tiền Dịch Vụ</td>
+                  <td className="py-2 px-4 border-b"></td>
+                  <td className="py-2 px-4 border-b"></td>
+                  <td className="py-2 px-4 border-b text-right">
+                    {serviceCost ? serviceCost.toLocaleString() : 0}
+                  </td>
+                </tr>
+                {/* Tiền Điện Nước */}
+                <tr>
+                  <td className="py-2 px-4 border-b">Tiền Điện</td>
+                  <td className="py-2 px-4 border-b ">
+                    {(serviceMeterReadingData?.electricity_new ?? 0) -
+                      (serviceMeterReadingData?.electricity_old ?? 0)}
+                  </td>
+                  <td className="py-2 px-4 border-b">
+                    {serviceMeterReadingData?.electricity_price}
+                  </td>
+                  <td className="py-2 px-4 border-b text-right">
+                    {electricityMoney ? electricityMoney.toLocaleString() : 0}
+                  </td>
+                </tr>
+                <tr>
+                  <td className="py-2 px-4 border-b">Tiền Nước</td>
+                  <td className="py-2 px-4 border-b">
+                    {(serviceMeterReadingData?.water_new ?? 0) -
+                      (serviceMeterReadingData?.water_old ?? 0)}
+                  </td>
+                  <td className="py-2 px-4 border-b">
+                    {serviceMeterReadingData?.water_price}
+                  </td>
+                  <td className="py-2 px-4 border-b text-right">
+                    {waterMoney ? waterMoney.toLocaleString() : 0}
+                  </td>
+                </tr>
+                {/* Tổng Tiền */}
+                <tr>
+                  <td className="py-2 px-4 font-bold">Tổng Tiền</td>
+                  <td className="py-2 px-4 font-bold"></td>
+                  <td className="py-2 px-4 font-bold"></td>
+                  <td className="py-2 px-4 font-bold text-right">
+                    {bill?.cost_service?.toLocaleString()}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            {/* <Input
               id="cost_service"
-              name="cost_servicse"
+              name="cost_service"
               type="number"
               readOnly
               className={`bg-gray-100 border rounded p-2 ${
@@ -466,7 +547,7 @@ const CreateBillForm: React.FC<CreateBillFormProps> = ({
               value={bill.cost_service}
               onChange={handleInputChange}
               placeholder="Nhập chi phí dịch vụ"
-            />
+            /> */}
           </div>
 
           {/* Penalty Amount */}

@@ -256,11 +256,9 @@ const DashBoardBuilding: React.FC = () => {
               </div>
               <div className="w-2/4 flex justify-center pl-4 items-start flex-col h-full ">
                 <span className="text-themeColor font-bold">Chi phí thuê</span>
-                {/* <span className="text-global">
-                  {building?.rental_costs === ""
-                    ? "Liên hệ"
-                    : `${building?.rental_costs} VND`}
-                </span> */}
+                <span className="text-global">
+                  <span>Liên hệ</span>
+                </span>
               </div>
               <div className="w-1/4 "></div>
             </div>

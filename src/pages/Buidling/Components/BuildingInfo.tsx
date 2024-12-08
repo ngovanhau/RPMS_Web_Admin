@@ -1,6 +1,6 @@
 import React from "react";
 import { Building } from "@/types/types";
-
+import { formatNumber } from "@/config/config";
 interface BuildingInfoProps {
   building: Building;
   isSelected: boolean;
@@ -40,7 +40,7 @@ const BuildingInfo: React.FC<BuildingInfoProps> = ({ building, isSelected, onSel
       </div>
       <div className="w-[21%] pr-2 h-full flex flex-col text-right justify-center">
         <span className="text-sm text-gray-400 font-semibold">
-          {building.rental_costs}
+        {Number(building.rental_costs).toLocaleString()}đ
         </span>
       </div>
       {

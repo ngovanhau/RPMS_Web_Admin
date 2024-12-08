@@ -54,24 +54,24 @@ const DepositActions: React.FC<DepositActionsProps> = ({
           className="absolute left-0 mt-2 bg-white border rounded shadow-lg w-44 z-50"
         >
           <button
-            className="flex items-center w-full px-5 py-3"
+            className="flex items-center w-full px-5 py-3 text-gray-600"
             onClick={onEdit}
           >
-            <FaEdit className="mr-3 text-blue-500" />
+            <FaEdit className="mr-3 text-gray-600" />
             Sửa
           </button>
           <button
-            className="flex items-center w-full px-5 py-3 text-red-600"
+            className="flex items-center w-full px-5 py-3 text-gray-600"
             onClick={onDelete}
           >
-            <FaTrash className="mr-3 text-red-500" />
+            <FaTrash className="mr-3 text-gray-600" />
             Xóa
           </button>
           <button
-            className="flex items-center w-full px-5 py-3 text-green-600"
+            className="flex items-center w-full px-5 py-3 text-gray-600"
             onClick={onCreateContract}
           >
-            <FaFileSignature className="mr-3 text-green-500" />
+            <FaFileSignature className="mr-3 text-gray-600" />
             Tạo hợp đồng
           </button>
         </div>

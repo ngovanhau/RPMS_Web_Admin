@@ -338,7 +338,7 @@ const DashBoardRoom: React.FC = () => {
               </div>
               <div className="w-2/4 flex justify-center pl-4 items-start flex-col h-full">
                 <span className="text-themeColor font-bold">Chi phí thuê</span>
-                <span className="text-global text-sm">{room?.room_price}</span>
+                <span className="text-global text-sm">{Number(room?.room_price).toLocaleString()}</span>
               </div>
               <div className="w-1/4"></div>
             </div>
