@@ -5,12 +5,11 @@ import { Building, Room } from "@/types/types";
 import { getallService } from "@/services/servicesApi/servicesApi";
 import useServiceStore from "@/stores/servicesStore";
 import { uploadImage } from "@/services/imageApi/imageApi";
-import { Upload } from "antd";
-import type { GetProp, UploadFile, UploadProps } from 'antd';
-import ImgCrop from 'antd-img-crop';
+import { Upload, message, Spin } from "antd";
+import type { UploadFile, UploadProps } from "antd";
+import ImgCrop from "antd-img-crop";
 import { useBuildingStore } from "@/stores/buildingStore";
-import Select, { SingleValue } from 'react-select'
-
+import Select, { SingleValue } from "react-select";
 
 interface CreateRoomFormProps {
   isOpen: boolean;
@@ -38,11 +37,12 @@ const CreateRoomForm: React.FC<CreateRoomFormProps> = ({
   const [paidServiceList, setPaidServiceList] = useState<
     { serviceId: string; serviceName: string | null }[]
   >([]);
-  const [selectedSubDetail, setSelectedSubDetail] = useState<Number>(0);
-  const [imageFiles, setImageFiles] = useState<File[]>([]);  // State để lưu trữ file ảnh
-  const [imageUrls, setImageUrls] = useState<string[]>([]); 
-  const buildingList = useBuildingStore((state) => state.buildings)
-  
+  const [selectedSubDetail, setSelectedSubDetail] = useState<number>(0);
+  const [fileList, setFileList] = useState<UploadFile[]>([]);
+  const [imageUrls, setImageUrls] = useState<string[]>([]);
+  const [uploading, setUploading] = useState<boolean>(false); // State for upload status
+  const buildingList = useBuildingStore((state) => state.buildings);
+
   const subDetailsLabel = [
     { id: 0, label: "DỊCH VỤ" },
     { id: 1, label: "ẢNH PHÒNG" },
@@ -54,6 +54,10 @@ const CreateRoomForm: React.FC<CreateRoomFormProps> = ({
   useEffect(() => {
     if (isOpen) {
       reset();
+      setFileList([]);
+      setImageUrls([]);
+      setPaidServiceList([]);
+      setSelectedSubDetail(0);
     }
   }, [isOpen, reset]);
 
@@ -66,45 +70,95 @@ const CreateRoomForm: React.FC<CreateRoomFormProps> = ({
     selectedOption: SingleValue<{ value: string; label: string }> | null
   ) => {
     if (selectedOption) {
-      // Khi có lựa chọn
       setValue("building_Id", selectedOption.value);
     } else {
-      // Khi không có lựa chọn
-      setValue("building_Id", undefined); 
+      setValue("building_Id", undefined);
     }
   };
-  
 
-  const handleFormSubmit = async (data: Room) => {
-    // Đẩy danh sách dịch vụ vào trường roomservice
+  // Function to handle image uploads
+  const handleUpload = async (file: UploadFile) => {
+    try {
+      setUploading(true);
+      const url = await uploadImage(file.originFileObj as File);
+      setImageUrls((prevUrls) => [...prevUrls, url]);
+      message.success(`${file.name} uploaded successfully`);
+    } catch (error) {
+      console.error("Upload error:", error);
+      message.error(`${file.name} upload failed`);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const uploadProps: UploadProps = {
+    listType: "picture-card",
+    fileList: fileList,
+    onChange: async ({ file, fileList: newFileList }) => {
+      setFileList(newFileList);
+
+      // Only handle newly added files that are not already uploaded
+      const newFiles = newFileList.filter(
+        (f) => f.status === "uploading" && !f.url && !f.thumbUrl
+      );
+
+      for (const file of newFiles) {
+        if (file.originFileObj) {
+          await handleUpload(file);
+          // Update the file status to done
+          setFileList((prevList) =>
+            prevList.map((f) =>
+              f.uid === file.uid ? { ...f, status: "done" } : f
+            )
+          );
+        }
+      }
+    },
+    onPreview: async (file) => {
+      let src = file.url as string;
+      if (!src && file.originFileObj) {
+        src = await new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.readAsDataURL(file.originFileObj as File);
+          reader.onload = () => resolve(reader.result as string);
+        });
+      }
+      const image = new Image();
+      image.src = src;
+      const imgWindow = window.open(src);
+      imgWindow?.document.write(image.outerHTML);
+    },
+    beforeUpload: (file) => {
+      const isImage = file.type.startsWith("image/");
+      if (!isImage) {
+        message.error(`${file.name} không phải là ảnh`);
+      }
+      return isImage || Upload.LIST_IGNORE;
+    },
+    // Disable automatic upload
+    customRequest: ({ onSuccess }) => {
+      // Simulate a successful upload immediately
+      setTimeout(() => {
+        onSuccess && onSuccess("ok");
+      }, 0);
+    },
+  };
+
+  const handleFormSubmit = (data: Room) => {
+    // Assign the uploaded image URLs
+    data.imageUrls = imageUrls;
+
+    // Assign the selected services
     const roomServices = paidServiceList.map((service) => ({
       serviceId: service.serviceId,
       serviceName: service.serviceName,
     }));
     data.roomservice = roomServices;
-    const uploadedImageUrls = await Promise.all(
-      imageFiles.map((file) => uploadImage(file))
-    );
 
-    // Cập nhật imageUrls vào data
-    data.imageUrls = uploadedImageUrls;
-    // Cập nhật building_Id nếu có building được truyền vào
-
-    // Gọi hàm onSubmit với dữ liệu đã cập nhật
+    // Call the onSubmit prop with the form data
     onSubmit(data);
     onClose();
   };
-
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const files = Array.from(e.target.files);
-      setImageFiles((prevFiles) => [...prevFiles, ...files]);
-    }
-  };
-
-  useEffect(() => {
-    getallService();
-  }, []);
 
   const handleServiceClick = (
     serviceId: string,
@@ -117,9 +171,14 @@ const CreateRoomForm: React.FC<CreateRoomFormProps> = ({
     );
   };
 
+  useEffect(() => {
+    getallService();
+  }, []);
+
   return (
     <CustomModal isOpen={isOpen} onClose={onClose} header="Thêm phòng">
       <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
+        {/* Tòa nhà */}
         <div className="grid grid-cols-2 gap-4">
           <div className="flex flex-col">
             <label className="block text-gray-700">Tòa nhà *</label>
@@ -127,9 +186,17 @@ const CreateRoomForm: React.FC<CreateRoomFormProps> = ({
               options={buildingOptions}
               onChange={handleBuildingChange}
               className="w-full"
+              placeholder="Chọn tòa nhà"
             />
+            {errors.building_Id && (
+              <span className="text-red-500 text-sm">
+                {errors.building_Id.message}
+              </span>
+            )}
           </div>
         </div>
+
+        {/* Tên phòng và Tầng */}
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-gray-700">Tên phòng *</label>
@@ -161,6 +228,7 @@ const CreateRoomForm: React.FC<CreateRoomFormProps> = ({
           </div>
         </div>
 
+        {/* Số phòng ngủ và Số phòng khách */}
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-gray-700">Số phòng ngủ *</label>
@@ -194,9 +262,10 @@ const CreateRoomForm: React.FC<CreateRoomFormProps> = ({
           </div>
         </div>
 
+        {/* Diện tích và Giới hạn số người */}
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-gray-700">Diện tích (m2) *</label>
+            <label className="block text-gray-700">Diện tích (m²) *</label>
             <input
               {...register("acreage", { required: "Vui lòng nhập diện tích" })}
               className="w-full border border-gray-300 p-2 rounded-lg"
@@ -227,6 +296,7 @@ const CreateRoomForm: React.FC<CreateRoomFormProps> = ({
           </div>
         </div>
 
+        {/* Tiền đặt cọc, Giá phòng và Trạng thái */}
         <div className="grid grid-cols-3 gap-4">
           <div>
             <label className="block text-gray-700">Tiền đặt cọc *</label>
@@ -275,7 +345,10 @@ const CreateRoomForm: React.FC<CreateRoomFormProps> = ({
             )}
           </div>
         </div>
-        <div className="w-full h-56 ">
+
+        {/* Sub Details Tabs */}
+        <div className="w-full h-56">
+          {/* Tab Headers */}
           <div className="h-12 w-full flex flex-row">
             {subDetailsLabel.map((tab) => (
               <div
@@ -292,6 +365,7 @@ const CreateRoomForm: React.FC<CreateRoomFormProps> = ({
             ))}
           </div>
 
+          {/* Tab Content */}
           {selectedSubDetail === 0 && (
             <div className="h-56 w-full flex flex-col">
               <div className="flex-1 w-full py-5 flex justify-start items-start">
@@ -299,7 +373,7 @@ const CreateRoomForm: React.FC<CreateRoomFormProps> = ({
                   {useServiceStore.getState().services.map((service) => (
                     <div
                       key={service.id}
-                      className="h-14 mr-2 px-2 w-36 flex flex-row border justify-center items-center border-gray-200 rounded-[8px]"
+                      className="h-14 mr-2 px-2 w-36 flex flex-row border justify-center items-center border-gray-200 rounded-[8px] cursor-pointer"
                       onClick={() =>
                         handleServiceClick(service.id!, service.service_name)
                       }
@@ -315,6 +389,7 @@ const CreateRoomForm: React.FC<CreateRoomFormProps> = ({
                         <img
                           className="object-cover h-8 w-8"
                           src="https://as1.ftcdn.net/jpg/01/40/62/16/500_F_140621690_lCjpTdvOoqdovvUlh89F5FM1gODHMIdx.jpg"
+                          alt={service.service_name}
                         />
                       </div>
                       <div className="w-4/5 flex flex-col pl-3">
@@ -331,27 +406,33 @@ const CreateRoomForm: React.FC<CreateRoomFormProps> = ({
               </div>
             </div>
           )}
+
           {selectedSubDetail === 1 && (
             <div className="py-4">
-              <label className="block text-gray-700">Chọn ảnh phòng</label>
-              <input
-                type="file"
-                multiple
-                accept="image/*"
-                onChange={handleImageChange}
-                className="w-full border border-gray-300 p-2 rounded-lg"
-              />
-              <div className="mt-4">
-                {imageFiles.map((file, index) => (
-                  <div key={index} className="flex items-center mb-2">
-                    <span className="text-gray-700">{file.name}</span>
-                  </div>
-                ))}
-              </div>
+              <label className="block text-gray-700 mb-2">Chọn ảnh phòng *</label>
+              <ImgCrop >
+                <Upload {...uploadProps} multiple accept="image/*">
+                  {fileList.length < 5 && "+ Upload"}
+                </Upload>
+              </ImgCrop>
+              {/* Display loading spinner during upload */}
+              {uploading && (
+                <div className="mt-2 flex justify-center">
+                  <Spin />
+                </div>
+              )}
+              {/* Display error if any (optional) */}
+              {errors.imageUrls && (
+                <span className="text-red-500 text-sm">
+                  {errors.imageUrls.message}
+                </span>
+              )}
             </div>
           )}
+
           {selectedSubDetail === 2 && (
             <div className="py-4">
+              <label className="block text-gray-700 mb-2">Tiện ích phòng</label>
               <textarea
                 {...register("utilities")}
                 className="w-full border h-36 border-gray-300 p-2 rounded-lg"
@@ -361,6 +442,7 @@ const CreateRoomForm: React.FC<CreateRoomFormProps> = ({
           )}
           {selectedSubDetail === 3 && (
             <div className="py-4">
+              <label className="block text-gray-700 mb-2">Mô tả phòng</label>
               <textarea
                 {...register("describe")}
                 className="w-full border h-36 border-gray-300 p-2 rounded-lg"
@@ -370,6 +452,7 @@ const CreateRoomForm: React.FC<CreateRoomFormProps> = ({
           )}
           {selectedSubDetail === 4 && (
             <div className="py-4">
+              <label className="block text-gray-700 mb-2">Lưu ý cho người thuê</label>
               <textarea
                 {...register("note")}
                 className="w-full border h-36 border-gray-300 p-2 rounded-lg"
@@ -379,6 +462,7 @@ const CreateRoomForm: React.FC<CreateRoomFormProps> = ({
           )}
         </div>
 
+        {/* Form Actions */}
         <div className="flex justify-end">
           <button
             type="button"
@@ -390,6 +474,7 @@ const CreateRoomForm: React.FC<CreateRoomFormProps> = ({
           <button
             type="submit"
             className="px-4 py-2 bg-themeColor text-white rounded-lg"
+            disabled={uploading} // Disable submit while uploading
           >
             Thêm phòng
           </button>

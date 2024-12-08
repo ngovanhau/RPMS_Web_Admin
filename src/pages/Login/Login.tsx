@@ -1,96 +1,155 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { login, information } from "../../services/userApi/userApi";
-import { EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
+import { Eye, EyeOff, UserCircle, Lock, ArrowRight } from "lucide-react";
 import useAuthStore from "@/stores/userStore";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
-const Login: React.FC = () => {
-    const { setUserData } = useAuthStore();
-    const [username, setUsername] = useState("");
-    const [password, setPassword] = useState("");
-    const [error, setError] = useState("");
-    const [showPassword, setShowPassword] = useState(false);
-    const navigate = useNavigate();
+const Login = () => {
+  const { setUserData } = useAuthStore();
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
 
-    const handleLogin = async () => {
-        if (username === "") {
-            setError("Username không được bỏ trống!");
-        } else if (password === "") {
-            setError("Password không được bỏ trống!");
+  const handleLogin = async () => {
+    if (username === "") {
+      setError("Username không được bỏ trống!");
+    } else if (password === "") {
+      setError("Password không được bỏ trống!");
+    } else {
+      setIsLoading(true);
+      try {
+        const response = await login(username, password);
+        if (response && response.data) {
+          localStorage.setItem("authToken", response.data);
+          handleInformation();
         } else {
-            try {
-                const response = await login(username, password);
-                if (response && response.data) {
-                    localStorage.setItem("authToken", response.data);
-                    handleInformation();
-                } else {
-                    setError("Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.");
-                }
-            } catch (error) {
-                setError("Có lỗi xảy ra khi đăng nhập.");
-            }
+          setError("Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.");
         }
-    };
+      } catch (error) {
+        setError("Có lỗi xảy ra khi đăng nhập.");
+      } finally {
+        setIsLoading(false);
+      }
+    }
+  };
 
-    const handleInformation = async () => {
-        try {
-            const response = await information(username);
-            setUserData(response);
-            if (response.role === "ADMIN" || response.role === "MANAGEMENT") {
-                navigate("/Dashboard");
-            } else {
-                localStorage.removeItem("authToken");
-                setError("Tài khoản của bạn không được đăng nhập vào trang ADMIN.");
-            }
-        } catch (error) {
-            setError("Có lỗi xảy ra khi lấy thông tin người dùng.");
-        }
-    };
+  const handleInformation = async () => {
+    try {
+      const response = await information(username);
+      setUserData(response);
+      if (response.role === "ADMIN" || response.role === "MANAGEMENT") {
+        navigate("/Dashboard");
+      } else {
+        localStorage.removeItem("authToken");
+        setError("Tài khoản của bạn không được đăng nhập vào trang ADMIN.");
+      }
+    } catch (error) {
+      setError("Có lỗi xảy ra khi lấy thông tin người dùng.");
+    }
+  };
 
-    return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-100">
-            <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md mx-4 md:mx-0">
-                <h2 className="text-3xl font-bold text-blue-500 text-center mb-6">Đăng nhập</h2>
-                <div className="mb-5">
-                    <input
-                        type="text"
-                        placeholder="Username"
-                        value={username}
-                        onChange={(e) => setUsername(e.target.value)}
-                        className="bg-gray-50 w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-green-400 focus:bg-white transition duration-200"
-                    />
-                </div>
-                <div className="relative mb-5">
-                    <input
-                        type={showPassword ? "text" : "password"}
-                        placeholder="Password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        className="bg-gray-50 w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-green-400 focus:bg-white transition duration-200"
-                    />
-                    <span
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500"
-                        onClick={() => setShowPassword(!showPassword)}
-                    >
-                        {showPassword ? <EyeOutlined /> : <EyeInvisibleOutlined />}
-                    </span>
-                </div>
-                {error && <p className="text-red-500 text-center mb-4">{error}</p>}
-                <button
-                    onClick={handleLogin}
-                    className="w-full p-3 bg-blue-400 text-white rounded-lg hover:bg-blue-500 transition duration-300 font-semibold shadow-md"
-                >
-                    Đăng nhập
-                </button>
-                <p className="text-center text-gray-500 text-sm mt-4">
-                    Quên mật khẩu?{" "}
-                    <a href="/reset-password" className="text-blue-400 hover:text-green-500 font-medium">
-                        Khôi phục mật khẩu
-                    </a>
-                </p>
-            </div>
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 p-4">
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+      <div className="w-full max-w-md">
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold text-blue-600 mb-2">ADMIN RPMS</h1>
+          <p className="text-gray-500">Hệ thống quản trị nhà cho thuê</p>
         </div>
-    );
+        
+        <Card className="border-0 shadow-2xl bg-white/80 backdrop-blur-xl">
+          <CardHeader className="space-y-1 pb-4">
+            <CardTitle className="text-2xl text-center font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              Đăng Nhập
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="space-y-4">
+              <div className="relative">
+                <UserCircle className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                <Input
+                  type="text"
+                  placeholder="Username"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  className="pl-10 h-12 border-gray-200 focus:border-blue-400 transition-all duration-200 bg-white/50"
+                />
+              </div>
+              
+              <div className="relative">
+                <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                <Input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="pl-10 pr-10 h-12 border-gray-200 focus:border-blue-400 transition-all duration-200 bg-white/50"
+                />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4 text-gray-500" />
+                  ) : (
+                    <Eye className="h-4 w-4 text-gray-500" />
+                  )}
+                </Button>
+              </div>
+            </div>
+
+            {error && (
+              <Alert variant="destructive" className="bg-red-50 text-red-600 border-red-200">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+
+            <div className="space-y-4">
+              <Button
+                className="w-full h-12 text-base font-semibold bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-70"
+                onClick={handleLogin}
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <div className="flex items-center gap-2">
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    Đang xử lý...
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-center gap-2 text-white">
+                    Đăng nhập
+                    <ArrowRight className="w-5 h-5" />
+                  </div>
+                )}
+              </Button>
+
+              <div className="text-center">
+                <a
+                  href="/reset-password"
+                  className="text-sm text-gray-600 hover:text-blue-600 transition-colors duration-200"
+                >
+                  Quên mật khẩu?
+                </a>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <p className="text-center text-gray-500 text-sm mt-8">
+          © 2024 RPMS. All rights reserved.
+        </p>
+      </div>
+    </div>
+  );
 };
 
 export default Login;

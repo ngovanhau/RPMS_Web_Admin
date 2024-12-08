@@ -81,7 +81,6 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({ bills, onEdit , onDelete}) 
         <thead className="text-sm bg-themeColor text-white h-12">
           <tr>
             {[
-              "Mã hóa đơn",
               "Hành động",
               "Tên hóa đơn",
               "Khách hàng",
@@ -116,9 +115,6 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({ bills, onEdit , onDelete}) 
                 key={bill.id}
                 className="border-b hover:bg-blue-50 text-blue-900 h-12"
               >
-                <td className="px-4 py-2 font-medium whitespace-nowrap text-center text-sm">
-                  {bill.id}
-                </td>
                 <td className="px-4 py-2 whitespace-nowrap text-center text-sm">
                   <div className="flex gap-2 justify-center">
                     {bill.status === 0 ? (

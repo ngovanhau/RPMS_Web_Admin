@@ -6,6 +6,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { MoreHorizontal } from "lucide-react";
+
 
 type AccountRowProps = {
   username: string;
@@ -37,7 +39,7 @@ export const AccountRow: React.FC<AccountRowProps> = ({
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button className="text-themeColor hover:text-themeColor focus:outline-none">
-              <FaEllipsisV className="w-5 h-5" />
+            <MoreHorizontal/>
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="bg-white shadow-lg rounded-lg p-2 border border-gray-200">
@@ -45,15 +47,15 @@ export const AccountRow: React.FC<AccountRowProps> = ({
               onClick={onDelete}
               className="p-2 text-red-500 hover:bg-red-50 flex items-center gap-2 rounded-md transition-colors duration-150"
             >
-              <FaTrash className="w-4 h-4" />
-              <span>Xóa</span>
+              <FaTrash className="w-4 h-4 text-gray-600" />
+              <span className="text-gray-600">Xóa</span>
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={onEdit}
               className="p-2 text-themeColor hover:bg-blue-50 flex items-center gap-2 rounded-md transition-colors duration-150"
             >
-              <FaEdit className="w-4 h-4" />
-              <span>Chỉnh sửa</span>
+              <FaEdit className="w-4 h-4 text-gray-600" />
+              <span className="text-gray-600">Chỉnh sửa</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

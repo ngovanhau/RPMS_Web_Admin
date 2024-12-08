@@ -1,4 +1,5 @@
 import api from "@/services/axios"; 
+import axios from "axios";
 
 /**
  * Hàm upload ảnh
@@ -26,3 +27,13 @@ export const uploadImage = async (file: File): Promise<string> => {
     throw error;
   }
 };
+
+
+export const deleteImage = async ( imageUrl : string) => {
+  try {
+    const response = await api.delete(`/upload/delete-image?imageUrl=${imageUrl}`)
+    return response.data
+  } catch (error) {
+    console.log(error)
+  }
+}

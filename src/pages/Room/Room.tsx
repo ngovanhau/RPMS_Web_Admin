@@ -355,7 +355,8 @@ const DashBoardRoom: React.FC = () => {
           </div>
 
           <div className="flex-1 flex flex-row justify-between h-full  mt-2 rounded-[8px]  overflow-hidden">
-            {room ? <RoomDetails room={room} /> : <div>Room not found</div>}
+            {room ? <RoomDetails room={room} /> :     <div className="h-[900px] w-full md:w-[59%] flex-col overflow-scroll p-4 flex justify-center items-center pb-[20%] bg-white rounded-lg">
+              Chưa có thông tin</div>}
 
             <div className="h-[850px] w-[38.5%] flex-col bg-white rounded-[8px] overflow-scroll">
               {selectedContract ? (

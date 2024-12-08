@@ -11,8 +11,11 @@ import { getroombystatus } from "@/services/tenantApi/tenant";
 import { Room } from "@/types/types";
 import { getCustomerNoRoom } from "@/services/contractApi/contractApi";
 import useTenantStore from "@/stores/tenantStore";
-import { uploadImage } from "@/services/imageApi/imageApi";
+import { deleteImage, uploadImage } from "@/services/imageApi/imageApi";
 import Viewer from "react-viewer";
+import { Upload, message } from "antd";
+import ImgCrop from "antd-img-crop";
+import type { UploadFile, UploadProps } from "antd";  
 
 interface CreateContractFormProps {
   onSubmit: (contract: Contract) => void;
@@ -44,6 +47,8 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({
   const [uploading, setUploading] = useState<boolean>(false); // Changed to single boolean
   const [visible, setVisible] = useState(false); // Trạng thái xem ảnh
   const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [fileList, setFileList] = useState<UploadFile[]>([]);
+
   // Access services from the store
   const services = useServiceStore.getState().services;
   const listCustomer = useTenantStore.getState().tenantsWithoutRoom;
@@ -79,6 +84,7 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({
     }));
   };
 
+  
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -134,11 +140,16 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({
   };
 
   // Xóa ảnh
-  const handleRemoveImage = () => {
-    setContract((prevState) => ({
+  const handleRemoveImage = async () => {
+    if(contract.image ){
+      await deleteImage(contract?.image)
+          setContract((prevState) => ({
       ...prevState,
       image: "",
     }));
+    }
+
+
   };
   const handleImageClick = () => {
     if (contract.image) {

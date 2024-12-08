@@ -40,3 +40,10 @@ export const formatNumberToNumber = (num: number | undefined): number => {
   const formattedString = validNum.toLocaleString();
   return parseFloat(formattedString.replace(/,/g, ''));
 };
+
+export const formatBigInt = (bigIntValue: BigInt) => {
+  return new Intl.NumberFormat("vi-VN", {
+    style: "currency",
+    currency: "VND",
+  }).format(Number(bigIntValue)); // Convert BigInt to Number for formatting
+};

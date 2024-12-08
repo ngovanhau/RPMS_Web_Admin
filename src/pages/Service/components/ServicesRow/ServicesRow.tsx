@@ -9,6 +9,7 @@ import {
 import { deleteService } from "@/services/servicesApi/servicesApi";
 import { Service } from "@/types/types";
 import { MoreHorizontal } from "lucide-react";
+import { FaEdit, FaTrash } from "react-icons/fa";
 
 
 interface ServiceRowProps {
@@ -51,8 +52,13 @@ const ServiceRow: React.FC<ServiceRowProps> = ({
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="bg-white ml-32">
-            <DropdownMenuItem onSelect={handleDelete}>Xóa</DropdownMenuItem>
-            <DropdownMenuItem onSelect={handleEditClick}>Chỉnh sửa</DropdownMenuItem>
+            <DropdownMenuItem onSelect={handleDelete}>
+            <FaTrash className="w-4 h-4 text-gray-600" />
+              Xóa
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={handleEditClick}>
+            <FaEdit className="w-4 h-4 text-gray-600" />
+              Chỉnh sửa</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

@@ -110,6 +110,9 @@ const DashBoardBooking: React.FC = () => {
     if (selectedBuildingId) {
       await getBookingByBuildingId(selectedBuildingId);
     }
+    else{
+      await fetchInitialData();
+    }
     setIsDetailModalOpen(false)
   };
 
@@ -119,6 +122,8 @@ const DashBoardBooking: React.FC = () => {
     if (selectedBuildingId) {
       await getBookingByBuildingId(selectedBuildingId);
       setIsDetailModalOpen(false)
+    } else {
+      await fetchInitialData();
     }
   };
 
@@ -126,6 +131,8 @@ const DashBoardBooking: React.FC = () => {
     await createBooking(booking);
     if (selectedBuildingId) {
       await getBookingByBuildingId(selectedBuildingId);
+    } else {
+      await fetchInitialData();
     }
   };
 
@@ -135,6 +142,9 @@ const DashBoardBooking: React.FC = () => {
       await updateBookingById(booking);
       if (selectedBuildingId) {
         await getBookingByBuildingId(selectedBuildingId);
+            fetchInitialData();
+      } else {
+        await fetchInitialData();
       }
     } catch (error) {
       console.error("Error updating booking status:", error);
@@ -145,9 +155,7 @@ const DashBoardBooking: React.FC = () => {
     fetchInitialData();
   }, []);
 
-  const filteredRooms = useMemo(() => {
-    return rooms.filter((room) => room.building_Id === selectedBuildingId);
-  }, [rooms, selectedBuildingId]);
+  
 
   return (
     <div className="flex flex-col flex-1 bg-gray-100 w-full overflow-y-hidden relative">
@@ -164,37 +172,12 @@ const DashBoardBooking: React.FC = () => {
             onBuildingChange={handleBuildingSelect}
           />
 
-          {/* <div className="flex items-center  justify-between mb-4">
-            <h2 className="text-xl font-bold text-themeColor">
-              Danh sách đặt chỗ
-            </h2>
-            <div className="flex gap-4 ">
-              <div className="flex flex-row">
-                <label className="text-sm w-28 flex justify-center items-center text-gray-700">
-                  Tòa nhà
-                </label>
-                <select
-                  value={selectedBuildingId || ""}
-                  onChange={handleBuildingSelect}
-                  className="p-2 border rounded bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-themeColor"
-                >
-                  <option value="">Chọn tòa nhà</option>
-                  {buildings.map((building) => (
-                    <option key={building.id} value={building.id}>
-                      {building.building_name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-          </div> */}
-
           {/* Table */}
           <div className="overflow-y-auto max-h-[70vh] border border-gray-200 rounded-md">
             <table className="w-full border-collapse">
               <thead className="sticky top-0 bg-themeColor text-white z-10">
                 <tr>
-                  <th className="border border-gray-300 p-2">STT</th>
+                  <th className="border border-gray-300 p-2"></th>
                   <th className="border border-gray-300 p-2">Tên khách hàng</th>
                   <th className="border border-gray-300 p-2">Số điện thoại</th>
                   <th className="border border-gray-300 p-2">Email</th>
@@ -206,7 +189,7 @@ const DashBoardBooking: React.FC = () => {
               </thead>
               <tbody>
                 {bookings.length > 0 ? (
-                  bookings.map((booking, index) => (
+                  filteredBookings.map((booking, index) => (
                     <tr
                       key={booking.id}
                       className="hover:bg-gray-100 transition"
