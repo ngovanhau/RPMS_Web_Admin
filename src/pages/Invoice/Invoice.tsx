@@ -178,11 +178,10 @@ const DashBoardInvoice: React.FC = () => {
         setSelectedRoom(null);
         setSelectedBuildingId(null);
         setSelectedRoomId(null);
-        await fetchBills(); // Fetch all bills
         return;
       }
       setSelectedBuildingId(buildingId);
-
+      
       try {
         const selectedBuilding = buildings.find(
           (building) => building.id === buildingId
@@ -190,16 +189,11 @@ const DashBoardInvoice: React.FC = () => {
         if (selectedBuilding) {
           setSelectedBuilding(selectedBuilding);
           setBuilding(selectedBuilding);
-
           // Fetch rooms for the selected building
           await getRoomByBuildingId(buildingId);
-
           // Reset trạng thái room
           setSelectedRoom(null);
           setSelectedRoomId(null);
-
-          // Fetch bills cho building được chọn
-          await fetchBills();
         }
       } catch (error) {
         console.error("Lỗi khi chọn tòa nhà:", error);
@@ -219,17 +213,17 @@ const DashBoardInvoice: React.FC = () => {
       if (!roomId) {
         setSelectedRoom(null);
         setSelectedRoomId(null);
-        // await fetchBills();
+        await fetchBills(); 
         return;
       }
       setSelectedRoomId(roomId);
-
+  
       try {
         const selectedRoom = roomList.find((room) => room.id === roomId);
         if (selectedRoom) {
           setSelectedRoom(selectedRoom);
-          // Fetch bills cho phòng được chọn
-          await getBillByRoomId(selectedRoom.id);
+          // Gọi fetchBills để lấy danh sách hóa đơn dựa trên phòng được chọn
+          await fetchBills();
         }
       } catch (error) {
         console.error("Lỗi khi chọn phòng:", error);
@@ -242,6 +236,7 @@ const DashBoardInvoice: React.FC = () => {
     },
     [roomList, fetchBills, toast]
   );
+  
 
   // Hàm xóa hóa đơn
   const handleDelete = async (id: string) => {
@@ -275,26 +270,17 @@ const DashBoardInvoice: React.FC = () => {
   const fetchInitialData = useCallback(async () => {
     try {
       if (userData?.role === "ADMIN") {
-        const buildingsData = (await getAllBuildings())?.data.data;
-        useBuildingStore.getState().setBuildings(buildingsData);
+        await getAllBuildings()
         await fetchBills();
       } else if (userData?.role === "MANAGEMENT") {
-        const buildingsData = (await getBuildingByUserId(userData?.id || ""))
-          ?.data.data;
-        useBuildingStore.getState().setBuildings(buildingsData);
-
-        if (buildingsData.length > 0) {
-          const firstBuildingId = buildingsData[0].id;
-
+          await getBuildingByUserId(userData?.id || "")
+        if (buildings.length > 0) {
+          const firstBuildingId = buildings[0].id;
           // Fetch và set danh sách phòng
-          const rooms = await getRoomByBuildingId(firstBuildingId);
-          setRooms(rooms?.data?.data || []);
-
-          // Chọn tòa nhà đầu tiên và load hóa đơn
+          await getRoomByBuildingId(firstBuildingId);
+          // Chọn tòa nhà đầu tiên và cập nhật trạng thái
           setSelectedBuildingId(firstBuildingId);
-          setBuilding(buildingsData[0]);
-
-          await getBillByBuildingId(buildingsData[0].id);
+          setBuilding(buildings[0]);
         }
       }
     } catch (error) {
@@ -305,7 +291,13 @@ const DashBoardInvoice: React.FC = () => {
         type: "background",
       });
     }
-  }, [userData, fetchBills, setRooms, toast, setBuilding]);
+  }, [userData]);
+  
+  useEffect(() => {
+    if(selectedBuildingId){
+    getBillByBuildingId(selectedBuildingId)
+    }
+  }, [selectedBuildingId]);
 
   // Fetch initial data on component mount
   useEffect(() => {
@@ -315,14 +307,7 @@ const DashBoardInvoice: React.FC = () => {
     <div className="flex flex-col flex-1 w-full bg-gray-100 h-screen overflow-auto">
       {/* Header */}
       <div className="flex flex-row px-6 gap-4 items-center justify-between border-b bg-white w-full h-[5%] shadow-md">
-        <div className="flex items-center gap-4 w-full max-w-md">
-          <Search className="w-6 h-6 text-themeColor" />
-          <input
-            className="w-full text-sm border-none focus:outline-none"
-            placeholder="Tìm kiếm hóa đơn"
-          />
-        </div>
-        <Bell className="w-6 h-6 text-themeColor cursor-pointer" />
+
       </div>
 
       {/* Main Content */}
@@ -378,7 +363,14 @@ const DashBoardInvoice: React.FC = () => {
                 <Plus className="w-5 h-5" />
                 Thêm hóa đơn
               </button>
-              
+              <button className="flex items-center gap-2 px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition text-sm">
+                <Filter className="w-5 h-5" />
+                Lọc
+              </button>
+              <button className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition text-sm">
+                <Download className="w-5 h-5" />
+                Xuất Excel
+              </button>
             </div>
           </div>
 

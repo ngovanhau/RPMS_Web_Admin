@@ -5,7 +5,7 @@ import useBookingStore from "@/stores/bookingStore";
 export const getAllBooking = async () => {
     try {
         const response = await api.get(`/booking/bookingall`)
-        // useBookingStore.getState().clearBookings()
+        useBookingStore.getState().clearBookings()
         useBookingStore.getState().setBookings(response.data.data)
         return response.data
     } catch (error) {
@@ -24,10 +24,11 @@ export const createBooking = async (booking : Booking) => {
 export const getBookingByBuildingId = async ( buildingId : string ) => {
     try {
         const response = await api.get(`/booking/getbookingbybuildingid?id=${buildingId}`)
-        // useBookingStore.getState().clearBookings()
+        useBookingStore.getState().clearBookings()
         useBookingStore.getState().setBookings(response.data.data)
         return response.data
     } catch (error) {
+        useBookingStore.getState().clearBookings()
         console.log(error)
     }
 }

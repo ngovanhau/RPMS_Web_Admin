@@ -18,11 +18,13 @@ import {
   updateBookingById,
 } from "@/services/bookingApi/bookingApi";
 import useBookingStore from "@/stores/bookingStore";
+import OptionSelector from "../Deposit/components/OptionSelector";
 
 const DashBoardBooking: React.FC = () => {
   const [selectedBuildingId, setSelectedBuildingId] = useState<string | null>(
     null
   );
+  const [selectedOption, setSelectedOption] = useState("Hẹn khách");
   const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   // State để lưu booking được chọn
@@ -32,6 +34,24 @@ const DashBoardBooking: React.FC = () => {
   const buildings = useBuildingStore((state) => state.buildings);
   const rooms = useBuildingStore((state) => state.roomList);
   const bookings = useBookingStore((state) => state.bookings);
+
+  const options = [
+    "Hẹn khách",
+    "Đặt cọc",
+    "Hoàn thành",
+    "Thất bại",
+  ];
+
+  const statusMap: { [key: number]: string } = {
+    0: "Hẹn khách",
+    1: "Đặt cọc",
+    2: "Hoàn thành",
+    3: "Thất bại",
+  };
+
+  const filteredBookings = bookings.filter(
+    (item) => statusMap[item.status] === selectedOption
+  );
 
   const fetchInitialData = async () => {
     try {
@@ -136,16 +156,19 @@ const DashBoardBooking: React.FC = () => {
       {/* Nội dung chính */}
       <div className="flex h-[95%] p-4 overflow-hidden">
         <div className="flex flex-1 rounded-[8px] flex-col py-4 px-4 w-full bg-white">
-          {/* Tiêu đề và dropdown */}
-          <div className="flex items-center  justify-between mb-4">
-            {/* Tiêu đề */}
+          <OptionSelector
+            options={options}
+            selectedOption={selectedOption}
+            buildings={buildings}
+            onOptionChange={setSelectedOption}
+            onBuildingChange={handleBuildingSelect}
+          />
+
+          {/* <div className="flex items-center  justify-between mb-4">
             <h2 className="text-xl font-bold text-themeColor">
               Danh sách đặt chỗ
             </h2>
-
-            {/* Dropdown filter */}
             <div className="flex gap-4 ">
-              {/* Select Tòa nhà */}
               <div className="flex flex-row">
                 <label className="text-sm w-28 flex justify-center items-center text-gray-700">
                   Tòa nhà
@@ -164,7 +187,7 @@ const DashBoardBooking: React.FC = () => {
                 </select>
               </div>
             </div>
-          </div>
+          </div> */}
 
           {/* Table */}
           <div className="overflow-y-auto max-h-[70vh] border border-gray-200 rounded-md">
@@ -240,7 +263,7 @@ const DashBoardBooking: React.FC = () => {
                       <td className="border border-gray-300 p-2 text-center">
                         <select
                           value={booking.status}
-                          onClick={(e) => e.stopPropagation()} // Prevent the row click event
+                          onClick={(e) => e.stopPropagation()} 
                           onChange={(e) =>
                             handleStatusChange(booking, Number(e.target.value))
                           }

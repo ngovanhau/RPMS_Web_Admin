@@ -1,5 +1,6 @@
-import React from "react";
 import { Room } from "@/types/types";
+import React from "react";
+import { MdMeetingRoom } from "react-icons/md"; // Import biểu tượng liên quan đến phòng
 
 interface RoomCardProps {
   room: Room;
@@ -8,46 +9,48 @@ interface RoomCardProps {
 
 const RoomCard: React.FC<RoomCardProps> = ({ room, onSelect }) => {
   return (
-    <div onClick={onSelect} className="w-full h-16 items-center flex flex-row cursor-pointer">
-      <div className="w-[10%] justify-center flex">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="#001eb4"
-          className="size-7"
-        >
-          <path
-            fillRule="evenodd"
-            d="M4.5 2.25a.75.75 0 0 0 0 1.5v16.5h-.75a.75.75 0 0 0 0 1.5h16.5a.75.75 0 0 0 0-1.5h-.75V3.75a.75.75 0 0 0 0-1.5h-15ZM9 6a.75.75 0 0 0 0 1.5h1.5a.75.75 0 0 0 0-1.5H9Zm-.75 3.75A.75.75 0 0 1 9 9h1.5a.75.75 0 0 1 0 1.5H9a.75.75 0 0 1-.75-.75ZM9 12a.75.75 0 0 0 0 1.5h1.5a.75.75 0 0 0 0-1.5H9Zm3.75-5.25A.75.75 0 0 1 13.5 6H15a.75.75 0 0 1 0 1.5h-1.5a.75.75 0 0 1-.75-.75ZM13.5 9a.75.75 0 0 0 0 1.5H15A.75.75 0 0 0 15 9h-1.5Zm-.75 3.75a.75.75 0 0 1 .75-.75H15a.75.75 0 0 1 0 1.5h-1.5a.75.75 0 0 1-.75-.75ZM9 19.5v-2.25a.75.75 0 0 1 .75-.75h4.5a.75.75 0 0 1 .75.75v2.25a.75.75 0 0 1-.75.75h-4.5A.75.75 0 0 1 9 19.5Z"
-            clipRule="evenodd"
-          />
-        </svg>
+    <div
+      onClick={onSelect}
+      className="w-full h-20 bg-white rounded-lg flex items-center flex-row cursor-pointer"
+    >
+      <div className="w-[12%] justify-center flex">
+        <MdMeetingRoom className="text-[#001eb4] text-4xl" />{" "}
+        {/* Sử dụng biểu tượng Room */}
       </div>
-      <div className="w-[30%] h-full justify-center flex flex-col">
+
+      <div className="w-[30%] h-full flex flex-col justify-center pl-3">
         <span className="text-sm font-semibold text-themeColor">
-          {room.room_name || "Unknown Room"}
+          {/* Giới hạn tên phòng, nếu quá dài sẽ cắt và thêm dấu ba chấm */}
+          {room.room_name
+            ? room.room_name.length > 20
+              ? `${room.room_name.slice(0, 20)}...`
+              : room.room_name
+            : "Unknown Room"}
         </span>
-        <span className="text-[12px]">Người thuê: {room.renter ?? "N/A"}</span>
+        <span className="text-xs text-gray-500">
+          Người thuê: {room?.status == 0 ? room?.renter : "1"}
+        </span>
       </div>
-      <div className="w-[40%] justify-center flex flex-col h-full">
+
+      <div className="w-[35%] flex flex-col justify-center pl-3">
         <span className="text-sm font-semibold text-themeColor">
           {room.room_price ? `${room.room_price.toLocaleString()} đ` : "N/A"}
         </span>
-        <span className="text-[12px]">Hóa đơn: 1</span>
+        <span className="text-xs text-gray-500">Hóa đơn: 0</span>
       </div>
-      <div className="w-[20%] justify-center items-end pr-6 flex flex-col h-full">
+
+      <div className="w-[23%] flex flex-col justify-center items-end pr-6">
         <span className="text-sm font-semibold text-white">
           {room.status === 0 ? (
-            <span className="bg-gray-400 text-white px-2 py-1 text-[10px] rounded-xl">
+            <span className="bg-gray-400 text-white px-3 py-1 text-[10px] rounded-xl">
               Trống
             </span>
           ) : (
-            <span className="bg-themeColor text-white px-2 py-1 text-[10px] rounded-xl">
+            <span className="bg-themeColor text-white px-3 py-1 text-[10px] rounded-xl">
               Đã thuê
             </span>
           )}
         </span>
-        <span className="text-[12px]">Vấn đề: 0</span>
       </div>
     </div>
   );

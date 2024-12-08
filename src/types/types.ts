@@ -122,6 +122,7 @@ export interface User {
     customerId?: string; // Guid
     // service?: ServiceInfo[];
     service?: string;
+    status: number;
     clause?: string;
     image?: string;
     // image?: string[];

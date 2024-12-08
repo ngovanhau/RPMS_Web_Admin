@@ -5,18 +5,23 @@ import { Building, Room } from "@/types/types";
 import { getallService } from "@/services/servicesApi/servicesApi";
 import useServiceStore from "@/stores/servicesStore";
 import { uploadImage } from "@/services/imageApi/imageApi";
+import { Upload } from "antd";
+import type { GetProp, UploadFile, UploadProps } from 'antd';
+import ImgCrop from 'antd-img-crop';
+import { useBuildingStore } from "@/stores/buildingStore";
+import Select, { SingleValue } from 'react-select'
+
+
 interface CreateRoomFormProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (data: Room) => void;
-  building: Building | null;
 }
 
 const CreateRoomForm: React.FC<CreateRoomFormProps> = ({
   isOpen,
   onClose,
   onSubmit,
-  building,
 }) => {
   const {
     register,
@@ -36,6 +41,7 @@ const CreateRoomForm: React.FC<CreateRoomFormProps> = ({
   const [selectedSubDetail, setSelectedSubDetail] = useState<Number>(0);
   const [imageFiles, setImageFiles] = useState<File[]>([]);  // State để lưu trữ file ảnh
   const [imageUrls, setImageUrls] = useState<string[]>([]); 
+  const buildingList = useBuildingStore((state) => state.buildings)
   
   const subDetailsLabel = [
     { id: 0, label: "DỊCH VỤ" },
@@ -51,6 +57,24 @@ const CreateRoomForm: React.FC<CreateRoomFormProps> = ({
     }
   }, [isOpen, reset]);
 
+  const buildingOptions = buildingList.map((building) => ({
+    value: building.id,
+    label: building.building_name,
+  }));
+
+  const handleBuildingChange = (
+    selectedOption: SingleValue<{ value: string; label: string }> | null
+  ) => {
+    if (selectedOption) {
+      // Khi có lựa chọn
+      setValue("building_Id", selectedOption.value);
+    } else {
+      // Khi không có lựa chọn
+      setValue("building_Id", undefined); 
+    }
+  };
+  
+
   const handleFormSubmit = async (data: Room) => {
     // Đẩy danh sách dịch vụ vào trường roomservice
     const roomServices = paidServiceList.map((service) => ({
@@ -65,7 +89,6 @@ const CreateRoomForm: React.FC<CreateRoomFormProps> = ({
     // Cập nhật imageUrls vào data
     data.imageUrls = uploadedImageUrls;
     // Cập nhật building_Id nếu có building được truyền vào
-    data.building_Id = building?.id || "";
 
     // Gọi hàm onSubmit với dữ liệu đã cập nhật
     onSubmit(data);
@@ -97,6 +120,16 @@ const CreateRoomForm: React.FC<CreateRoomFormProps> = ({
   return (
     <CustomModal isOpen={isOpen} onClose={onClose} header="Thêm phòng">
       <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
+        <div className="grid grid-cols-2 gap-4">
+          <div className="flex flex-col">
+            <label className="block text-gray-700">Tòa nhà *</label>
+            <Select
+              options={buildingOptions}
+              onChange={handleBuildingChange}
+              className="w-full"
+            />
+          </div>
+        </div>
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-gray-700">Tên phòng *</label>

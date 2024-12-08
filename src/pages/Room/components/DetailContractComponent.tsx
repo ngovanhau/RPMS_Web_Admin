@@ -65,16 +65,16 @@ const ContractItem: React.FC<{ contract: Contract }> = ({ contract }) => {
                 <span className="text-sm font-medium">Chi tiết tài chính</span>
               </div>
               <div className="grid grid-cols-3 gap-3 pl-5">
-                <div className="bg-gray-50 p-2 rounded-lg">
-                  <p className="text-xs text-gray-600">Phí thuê hàng tháng</p>
+                <div className="bg-gray-50 p-2 rounded-lg gap-2 flex flex-col">
+                  <p className="text-xs text-gray-600">Phí thuê</p>
                   <p className="text-gray-800 font-semibold">{formatNumber(contract.room_fee)}đ</p>
                 </div>
-                <div className="bg-gray-50 p-2 rounded-lg">
+                <div className="bg-gray-50 p-2 rounded-lg gap-2 flex flex-col">
                   <p className="text-xs text-gray-600">Tiền đặt cọc</p>
                   <p className="text-gray-800 font-semibold">${formatNumber(contract.deposit)}đ</p>
                 </div>
-                <div className="bg-gray-50 p-2 rounded-lg">
-                  <p className="text-xs text-gray-600">Thời gian hợp đồng</p>
+                <div className="bg-gray-50 p-2 rounded-lg gap-2 flex flex-col">
+                  <p className="text-xs text-gray-600">Thời hạn</p>
                   <p className="text-gray-800 font-semibold">{contract.payment_term} tháng</p>
                 </div>
               </div>
