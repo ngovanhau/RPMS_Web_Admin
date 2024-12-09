@@ -8,8 +8,8 @@ import DashBoardBuidling from "./pages/Buidling/Building";
 import DashBoardRoom from "./pages/Room/Room";
 import Profile from "./pages/Profile/Profile";
 import ChangePassWord from "./pages/ChangePassWord/ChangePassWord";
-import Tenant from "./pages/Tenant/Tenant";  
-import DashBoardContract from "./pages/Contract/Contract";   
+import Tenant from "./pages/Tenant/Tenant";
+import DashBoardContract from "./pages/Contract/Contract";
 import DashBoardAccount from "./pages/Account/Account";
 import DashBoardPermission from "./pages/Permission/Permission";
 import DashBoardDeposit from "./pages/Deposit/Deposit";
@@ -20,37 +20,35 @@ import DashBoardCashFlow from "./pages/Cashflow/Cashflow";
 import DashBoardBooking from "./pages/Booking/Booking";
 import { Toaster } from "./components/ui/toaster";
 const App: React.FC = () => {
-    return (
-        <Router>
-                            <Toaster />
-            <Routes>
-                
-                {/* Route Login nằm ngoài layout */}
-                <Route path="/" element={<Login />} />
-                
-                {/* DashboardLayout bao bọc các tuyến đường khác */}
-                <Route element={<DashboardLayout />}>
+  return (
+    <Router>
+      <Toaster />
+      <Routes>
+        {/* Route Login nằm ngoài layout */}
+        <Route path="/" element={<Login />} />
 
-                    <Route path="Dashboard" element={<DashboardHome />} />
-                    <Route path="Service" element={<DashBoardService />} />
-                    <Route path="/building" element={<DashBoardBuidling />} />
-                    <Route path="/room" element={<DashBoardRoom />} />
-                    <Route path="/Profile" element={<Profile/>}/>
-                    <Route path="/Changepass" element={<ChangePassWord/>}/>
-                    <Route path="/Tenant" element={<Tenant/>}/>
-                    <Route path="/Contract" element={<DashBoardContract/>}/>
-                    <Route path="/Account" element={<DashBoardAccount/>}/>
-                    <Route path="/Permission" element={<DashBoardPermission/>}/>
-                    <Route path="/Deposit" element={<DashBoardDeposit/>}/>
-                    <Route path="/RoomStatement" element={<DashBoardRoomStatement/>}/>
-                    <Route path="/Invoice" element={<DashBoardInvoice/>}/>
-                    <Route path="/Problem" element={<DashBoardProblem/>}/>
-                    <Route path="/Income-expense" element={<DashBoardCashFlow/>}/>
-                    <Route path="/Booking" element={<DashBoardBooking/>}/>
-                </Route>
-            </Routes>
-        </Router>
-    );
+        {/* DashboardLayout bao bọc các tuyến đường khác */}
+        <Route element={<DashboardLayout />}>
+          <Route path="Dashboard" element={<DashboardHome />} />
+          <Route path="Service" element={<DashBoardService />} />
+          <Route path="/building" element={<DashBoardBuidling />} />
+          <Route path="/room" element={<DashBoardRoom />} />
+          <Route path="/Profile" element={<Profile />} />
+          <Route path="/Changepass" element={<ChangePassWord />} />
+          <Route path="/Tenant" element={<Tenant />} />
+          <Route path="/Contract" element={<DashBoardContract />} />
+          <Route path="/Account" element={<DashBoardAccount />} />
+          <Route path="/Permission" element={<DashBoardPermission />} />
+          <Route path="/Deposit" element={<DashBoardDeposit />} />
+          <Route path="/RoomStatement" element={<DashBoardRoomStatement />} />
+          <Route path="/Invoice" element={<DashBoardInvoice />} />
+          <Route path="/Problem" element={<DashBoardProblem />} />
+          <Route path="/Income-expense" element={<DashBoardCashFlow />} />
+          <Route path="/Booking" element={<DashBoardBooking />} />
+        </Route>
+      </Routes>
+    </Router>
+  );
 };
 
 export default App;

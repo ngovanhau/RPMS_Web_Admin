@@ -10,6 +10,7 @@ import TransactionGroups from "./components/TransactionGroups";
 import OptionSelector from "../Deposit/components/OptionSelector";
 import { getAllBuildings, getBuildingByUserId } from "@/services/buildingApi/buildingApi";
 import { getAllTransaction, getTransactionByBuildingId } from "@/services/transactionApi/transactionApi";
+import { Bell } from "lucide-react";
 
 const DashBoardCashFlow: React.FC = () => {
   const buildings = useBuildingStore((state) => state.buildings);
@@ -22,7 +23,8 @@ const DashBoardCashFlow: React.FC = () => {
   return (
     <div className="flex flex-col flex-1 bg-gray-100 w-full overflow-y-hidden">
       {/* Header */}
-      <div className="h-[5%] flex flex-row px-6 gap-4 items-center justify-start border-b bg-white w-full">
+      <div className="h-[5%] flex flex-row px-10 gap-4 items-center justify-end border-b bg-white w-full">
+      <Bell className="w-6 h-6 text-themeColor cursor-pointer" />
       </div>
 
       {/* Main Content */}

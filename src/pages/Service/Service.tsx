@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { PlusCircle, Search, ClipboardList } from "lucide-react"; // Import các icon từ Lucide-react
+import { PlusCircle, Search, ClipboardList, Bell } from "lucide-react"; // Import các icon từ Lucide-react
 import HeaderServiceRow from "./components/HeaderServiceRow";
 import ServiceForm from "./components/ServiceForm";
 import CustomModal from "@/components/Modal/Modal";
@@ -48,8 +48,8 @@ const DashBoardService: React.FC = () => {
   return (
     <div className="flex flex-col flex-1 bg-gray-100  w-full overflow-y-hidden">
       {/* Header */}
-      <div className="h-[5%] flex flex-row px-6 gap-4 items-center justify-start border-b-b bg-white w-full">
-
+      <div className="h-[5%] flex flex-row px-10 gap-4 items-center justify-end border-b-b bg-white w-full">
+        <Bell className="w-6 h-6 text-themeColor cursor-pointer" />
       </div>
 
       <div className="flex h-[95%] p-6 overflow-hidden">

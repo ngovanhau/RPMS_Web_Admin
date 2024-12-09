@@ -15,6 +15,7 @@ import EditTenantForm from "./components/EditTenantForm";
 import { BiSearch } from "react-icons/bi";
 import { BiPlus } from "react-icons/bi";
 import { BiBell } from "react-icons/bi";
+import { Bell } from "lucide-react";
 
 const Tenant: React.FC = () => {
   const { userData } = useAuthStore();
@@ -55,7 +56,8 @@ const Tenant: React.FC = () => {
 
   return (
     <div className="flex flex-col flex-1 bg-gray-100 w-full overflow-y-hidden">
-      <div className="h-[5%] flex flex-row px-6 gap-4 items-center justify-start border-b bg-white w-full">
+      <div className="h-[5%] flex flex-row px-10 gap-4 items-center justify-end border-b bg-white w-full">
+        <Bell className="w-6 h-6 text-themeColor cursor-pointer" />
       </div>
 
       <div className="flex h-[95%] p-4  overflow-hidden">
@@ -63,7 +65,9 @@ const Tenant: React.FC = () => {
           <div className="flex flex-row justify-between items-center pb-4 border-b">
             <div className="flex flex-row items-center gap-6">
               <div className="py-1 px-2 rounded-[6px] flex justify-center items-center ">
-                <span className="text-base text-themeColor font-bold">Danh sách khách hàng</span>
+                <span className="text-base text-themeColor font-bold">
+                  Danh sách khách hàng
+                </span>
               </div>
               <span className="text-base"></span>
             </div>

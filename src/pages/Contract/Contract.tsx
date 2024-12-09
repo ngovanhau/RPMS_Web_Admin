@@ -23,6 +23,7 @@ import {
   getAllBuildings,
   getBuildingByUserId,
 } from "@/services/buildingApi/buildingApi";
+import { Bell } from "lucide-react";
 
 const DashBoardContract: React.FC = () => {
   const [selectedContract, setSelectedContract] = useState<Contract | null>(
@@ -48,7 +49,7 @@ const DashBoardContract: React.FC = () => {
   const fetchInitialData = async () => {
     try {
       if (userData?.role === "ADMIN") {
-        await getAllBuildings()
+        await getAllBuildings();
         await getAllContract();
       } else if (userData?.role === "MANAGEMENT") {
         const buildingsData = (await getBuildingByUserId(userData?.id || ""))
@@ -65,8 +66,8 @@ const DashBoardContract: React.FC = () => {
   };
 
   useEffect(() => {
-    if(selectedBuildingId){
-    getContractByBuildingId(selectedBuildingId);
+    if (selectedBuildingId) {
+      getContractByBuildingId(selectedBuildingId);
     }
   }, [selectedBuildingId]);
 
@@ -131,7 +132,9 @@ const DashBoardContract: React.FC = () => {
 
   return (
     <div className="flex flex-col flex-1 bg-gray-100 w-full overflow-y-hidden">
-      <div className="h-[5%] flex flex-row px-6 gap-4 items-center justify-start border-b bg-white w-full"></div>
+      <div className="h-[5%] flex flex-row px-10 gap-4 items-center justify-end border-b bg-white w-full">
+        <Bell className="w-6 h-6 text-themeColor cursor-pointer" />
+      </div>
 
       <div className="flex h-[95%] p-4 overflow-hidden">
         <div className="flex flex-1 rounded-[8px] flex-col py-4 px-4 w-full bg-white">
@@ -143,8 +146,8 @@ const DashBoardContract: React.FC = () => {
                 </span>
               </div>
               <span className="text-sm">{contractData.length} Hợp đồng</span>
-               {/* Building Selector */}
-               <div className="flex items-center gap-4">
+              {/* Building Selector */}
+              <div className="flex items-center gap-4">
                 <select
                   className="p-2 border border-gray-300 rounded-md"
                   value={selectedBuildingId || ""}
@@ -160,7 +163,6 @@ const DashBoardContract: React.FC = () => {
               </div>
             </div>
             <div>
-             
               <div
                 onClick={() => setIsOpenCreateModal(true)}
                 className="bg-themeColor flex flex-row justify-center items-center gap-2 text-base h-12 text-white py-2 w-44 rounded-[6px] shadow hover:bg-themeColor transition duration-300 cursor-pointer"

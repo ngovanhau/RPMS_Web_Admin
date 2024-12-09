@@ -19,6 +19,7 @@ import {
 } from "@/services/bookingApi/bookingApi";
 import useBookingStore from "@/stores/bookingStore";
 import OptionSelector from "../Deposit/components/OptionSelector";
+import { Bell } from "lucide-react";
 
 const DashBoardBooking: React.FC = () => {
   const [selectedBuildingId, setSelectedBuildingId] = useState<string | null>(
@@ -35,12 +36,7 @@ const DashBoardBooking: React.FC = () => {
   const rooms = useBuildingStore((state) => state.roomList);
   const bookings = useBookingStore((state) => state.bookings);
 
-  const options = [
-    "Hẹn khách",
-    "Đặt cọc",
-    "Hoàn thành",
-    "Thất bại",
-  ];
+  const options = ["Hẹn khách", "Đặt cọc", "Hoàn thành", "Thất bại"];
 
   const statusMap: { [key: number]: string } = {
     0: "Hẹn khách",
@@ -52,7 +48,7 @@ const DashBoardBooking: React.FC = () => {
   const filteredBookings = bookings.filter(
     (item) => statusMap[item.status] === selectedOption
   );
-  
+
   const fetchInitialData = async () => {
     try {
       if (userData?.role === "ADMIN") {
@@ -106,22 +102,21 @@ const DashBoardBooking: React.FC = () => {
 
   // Hàm xử lý khi nhấn nút Sửa
   const handleEdit = async (booking: Booking) => {
-    await updateBookingById(booking)
+    await updateBookingById(booking);
     if (selectedBuildingId) {
       await getBookingByBuildingId(selectedBuildingId);
-    }
-    else{
+    } else {
       await fetchInitialData();
     }
-    setIsDetailModalOpen(false)
+    setIsDetailModalOpen(false);
   };
 
   // Hàm xử lý khi nhấn nút Xóa
   const handleDelete = async (id: string) => {
-    await deleteBookingById(id)
+    await deleteBookingById(id);
     if (selectedBuildingId) {
       await getBookingByBuildingId(selectedBuildingId);
-      setIsDetailModalOpen(false)
+      setIsDetailModalOpen(false);
     } else {
       await fetchInitialData();
     }
@@ -142,7 +137,7 @@ const DashBoardBooking: React.FC = () => {
       await updateBookingById(booking);
       if (selectedBuildingId) {
         await getBookingByBuildingId(selectedBuildingId);
-            fetchInitialData();
+        fetchInitialData();
       } else {
         await fetchInitialData();
       }
@@ -155,12 +150,12 @@ const DashBoardBooking: React.FC = () => {
     fetchInitialData();
   }, []);
 
-  
-
   return (
     <div className="flex flex-col flex-1 bg-gray-100 w-full overflow-y-hidden relative">
       {/* Thanh tìm kiếm */}
-      <div className="h-[5%] flex flex-row px-6 gap-4 items-center justify-start border-b bg-white w-full"></div>
+      <div className="h-[5%] flex flex-row px-10 gap-4 items-center justify-end border-b bg-white w-full">
+        <Bell className="w-6 h-6 text-themeColor cursor-pointer" />
+      </div>
       {/* Nội dung chính */}
       <div className="flex h-[95%] p-4 overflow-hidden">
         <div className="flex flex-1 rounded-[8px] flex-col py-4 px-4 w-full bg-white">
@@ -246,7 +241,7 @@ const DashBoardBooking: React.FC = () => {
                       <td className="border border-gray-300 p-2 text-center">
                         <select
                           value={booking.status}
-                          onClick={(e) => e.stopPropagation()} 
+                          onClick={(e) => e.stopPropagation()}
                           onChange={(e) =>
                             handleStatusChange(booking, Number(e.target.value))
                           }
@@ -303,7 +298,6 @@ const DashBoardBooking: React.FC = () => {
         onEdit={handleEdit}
         onDelete={handleDelete}
       />
-      
     </div>
   );
 };

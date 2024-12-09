@@ -25,6 +25,7 @@ import CustomModal from "@/components/Modal/Modal";
 import MeterReadingForm from "./components/CreateForm";
 import EditMeterReadingForm from "./components/EditForm";
 import { createBill } from "@/services/invoiceApi/invoiceApi";
+import { Bell } from "lucide-react";
 
 const DashBoardRoomStatement: React.FC = () => {
   const { toast } = useToast(); // Sử dụng hook useToast
@@ -69,7 +70,8 @@ const DashBoardRoomStatement: React.FC = () => {
         hasFetchedBuildingsRef.current = true; // Cập nhật useRef
         getALlServicemeterreadings();
       } else if (userData?.role === "MANAGEMENT") {
-        const buildingsData = (await getBuildingByUserId(userData?.id || ""))?.data.data;
+        const buildingsData = (await getBuildingByUserId(userData?.id || ""))
+          ?.data.data;
         useBuildingStore.getState().setBuildings(buildingsData);
         if (buildingsData.length > 0) {
           await handleBuildingSelect(buildingsData[0].id);
@@ -317,7 +319,9 @@ const DashBoardRoomStatement: React.FC = () => {
 
   return (
     <div className="flex flex-col flex-1 bg-gray-100 w-full overflow-y-hidden">
-      <div className="h-[5%] flex flex-row px-6 gap-4 items-center justify-start border-b bg-white w-full"></div>
+      <div className="h-[5%] flex flex-row px-10 gap-4 items-center justify-end border-b bg-white w-full">
+        <Bell className="w-6 h-6 text-themeColor cursor-pointer" />
+      </div>
 
       <div className="flex h-[95%] p-6 overflow-hidden">
         <div className="flex flex-1 flex-col py-4 px-4 rounded-[8px] w-full bg-white">

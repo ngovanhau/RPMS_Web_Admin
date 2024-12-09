@@ -9,6 +9,7 @@ import CustomModal from "@/components/Modal/Modal";
 import AddManagerForm from "./components/AddManagerForm";
 import { createPermissionByBuildingId } from "@/services/buildingApi/buildingApi";
 import { getAllAccount } from "@/services/accountApi/accountApi";
+import { Bell } from "lucide-react";
 
 const DashBoardPermission: React.FC = () => {
   const listBuilding: Building[] = useBuildingStore((state) => state.buildings);
@@ -98,7 +99,9 @@ const DashBoardPermission: React.FC = () => {
 
   return (
     <div className="flex flex-col flex-1 bg-gray-100 w-full overflow-y-hidden">
-      <div className="h-[5%] flex flex-row px-6 gap-4 items-center justify-start border-b-b bg-white w-full"></div>
+      <div className="h-[5%] flex flex-row px-10 gap-4 items-center justify-end border-b-b bg-white w-full">
+      <Bell className="w-6 h-6 text-themeColor cursor-pointer" />
+      </div>
 
       <div className="flex h-[95%] p-6 overflow-hidden">
         <div className="flex flex-1 rounded-[8px] flex-col py-4 px-4 w-full bg-white">

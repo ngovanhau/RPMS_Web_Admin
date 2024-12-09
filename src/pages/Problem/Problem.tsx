@@ -20,6 +20,7 @@ import {
 import { useProblemStore } from "@/stores/problemStore";
 import ProblemCard from "./components/ProblemDetail";
 import CustomModal from "@/components/Modal/Modal";
+import { Bell } from "lucide-react";
 
 const DashBoardProblem: React.FC = () => {
   const [selectedOption, setSelectedOption] = useState("Đang yêu cầu");
@@ -156,8 +157,8 @@ const DashBoardProblem: React.FC = () => {
 
   return (
     <div className="flex flex-col flex-1 bg-gray-100 w-full overflow-y-hidden">
-      <div className="h-[5%] flex flex-row px-6 gap-4 items-center justify-start border-b bg-white w-full">
-
+      <div className="h-[5%] flex flex-row px-10 gap-4 items-center justify-end border-b bg-white w-full">
+        <Bell className="w-6 h-6 text-themeColor cursor-pointer" />
       </div>
 
       <div className="flex h-[95%] p-4 overflow-hidden">
@@ -177,17 +178,16 @@ const DashBoardProblem: React.FC = () => {
             onStatusChange={handleStatusChange}
             onProblemSelect={handleProblemSelect}
           />
-
         </div>
       </div>
       <CustomModal
-            isOpen={isModalOpen}
-            onClose={handleModalClose}
-            header="Chi tiết vấn đề"
-            className="max-w-2xl"
-          >
-            <ProblemCard onClose={handleModalClose} problem={selectedProblem} />
-          </CustomModal>
+        isOpen={isModalOpen}
+        onClose={handleModalClose}
+        header="Chi tiết vấn đề"
+        className="max-w-2xl"
+      >
+        <ProblemCard onClose={handleModalClose} problem={selectedProblem} />
+      </CustomModal>
     </div>
   );
 };
