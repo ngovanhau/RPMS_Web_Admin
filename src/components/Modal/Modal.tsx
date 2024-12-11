@@ -30,7 +30,7 @@ const CustomModal: React.FC<CustomModalProps> = ({
       <div className={`fixed inset-0 bg-black bg-opacity-30 transition-opacity ${overlayClassName}`} onClick={onClose}></div>
       <div className={`bg-white rounded-xl shadow-lg w-full max-w-7xl transform transition-all ${className}`}>
         <div className={`flex justify-between items-center border-b pb-3 px-6 pt-4 ${headerClassName}`}>
-          <h2 className="text-xl font-bold text-themeColor">{header}</h2>
+          <h2 className="text-xl font-bold ">{header}</h2>
           <button
             onClick={onClose}
             className="text-gray-500 hover:text-gray-700 transition"

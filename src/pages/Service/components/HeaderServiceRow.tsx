@@ -4,34 +4,20 @@ type HeaderServiceRowProps = {};
 
 export const HeaderServiceRow: React.FC<HeaderServiceRowProps> = () => {
   return (
-    <div className="flex flex-row w-full h-12 cursor-pointer bg-themeColor">
-      <div className="w-[4%] border border-gray-300 px-4 py-2">
-        
+    <div className="flex flex-row w-full h-12 cursor-pointer"
+    style={{ backgroundColor: "#004392" }}
+    >
+      <div className="w-[7%] px-4 py-2 text-white justify-start font-semibold text-base border-r border-white">
+        Thao tác
       </div>
-      <div className="w-[25%] px-4 flex items-center justify-start border border-gray-300">
-        <span className="text-white font-semibold text-base text-left">
+      <div className="w-[30%] px-4 flex items-center justify-start justify-start font-semibold text-base border-r border-white text-white ">
           Tên dịch vụ
-        </span>
       </div>
-      <div className="w-[15%] px-4 flex items-center justify-start border border-gray-300">
-        <span className="text-white font-semibold text-base text-left">
-          Đơn vị
-        </span>
+      <div className="w-[35%] px-4 flex items-center justify-start justify-start font-semibold text-base border-r border-white text-white ">
+          Giá tiền
       </div>
-      <div className="w-[15%] px-4 flex items-center justify-start border border-gray-300">
-        <span className="text-white font-semibold text-base text-left">
-          Phí dịch vụ
-        </span>
-      </div>
-      <div className="w-[15%] px-4 flex items-center justify-start border border-gray-300">
-        <span className="text-white font-semibold text-base text-left">
-          Cập nhật
-        </span>
-      </div>
-      <div className="w-[26%] px-4 flex items-center justify-start border border-gray-300">
-        <span className="text-white font-semibold text-base text-left">
-          Ghi chú
-        </span>
+      <div className="w-[30%] px-4 flex items-center justify-start justify-start font-semibold text-base border-r  border-white text-white ">
+          Mô tả
       </div>
     </div>
   );

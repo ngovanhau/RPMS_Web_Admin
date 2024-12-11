@@ -1,5 +1,4 @@
 import React from "react";
-import { formatDate } from "@/config/config";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,7 +9,6 @@ import { deleteService } from "@/services/servicesApi/servicesApi";
 import { Service } from "@/types/types";
 import { MoreHorizontal } from "lucide-react";
 import { FaEdit, FaTrash } from "react-icons/fa";
-
 
 interface ServiceRowProps {
   service: Service;
@@ -40,53 +38,51 @@ const ServiceRow: React.FC<ServiceRowProps> = ({
     }
   };
 
-  
-
   return (
-    <div className="flex flex-row w-full h-16 cursor-pointer">
-      <div className="w-[4%] border border-gray-300 px-4 flex items-center justify-start">
+    <div className="flex flex-row w-full h-16 cursor-pointer border-b border-gray-300">
+      {/* Cột Thao Tác */}
+      <div className="w-[7%] px-4 flex items-center justify-start border-r border-gray-300">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button>
-              <MoreHorizontal/>
+              <MoreHorizontal className="w-5 h-5 text-gray-600" />
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="bg-white ml-32">
             <DropdownMenuItem onSelect={handleDelete}>
-            <FaTrash className="w-4 h-4 text-gray-600" />
+              <FaTrash className="w-4 h-4 text-gray-600 text-[10px]" />
               Xóa
             </DropdownMenuItem>
             <DropdownMenuItem onSelect={handleEditClick}>
-            <FaEdit className="w-4 h-4 text-gray-600" />
-              Chỉnh sửa</DropdownMenuItem>
+              <FaEdit className="w-4 h-4 text-gray-600 text-[10px]" />
+              Chỉnh sửa
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
 
-      <div className="w-[25%] border border-gray-300 px-4 flex items-center justify-start">
-        <span className="text-gray-600 font-semibold text-[15px] text-left">
-          {service.service_name}
-        </span>
+      {/* Cột Tên Dịch Vụ */}
+      <div className="w-[30%] px-4 flex items-center justify-start border-r border-gray-300 font-semibold text-gray-800">
+        {service.service_name}
       </div>
-      <div className="w-[15%] border border-gray-300 px-4 flex items-center justify-start">
-        <span className="text-gray-600 font-semibold text-[15px] text-left">
-          {service.unitMeasure}
-        </span>
+
+      {/* Cột Giá Tiền */}
+      <div className="w-[35%] px-4 flex flex-col justify-start border-r border-gray-300 mt-2">
+        {/* Giá tiền và đơn vị */}
+        <div className="font-semibold text-gray-800">
+          {service.service_cost
+            ? `${service.service_cost.toLocaleString()} / ${service.unitMeasure || "---"}`
+            : "---"}
+        </div>
+        {/* Loại đơn giá */}
+        <div className="text-gray-500 text-sm">
+          {service.collect_fees || "---"}
+        </div>
       </div>
-      <div className="w-[15%] border border-gray-300 px-4 flex items-center justify-start">
-        <span className="text-gray-600 font-semibold text-[15px] text-left">
-          {service.service_cost}
-        </span>
-      </div>
-      <div className="w-[15%] border border-gray-300 px-4 flex items-center justify-start">
-        <span className="text-gray-600 font-semibold text-[15px] text-left">
-          {service.updatedAt ? formatDate(service.updatedAt) : "N/A"}
-        </span>
-      </div>
-      <div className="w-[26%] border border-gray-300 px-4 flex items-center justify-start">
-        <span className="text-gray-600 font-semibold text-[15px] text-left">
-          {service.note}
-        </span>
+
+      {/* Cột Mô Tả */}
+      <div className="w-[30%] px-4 flex items-center justify-start border-r border-gray-300 font-semibold text-gray-800">
+        {service.note}
       </div>
     </div>
   );

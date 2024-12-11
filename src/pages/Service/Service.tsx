@@ -49,7 +49,7 @@ const DashBoardService: React.FC = () => {
     <div className="flex flex-col flex-1 bg-gray-100  w-full overflow-y-hidden">
       {/* Header */}
       <div className="h-[5%] flex flex-row px-10 gap-4 items-center justify-end border-b-b bg-white w-full">
-        <Bell className="w-6 h-6 text-themeColor cursor-pointer" />
+        <Bell className="w-6 h-6  cursor-pointer" />
       </div>
 
       <div className="flex h-[95%] p-6 overflow-hidden">
@@ -57,17 +57,18 @@ const DashBoardService: React.FC = () => {
           {/* Header */}
           <div className="flex flex-row justify-between items-center pb-4 border-b">
             <div className="flex flex-row items-center gap-6">
-              <div className="py-1 px-2 rounded-[6px] flex justify-center items-center bg-themeColor">
+              <div className="py-1 px-2 rounded-[6px] flex justify-center items-center"
+              style={{ backgroundColor: "#004392" }}>
                 <span className="text-base text-white font-bold">
                   {services.length}
                 </span>
               </div>
-              <span className="text-base">{services.length} dịch vụ</span>
             </div>
             {/* Add Button */}
             <div>
               <div
-                className="bg-themeColor flex flex-row justify-center items-center gap-2 text-base h-12 text-white py-2 w-44 rounded-[6px] shadow hover:bg-themeColor transition duration-300"
+                className="bg-themeColor flex flex-row justify-center items-center gap-2 text-base h-11 text-white py-2 w-36 rounded-[6px] shadow hover:bg-themeColor transition duration-300"
+                style={{ backgroundColor: "#004392" }}
                 title="Thêm dịch vụ"
                 onClick={() => {
                   setIsEdit(false);
@@ -75,8 +76,8 @@ const DashBoardService: React.FC = () => {
                   setModalIsOpen(true);
                 }}
               >
-                <PlusCircle className="w-6 h-6 text-white" />
-                <span>Thêm</span>
+                <PlusCircle className="w-6 h-6 text-white cursor-pointer" />
+                Thêm
               </div>
             </div>
           </div>
@@ -101,7 +102,9 @@ const DashBoardService: React.FC = () => {
       <CustomModal
         isOpen={modalIsOpen}
         onClose={() => setModalIsOpen(false)}
+        
         header={isEdit ? "Chỉnh sửa" : "Thêm mới"}
+
       >
         <ServiceForm
           onSuccess={handleSuccess}
