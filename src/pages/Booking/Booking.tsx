@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Booking, Building, Room } from "@/types/types";
+import { Booking } from "@/types/types";
 import CustomModal from "@/components/Modal/Modal";
 import CreateBooking from "./components/CreateBooking";
 import useAuthStore from "@/stores/userStore";
@@ -19,7 +19,9 @@ import {
 } from "@/services/bookingApi/bookingApi";
 import useBookingStore from "@/stores/bookingStore";
 import OptionSelector from "../Deposit/components/OptionSelector";
-import { Bell } from "lucide-react";
+import { Bell, MoreHorizontal } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
+import { FaEdit, FaTrash } from "react-icons/fa";
 
 const DashBoardBooking: React.FC = () => {
   const [selectedBuildingId, setSelectedBuildingId] = useState<string | null>(
@@ -94,11 +96,6 @@ const DashBoardBooking: React.FC = () => {
     getBookingByBuildingId(buildingId);
     fetchRooms(buildingId);
   };
-  // Hàm xử lý khi nhấn vào một hàng
-  const handleRowClick = (booking: Booking) => {
-    setSelectedBooking(booking);
-    setIsDetailModalOpen(true);
-  };
 
   // Hàm xử lý khi nhấn nút Sửa
   const handleEdit = async (booking: Booking) => {
@@ -170,10 +167,10 @@ const DashBoardBooking: React.FC = () => {
           {/* Table */}
           <div className="overflow-y-auto max-h-[70vh] border border-gray-200 rounded-md">
             <table className="w-full border-collapse">
-              <thead className="sticky top-0 bg-themeColor text-white z-10 h-15">
+              <thead className="sticky top-0 bg-themeColor text-white z-10 h-25">
                 <tr>
-                  <th className="border border-gray-300 p-2"></th>
-                  <th className="border border-gray-300 p-2">Tên khách hàng</th>
+                  <th className="border border-gray-300 p-2">Thao tác</th>
+                  <th className="border border-gray-300 p-2">Tên khách hàng</th>  
                   <th className="border border-gray-300 p-2">Số điện thoại</th>
                   <th className="border border-gray-300 p-2">Email</th>
                   <th className="border border-gray-300 p-2">Phòng</th>
@@ -187,43 +184,44 @@ const DashBoardBooking: React.FC = () => {
                   filteredBookings.map((booking, index) => (
                     <tr
                       key={booking.id}
-                      className="hover:bg-gray-100 transition"
-                    >
-                      <td
-                        className="border border-gray-300 p-2 text-center"
-                        onClick={() => handleRowClick(booking)}
-                      >
-                        {index + 1}
+                      className="hover:bg-gray-100 transition">
+                        <td className="border border-gray-300 p-2">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <button>
+                              <MoreHorizontal className="w-5 h-5 text-gray-600" />
+                            </button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent className="bg-white ml-32">
+                            <DropdownMenuItem >
+                              <FaTrash className="w-4 h-4 text-gray-600 text-[10px]" />
+                              Xóa
+                            </DropdownMenuItem>
+                            <DropdownMenuItem >
+                              <FaEdit className="w-4 h-4 text-gray-600 text-[10px]" />
+                              Chỉnh sửa
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </td>
                       <td
-                        className="border border-gray-300 p-2"
-                        onClick={() => handleRowClick(booking)}
-                      >
+                        className="border border-gray-300 p-2">
                         {booking.customername}
                       </td>
                       <td
-                        className="border border-gray-300 p-2"
-                        onClick={() => handleRowClick(booking)}
-                      >
+                      className="border border-gray-300 p-2">
                         {booking.phone}
                       </td>
                       <td
-                        className="border border-gray-300 p-2"
-                        onClick={() => handleRowClick(booking)}
-                      >
+                      className="border border-gray-300 p-2">
                         {booking.email}
                       </td>
                       <td
-                        className="border border-gray-300 p-2"
-                        onClick={() => handleRowClick(booking)}
-                      >
-                        {rooms.find((room) => room.id === booking.roomid)
-                          ?.room_name || ""}
+                      className="border border-gray-300 p-2">
+                        {booking.roomname}
                       </td>
                       <td
-                        className="border border-gray-300 p-2 text-center whitespace-nowrap"
-                        onClick={() => handleRowClick(booking)}
-                      >
+                      className="border border-gray-300 p-2 text-center whitespace-nowrap">
                         {new Date(booking.date).toLocaleDateString("vi-VN", {
                           day: "2-digit",
                           month: "2-digit",
@@ -279,7 +277,7 @@ const DashBoardBooking: React.FC = () => {
       </div>
       {/* Modal thêm đặt chỗ */}
       <CustomModal
-        header="Tạo đặt chỗ mới"
+        header="Thêm mới"
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
       >

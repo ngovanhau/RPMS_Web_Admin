@@ -7,6 +7,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useUserTokens } from "@/services/notificationApi/notificationApi"; 
+import { getDeviceToken } from "@/services/notificationApi/notificationApi";
+import { UserTokens } from "@/types/types";
 
 const Login = () => {
   const { setUserData } = useAuthStore();
@@ -25,35 +28,55 @@ const Login = () => {
     } else {
       setIsLoading(true);
       try {
-        const response = await login(username, password);
-        if (response && response.data) {
-          localStorage.setItem("authToken", response.data);
-          handleInformation();
+        // Gọi API login để lấy token
+        const loginResponse = await login(username, password);
+        if (loginResponse && loginResponse.data) {
+          const authToken = loginResponse.data; // Lấy token từ login response
+          localStorage.setItem("authToken", authToken); // Lưu token vào localStorage
+          
+          // Gọi API information để lấy thông tin người dùng
+          const userInfoResponse = await information(username); 
+          console.log(userInfoResponse)
+          if (userInfoResponse) {
+            
+            const userId = userInfoResponse.id; // Lấy userId từ thông tin user
+  
+            // Lấy device token từ Firebase
+            const deviceToken = await getDeviceToken();
+            if (deviceToken) {
+              // Tạo dữ liệu UserTokens
+              const userTokenData: UserTokens = {
+                userId: userId,
+                device: "web", // Thiết bị hiện tại
+                token: deviceToken, // Token từ Firebase
+              };
+  
+              // Lưu thông tin user token vào cơ sở dữ liệu
+              await useUserTokens(userTokenData); // Chỉ cần gọi API lưu token
+            }
+  
+            // Lưu thông tin user vào store và điều hướng
+            setUserData(userInfoResponse);
+            if (userInfoResponse.role === "ADMIN" || userInfoResponse.role === "MANAGEMENT") {
+              navigate("/Dashboard");
+            } else {
+              setError("Tài khoản của bạn không được đăng nhập vào trang ADMIN.");
+            }
+          } else {
+            setError("Không thể lấy thông tin người dùng.");
+          }
         } else {
           setError("Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.");
         }
       } catch (error) {
+        console.error("Error during login process:", error); // Log lỗi để kiểm tra
         setError("Có lỗi xảy ra khi đăng nhập.");
       } finally {
         setIsLoading(false);
       }
     }
   };
-
-  const handleInformation = async () => {
-    try {
-      const response = await information(username);
-      setUserData(response);
-      if (response.role === "ADMIN" || response.role === "MANAGEMENT") {
-        navigate("/Dashboard");
-      } else {
-        localStorage.removeItem("authToken");
-        setError("Tài khoản của bạn không được đăng nhập vào trang ADMIN.");
-      }
-    } catch (error) {
-      setError("Có lỗi xảy ra khi lấy thông tin người dùng.");
-    }
-  };
+  
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 p-4">
@@ -61,7 +84,7 @@ const Login = () => {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-blue-600 mb-2">ADMIN RPMS</h1>
-          <p className="text-gray-500">Hệ thống quản trị nhà cho thuê</p>
+          <p className="text-gray-500">Hệ thống quản lý nhà cho thuê</p>
         </div>
         
         <Card className="border-0 shadow-2xl bg-white/80 backdrop-blur-xl">

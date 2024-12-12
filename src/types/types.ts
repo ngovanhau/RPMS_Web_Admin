@@ -254,4 +254,11 @@ export interface Booking {
   date: string; 
   status: number; 
   note: string;
+  roomname: string
 };
+
+export interface UserTokens{
+  userId: string
+  device: string
+  token: string
+} 
