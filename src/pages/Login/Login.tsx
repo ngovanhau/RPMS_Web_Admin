@@ -157,7 +157,7 @@ const Login = () => {
 
               <div className="text-center">
                 <a
-                  href="/reset-password"
+                  href="/Forgotpassword"
                   className="text-sm text-gray-600 hover:text-blue-600 transition-colors duration-200"
                 >
                   Quên mật khẩu?
