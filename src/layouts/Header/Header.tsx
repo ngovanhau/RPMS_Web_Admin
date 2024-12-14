@@ -3,18 +3,23 @@ import { Bell } from "lucide-react";
 import { getAllNotification, updateisread, deletenotification } from "@/services/notificationApi/notificationApi";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { MdOutlineDownloadDone } from "react-icons/md";
-import { MdDelete } from "react-icons/md";
+import { MdOutlineDownloadDone, MdDelete } from "react-icons/md";
+import useAuthStore from "@/stores/userStore";
 
 const Header: React.FC = () => {
   const [notifications, setNotifications] = useState<any[]>([]); // Danh sách thông báo
   const [unreadCount, setUnreadCount] = useState<number>(0); // Số thông báo chưa đọc
-  const [userId] = useState<string>("3c2131e9-8d53-4785-aa1c-9c4350d90b41");
+  const userId = useAuthStore((state) => state.userData?.id ?? ""); // Đảm bảo userId luôn là string
   const [isDropdownVisible, setIsDropdownVisible] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<"unread" | "read">("unread"); // Tab hiển thị
 
   // Hàm lấy thông báo từ API
   const fetchNotifications = async () => {
+    if (!userId) {
+      console.error("Lỗi: userId không xác định");
+      return;
+    }
+
     try {
       const response = await getAllNotification(userId);
       const data = Array.isArray(response.data) ? response.data : []; // Đảm bảo dữ liệu trả về là mảng
@@ -31,10 +36,12 @@ const Header: React.FC = () => {
 
   // Gọi API mỗi 5 giây để kiểm tra thông báo mới
   useEffect(() => {
-    fetchNotifications();
-    const intervalId = setInterval(fetchNotifications, 5000);
-    return () => clearInterval(intervalId); // Cleanup khi component unmount
-  }, []);
+    if (userId) {
+      fetchNotifications();
+      const intervalId = setInterval(fetchNotifications, 5000);
+      return () => clearInterval(intervalId); // Cleanup khi component unmount
+    }
+  }, [userId]);
 
   // Xử lý toggle hiển thị danh sách thông báo
   const toggleDropdown = () => {
@@ -131,7 +138,7 @@ const Header: React.FC = () => {
                       className="flex items-center justify-center w-8 h-8 bg-gray-100 rounded-md"
                       title="Đánh dấu đã đọc"
                     >
-                      <MdOutlineDownloadDone/>
+                      <MdOutlineDownloadDone />
                     </button>
                   )}
                   <button
@@ -139,7 +146,7 @@ const Header: React.FC = () => {
                     className="flex items-center justify-center w-8 h-8 bg-gray-100 rounded-md"
                     title="Xóa"
                   >
-                    <MdDelete/>
+                    <MdDelete />
                   </button>
                 </div>
               </div>
