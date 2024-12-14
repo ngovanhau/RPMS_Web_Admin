@@ -92,3 +92,36 @@ export const createNotification = async (
     throw error;  // Ném lỗi ra ngoài nếu có lỗi xảy ra
   }
 };
+
+
+// get 
+export const getAllNotification= async (userId: string) => {
+  try {
+    const response = await api.get(`/notifications/getbyuserid?id=${userId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Lỗi khi lấy danh sách thông báo:", error);
+    throw error;
+  }
+};
+
+//update isread
+
+export const updateisread= async (userId: string, isread: boolean) => {
+  try {
+    const response = await api.put(`/notifications/updateisread?id=${userId}&isread=${isread}`);
+    return response.data;
+  } catch (error) {
+    console.error("Lỗi khi cập nhật trạng thái thông báo:", error);
+    throw error;
+  }
+};
+//delete
+export const deletenotification = async (userId: string) => {
+  try {
+    const response = await api.delete(`/notifications/delete?id=${userId}`); 
+    return response;
+  } catch (error) {
+    throw error;
+  }
+};

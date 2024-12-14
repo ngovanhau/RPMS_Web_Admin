@@ -339,10 +339,6 @@ const DashBoardInvoice: React.FC = () => {
   }, []);
   return (
     <div className="flex flex-col flex-1 w-full bg-gray-100 h-screen overflow-auto">
-      {/* Header */}
-      <div className="flex flex-row px-10 gap-4 items-center justify-end border-b bg-white w-full h-[5%] shadow-md">
-        <Bell className="w-6 h-6 text-themeColor cursor-pointer" />
-      </div>
 
       {/* Main Content */}
       <div className="flex flex-1 p-6 overflow-auto">

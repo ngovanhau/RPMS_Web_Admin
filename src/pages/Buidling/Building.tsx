@@ -140,9 +140,6 @@ const DashBoardBuilding: React.FC = () => {
 
   return (
     <div className="flex flex-col flex-1 bg-gray-200 w-full overflow-y-hidden">
-      <div className="h-[5%] flex flex-row px-10 gap-4 items-center justify-end border-b-b bg-white w-full">
-      <Bell className="w-6 h-6 text-themeColor cursor-pointer" />
-      </div>
 
       <div className="flex h-[95%] flex-row justify-between bg-gray-200 p-4">
         <div className="w-[24%] h-full rounded-l-[8px] flex flex-col bg-white">

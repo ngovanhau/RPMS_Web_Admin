@@ -22,10 +22,6 @@ const DashBoardCashFlow: React.FC = () => {
 
   return (
     <div className="flex flex-col flex-1 bg-gray-100 w-full overflow-y-hidden">
-      {/* Header */}
-      <div className="h-[5%] flex flex-row px-10 gap-4 items-center justify-end border-b bg-white w-full">
-      <Bell className="w-6 h-6 text-themeColor cursor-pointer" />
-      </div>
 
       {/* Main Content */}
       <div className="flex h-[95%] p-4 overflow-hidden">
