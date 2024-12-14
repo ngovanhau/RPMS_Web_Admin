@@ -3,23 +3,21 @@ import { Bell } from "lucide-react";
 import { getAllNotification, updateisread, deletenotification } from "@/services/notificationApi/notificationApi";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { MdOutlineDownloadDone, MdDelete } from "react-icons/md";
+import { MdOutlineDownloadDone } from "react-icons/md";
+import { MdDelete } from "react-icons/md";
 import useAuthStore from "@/stores/userStore";
 
 const Header: React.FC = () => {
   const [notifications, setNotifications] = useState<any[]>([]); // Danh sách thông báo
   const [unreadCount, setUnreadCount] = useState<number>(0); // Số thông báo chưa đọc
-  const userId = useAuthStore((state) => state.userData?.id ?? ""); // Đảm bảo userId luôn là string
+  const [newNotification, setNewNotification] = useState<any | null>(null); // Thông báo mới
+  const userData = useAuthStore((state) => state.userData?.id ?? "");
+  const [userId] = useState(userData);
   const [isDropdownVisible, setIsDropdownVisible] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<"unread" | "read">("unread"); // Tab hiển thị
 
   // Hàm lấy thông báo từ API
   const fetchNotifications = async () => {
-    if (!userId) {
-      console.error("Lỗi: userId không xác định");
-      return;
-    }
-
     try {
       const response = await getAllNotification(userId);
       const data = Array.isArray(response.data) ? response.data : []; // Đảm bảo dữ liệu trả về là mảng
@@ -28,6 +26,20 @@ const Header: React.FC = () => {
       // Cập nhật số lượng thông báo chưa đọc
       const unreadNotifications = data.filter((notif: any) => !notif.isRead);
       setUnreadCount(unreadNotifications.length);
+
+      // Kiểm tra thông báo mới
+      const newNotifs = data.filter((notif: any) => !notif.isRead && !notifications.some((existingNotif) => existingNotif.id === notif.id));
+
+      if (newNotifs.length > 0) {
+        // Hiển thị thông báo mới qua toast
+        setNewNotification(newNotifs[0]); // Lấy thông báo mới
+        toast.success(`Có thông báo mới: ${newNotifs[0].title}`);
+
+        // Ẩn thông báo mới sau 5 giây
+        setTimeout(() => {
+          setNewNotification(null);
+        }, 5000);
+      }
     } catch (error) {
       console.error("Lỗi khi lấy thông báo:", error);
       setNotifications([]); // Gán danh sách thông báo là mảng rỗng nếu xảy ra lỗi
@@ -36,12 +48,10 @@ const Header: React.FC = () => {
 
   // Gọi API mỗi 5 giây để kiểm tra thông báo mới
   useEffect(() => {
-    if (userId) {
-      fetchNotifications();
-      const intervalId = setInterval(fetchNotifications, 5000);
-      return () => clearInterval(intervalId); // Cleanup khi component unmount
-    }
-  }, [userId]);
+    fetchNotifications();
+    const intervalId = setInterval(fetchNotifications, 5000);
+    return () => clearInterval(intervalId); // Cleanup khi component unmount
+  }, [notifications]);
 
   // Xử lý toggle hiển thị danh sách thông báo
   const toggleDropdown = () => {
