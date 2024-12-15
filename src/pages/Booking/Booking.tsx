@@ -198,7 +198,7 @@ const DashBoardBooking: React.FC = () => {
             
           <div className="flex justify-end items-center mb-4 gap-4">
               <h2 className="text-xl font-semibold text-gray-800 ml-0 pl-0 text-left w-full">
-                Danh sách hẹn xem
+                Danh sách khách hẹn xem
               </h2>
               {/* Thanh tìm kiếm */}
               <input

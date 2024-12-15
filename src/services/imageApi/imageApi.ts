@@ -6,6 +6,11 @@ import axios from "axios";
  * @param {File} file - File ảnh được chọn từ input
  * @returns {Promise<string>} - Trả về URL ảnh sau khi upload thành công
  */
+/**
+ * Hàm upload ảnh
+ * @param {File} file - File ảnh được chọn từ input
+ * @returns {Promise<string>} - Trả về URL ảnh sau khi upload thành công
+ */
 export const uploadImage = async (file: File): Promise<string> => {
   try {
     const formData = new FormData();
@@ -16,9 +21,16 @@ export const uploadImage = async (file: File): Promise<string> => {
         "Content-Type": "multipart/form-data", // Header để gửi file
       },
     });
-    console.log('Đây là response ', response)
+
+    console.log("Đây là response ", response);
+
     if (response.status === 201 || response.status === 200) {
-      return response.data.data; 
+      // Kiểm tra cấu trúc response trả về từ API
+      if (response.data?.isSuccess && response.data?.data) {
+        return response.data.data; // Trả về URL ảnh từ thuộc tính `data`
+      } else {
+        throw new Error("Invalid response format from server");
+      }
     } else {
       throw new Error("Failed to upload image");
     }
@@ -37,3 +49,4 @@ export const deleteImage = async ( imageUrl : string) => {
     console.log(error)
   }
 }
+

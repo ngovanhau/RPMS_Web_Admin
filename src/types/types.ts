@@ -148,7 +148,7 @@ export interface User {
     deposit_amount: number;
     roomid: string;
     roomname: string;
-    move_in_date: Date;
+    move_in_date: Date| string;
     payment_method: string;
     customerid: string;
     customername: string;

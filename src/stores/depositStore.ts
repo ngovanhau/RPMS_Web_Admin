@@ -38,3 +38,4 @@ export const useDepositStore = create<DepositStore>((set) => ({
   // Action to clear the list of deposits
   clearDeposits: () => set({ deposits: [] }), // Sets deposits to an empty array
 }));
+export default useDepositStore;

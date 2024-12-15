@@ -62,7 +62,7 @@ export const changeStatusDepositById = async (id: string, status: number) => {
 
 
 
-  export const editDeposit = async (deposit: Deposit) => {
+  export const updateDeposit = async (deposit: Deposit) => {
     try {
       // Gửi yêu cầu PUT để cập nhật thông tin deposit
       const response = await api.put(`/deposit/update?id=${deposit.id}`, deposit);
