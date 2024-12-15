@@ -47,11 +47,11 @@ const Header: React.FC = () => {
   };
 
   // Gọi API mỗi 5 giây để kiểm tra thông báo mới
-  useEffect(() => {
-    fetchNotifications();
-    const intervalId = setInterval(fetchNotifications, 5000);
-    return () => clearInterval(intervalId); // Cleanup khi component unmount
-  }, [notifications]);
+  // useEffect(() => {
+  //   fetchNotifications();
+  //   const intervalId = setInterval(fetchNotifications, 60000);
+  //   return () => clearInterval(intervalId); // Cleanup khi component unmount
+  // }, [notifications]);
 
   // Xử lý toggle hiển thị danh sách thông báo
   const toggleDropdown = () => {

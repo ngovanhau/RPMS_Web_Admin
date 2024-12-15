@@ -49,13 +49,13 @@ const ServiceRow: React.FC<ServiceRowProps> = ({
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="bg-white ml-32">
+          <DropdownMenuItem onSelect={handleEditClick}>
+              <FaEdit className="w-4 h-4 text-gray-600 text-[10px]" />
+              Chỉnh sửa
+            </DropdownMenuItem>
             <DropdownMenuItem onSelect={handleDelete}>
               <FaTrash className="w-4 h-4 text-gray-600 text-[10px]" />
               Xóa
-            </DropdownMenuItem>
-            <DropdownMenuItem onSelect={handleEditClick}>
-              <FaEdit className="w-4 h-4 text-gray-600 text-[10px]" />
-              Chỉnh sửa
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

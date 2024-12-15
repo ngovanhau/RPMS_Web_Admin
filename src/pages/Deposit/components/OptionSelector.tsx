@@ -49,7 +49,7 @@ const OptionSelector: React.FC<OptionSelectorProps> = ({
         >
           <option value="">Chọn tòa nhà</option>
           {buildings.map((building, index) => (
-            <option key={index} value={building.building_name}>
+            <option key={index} value={building.id}>
               {building.building_name}
             </option>
           ))}

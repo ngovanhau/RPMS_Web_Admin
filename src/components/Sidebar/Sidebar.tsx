@@ -76,7 +76,7 @@ import './Sidebar.css';
 
               </div>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-[200px] bg-white rounded-xl border border-themeColor">
+            <DropdownMenuContent className="w-[200px] bg-white rounded-xl border border-themeColor font-semibold text-gray-800">
               <DropdownMenuLabel>My Account</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem className="itemDropDown-Profile" onClick={handleProfile}>

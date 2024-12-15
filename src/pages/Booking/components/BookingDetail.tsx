@@ -1,165 +1,98 @@
-import React, { useState, useEffect } from "react";
-import { Room, Booking } from "@/types/types";
+import React, { useEffect, useState } from "react";
+import { Booking } from "@/types/types";
 import CustomModal from "@/components/Modal/Modal";
+import { getBuildingByRoomId } from "@/services/bookingApi/bookingApi";
+
+interface BuildingInfo {
+  building_name: string;
+  address: string;
+  city: string;
+}
 
 interface BookingDetailModalProps {
   isOpen: boolean;
   onClose: () => void;
   booking: Booking | null;
-  rooms: Room[];
-  onEdit: (booking: Booking) => void;
-  onDelete: (id: string) => void;
 }
 
 const BookingDetailModal: React.FC<BookingDetailModalProps> = ({
   isOpen,
   onClose,
   booking,
-  rooms,
-  onEdit,
-  onDelete,
 }) => {
-  const [isEditing, setIsEditing] = useState(false);
-  const [editedBooking, setEditedBooking] = useState<Booking | null>(null);
+  const [buildingInfo, setBuildingInfo] = useState<BuildingInfo | null>(null);
 
   useEffect(() => {
-    if (booking) {
-      setEditedBooking({ ...booking });
+    const fetchBuildingInfo = async () => {
+      if (booking?.roomid) {
+        try {
+          const response = await getBuildingByRoomId(booking.roomid);
+          if (response?.data) {
+            setBuildingInfo({
+              building_name: response.data.building_name,
+              address: response.data.address,
+              city: response.data.city,
+            });
+          }
+        } catch (error) {
+          console.error("Error fetching building info:", error);
+          setBuildingInfo(null);
+        }
+      }
+    };
+
+    if (isOpen) {
+      fetchBuildingInfo();
     }
-  }, [booking]);
+  }, [isOpen, booking]);
 
   if (!booking) return null;
 
-  const roomName = rooms.find((room) => room.id === booking.roomid)?.room_name || "";
-
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
-  ) => {
-    if (!editedBooking) return;
-    const { name, value } = e.target;
-    setEditedBooking({
-      ...editedBooking,
-      [name]: value,
-    });
-  };
-
-  const handleSave = () => {
-    if (editedBooking) {
-      onEdit(editedBooking);
-      setIsEditing(false);
-    }
-  };
-
-  const handleCancel = () => {
-    setEditedBooking({ ...booking });
-    setIsEditing(false);
-  };
-
   return (
-    <CustomModal header={isEditing ? "Chỉnh sửa Booking" : "Chi tiết Booking"} isOpen={isOpen} onClose={onClose}>
-      <div className="space-y-4">
-        {isEditing ? (
-          <>
-            <div>
-              <label className="block font-semibold">Tên khách hàng:</label>
-              <input
-                type="text"
-                name="customername"
-                value={editedBooking?.customername || ""}
-                onChange={handleChange}
-                className="w-full mt-1 p-2 border rounded"
-              />
-            </div>
-            <div>
-              <label className="block font-semibold">Số điện thoại:</label>
-              <input
-                type="text"
-                name="phone"
-                value={editedBooking?.phone || ""}
-                onChange={handleChange}
-                className="w-full mt-1 p-2 border rounded"
-              />
-            </div>
-            <div>
-              <label className="block font-semibold">Email:</label>
-              <input
-                type="email"
-                name="email"
-                value={editedBooking?.email || ""}
-                onChange={handleChange}
-                className="w-full mt-1 p-2 border rounded"
-              />
-            </div>
-            <div>
-              <label className="block font-semibold">Phòng:</label>
-              <select
-                name="roomid"
-                value={editedBooking?.roomid || ""}
-                onChange={handleChange}
-                className="w-full mt-1 p-2 border rounded"
-              >
-                <option value="">Chọn phòng</option>
-                {rooms.map((room) => (
-                  <option key={room.id} value={room.id}>
-                    {room.room_name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block font-semibold">Ngày:</label>
-              <input
-                type="datetime-local"
-                name="date"
-                value={
-                  editedBooking
-                    ? new Date(editedBooking.date).toISOString().slice(0, 16)
-                    : ""
-                }
-                onChange={handleChange}
-                className="w-full mt-1 p-2 border rounded"
-              />
-            </div>
-            <div>
-              <label className="block font-semibold">Ghi chú:</label>
-              <textarea
-                name="note"
-                value={editedBooking?.note || ""}
-                onChange={handleChange}
-                className="w-full mt-1 p-2 border rounded"
-              />
-            </div>
-            <div>
-              <label className="block font-semibold">Trạng thái:</label>
-              <select
-                name="status"
-                value={editedBooking?.status ?? 0}
-                onChange={handleChange}
-                className="w-full mt-1 p-2 border rounded"
-              >
-                <option value={0}>Hẹn khách</option>
-                <option value={1}>Đặt cọc</option>
-                <option value={2}>Hoàn thành</option>
-                <option value={3}>Thất bại</option>
-              </select>
-            </div>
-          </>
-        ) : (
-          <>
-            <p>
-              <strong>Tên khách hàng:</strong> {booking.customername}
+    <CustomModal header={"Chi tiết"} isOpen={isOpen} onClose={onClose}>
+      <div className="grid grid-cols-2 gap-x-8 p-6 bg-gray-50 rounded-md shadow-sm">
+        {/* Cột bên trái */}
+        <div className="space-y-4">
+        <h4 className="text-lg font-semibold font-semibold text-gray-10000 mb-4">
+            Thông tin khách hàng
+          </h4>
+          <div className="flex">
+            <p className="font-semibold font-semibold text-gray-800 w-40">Tên khách hàng:</p>
+            <p className="flex-1 font-semibold font-semibold text-gray-800">
+              {booking.customername}
             </p>
-            <p>
-              <strong>Số điện thoại:</strong> {booking.phone}
+          </div>
+          <div className="flex">
+            <p className="font-semibold font-semibold text-gray-800  w-40">Số điện thoại:</p>
+            <p className="flex-1 font-semibold font-semibold text-gray-800">{booking.phone}</p>
+          </div>
+          <div className="flex">
+            <p className="font-semibold font-semibold text-gray-800 w-40">Email:</p>
+            <p className="flex-1 font-semibold text-gray-800">{booking.email}</p>
+          </div>
+          <div className="flex">
+            <p className="font-semibold font-semibold text-gray-800 w-40">Phòng:</p>
+            <p className="flex-1 font-semibold text-gray-800">{booking.roomname}</p>
+          </div>
+        </div>
+
+        {/* Cột bên phải */}
+        <div className="space-y-4">
+          <div className="flex">
+            <p className="font-semibold font-semibold text-gray-800 w-40">Trạng thái:</p>
+            <p className="flex-1 font-semibold text-gray-800">
+              {booking.status === 0
+                ? "Hẹn khách"
+                : booking.status === 1
+                ? "Đặt cọc"
+                : booking.status === 2
+                ? "Hoàn thành"
+                : "Thất bại"}
             </p>
-            <p>
-              <strong>Email:</strong> {booking.email}
-            </p>
-            <p>
-              <strong>Phòng:</strong> {roomName}
-            </p>
-            <p>
-              <strong>Ngày:</strong>{" "}
+          </div>
+          <div className="flex">
+            <p className="font-semibold font-semibold text-gray-800 w-40">Ngày:</p>
+            <p className="flex-1 font-semibold text-gray-800">
               {new Date(booking.date).toLocaleDateString("vi-VN", {
                 day: "2-digit",
                 month: "2-digit",
@@ -171,57 +104,40 @@ const BookingDetailModal: React.FC<BookingDetailModalProps> = ({
                 hour12: false,
               })}
             </p>
-            <p>
-              <strong>Ghi chú:</strong> {booking.note}
+          </div>
+          <div className="flex">
+            <p className="font-semibold font-semibold text-gray-800 w-40">Ghi chú:</p>
+            <p className="flex-1 font-semibold text-gray-800">
+              {booking.note || "Không có ghi chú"}
             </p>
-            <p>
-              <strong>Trạng thái:</strong>{" "}
-              {booking.status === 0
-                ? "Hẹn khách"
-                : booking.status === 1
-                ? "Đặt cọc"
-                : booking.status === 2
-                ? "Hoàn thành"
-                : "Thất bại"}
-            </p>
-          </>
-        )}
-
-        {/* Nút hành động */}
-        <div className="flex justify-end space-x-4">
-          {isEditing ? (
-            <>
-              <button
-                onClick={handleSave}
-                className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition"
-              >
-                Lưu
-              </button>
-              <button
-                onClick={handleCancel}
-                className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition"
-              >
-                Hủy
-              </button>
-            </>
-          ) : (
-            <>
-              <button
-                onClick={() => setIsEditing(true)}
-                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
-              >
-                Sửa
-              </button>
-              <button
-                onClick={() => onDelete(booking.id)}
-                className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition"
-              >
-                Xóa
-              </button>
-            </>
-          )}
+          </div>
         </div>
       </div>
+
+      {/* Thông tin Tòa nhà */}
+      {buildingInfo && (
+        <div className=" p-4 bg-white rounded-md shadow-md">
+          <h4 className="text-lg font-semibold font-semibold text-gray-10000 mb-4">
+            Thông tin tòa nhà
+          </h4>
+          <div className="space-y-2">
+            <div className="flex">
+              <p className="font-semibold font-semibold text-gray-800 w-40">Tên tòa nhà:</p>
+              <p className="flex-1 font-semibold text-gray-800">
+                {buildingInfo.building_name}
+              </p>
+            </div>
+            <div className="flex">
+              <p className="font-semibold font-semibold text-gray-800 w-40">Địa chỉ:</p>
+              <p className="flex-1 font-semibold text-gray-800">{buildingInfo.address}</p>
+            </div>
+            <div className="flex">
+              <p className="font-semibold font-semibold text-gray-800 w-40">Thành phố:</p>
+              <p className="flex-1 font-semibold text-gray-800">{buildingInfo.city}</p>
+            </div>
+          </div>
+        </div>
+      )}
     </CustomModal>
   );
 };
