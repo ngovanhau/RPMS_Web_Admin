@@ -36,7 +36,6 @@ const Login = () => {
           
           // Gọi API information để lấy thông tin người dùng
           const userInfoResponse = await information(username); 
-          console.log(userInfoResponse)
           if (userInfoResponse) {
             
             const userId = userInfoResponse.id; // Lấy userId từ thông tin user
@@ -58,6 +57,7 @@ const Login = () => {
             // Lưu thông tin user vào store và điều hướng
             setUserData(userInfoResponse);
             if (userInfoResponse.role === "ADMIN" || userInfoResponse.role === "MANAGEMENT") {
+              console.log('Login thành công')
               navigate("/Dashboard");
             } else {
               setError("Tài khoản của bạn không được đăng nhập vào trang ADMIN.");

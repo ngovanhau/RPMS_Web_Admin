@@ -238,8 +238,8 @@ export interface Transaction {
   transactiongroupid: string;
   transactiongroupname: string;
   paymentmethod: string;
-  contractid: string;
-  contractname: string;
+  contractid?: string | null; 
+  contractname?: string | null;
   note: string;
   image: string; // URL or base64-encoded string
 };

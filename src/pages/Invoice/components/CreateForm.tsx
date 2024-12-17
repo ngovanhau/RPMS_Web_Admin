@@ -198,11 +198,19 @@ const CreateBillForm: React.FC<CreateBillFormProps> = ({
       setCustomerError("");
     }
   };
+  const handleClearMoney = () => {
+    setBill((prevState) => ({
+      ...prevState,
+      cost_service : 0
+    }))
+    setWaterMoney(0)
+    setElectricityMoney(0)
+  }
 
   // Handle room selection change with logging and setting cost_room, customer_id, nameCustomer
   const handleRoomChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
     const { name, value } = e.target;
-
+    handleClearMoney()
     // Find the selected room based on the selected value
     const selectedRoom = rooms.find((room) => room.id === value);
     const contract = contracts.find(
@@ -211,6 +219,14 @@ const CreateBillForm: React.FC<CreateBillFormProps> = ({
 
     if (selectedRoom) {
       try {
+        setBill((prev) => ({
+          ...prev,
+          [name]: value,
+          roomname: selectedRoom.room_name, // Keep the room name
+          cost_room: selectedRoom.room_price || 0,
+          customer_id: contract?.customerId || "",
+          customer_name: contract?.customerName || "",
+        }));
         // Fetch service meter readings
         const serviceMeterReading = await getServicemeterByRoomId(
           selectedRoom.id
@@ -246,21 +262,17 @@ const CreateBillForm: React.FC<CreateBillFormProps> = ({
         setBill((prev) => ({
           ...prev,
           [name]: value,
-          roomname: selectedRoom.room_name, // Keep the room name
-          cost_room: selectedRoom.room_price || 0,
-          customer_id: contract?.customerId || "",
-          customer_name: contract?.customerName || "",
           cost_service: totalServiceCost, // Set the total service cost
         }));
       } catch (error) {
         // Handle API errors without changing the selected room
         console.error("Error fetching service or meter information:", error);
-        setCustomerError("Có lỗi khi tải thông tin dịch vụ và công tơ.");
+        setCustomerError("");
 
         // Optionally, you might want to reset some state here if necessary
       }
     } else {
-      console.warn("Selected room not found.");
+      console.log("Selected room not found.");
       setCustomerError("");
     }
   };
@@ -347,6 +359,7 @@ const CreateBillForm: React.FC<CreateBillFormProps> = ({
               value={bill.bill_name}
               onChange={handleInputChange}
               placeholder="VD: Hóa đơn tháng 11/2024"
+              className="border-gray-300 rounded h-12"
             />
             {errors.bill_name && (
               <span className="text-red-500 text-sm">{errors.bill_name}</span>
@@ -385,16 +398,13 @@ const CreateBillForm: React.FC<CreateBillFormProps> = ({
 
             {/* Display Selected Building Details */}
             {selectedBuilding && (
-              <div className="mt-2 p-2 border border-gray-200 rounded bg-gray-50">
+              <div className="mt-2 px-2 py-4 border border-gray-200 rounded bg-gray-50">
                 <p>
-                  <strong>Địa chỉ:</strong> {selectedBuilding.address},{" "}
+                  <strong className="text-themeColor">Địa chỉ: </strong> {selectedBuilding.address},{" "}
                   {selectedBuilding.district}, {selectedBuilding.city}
                 </p>
                 <p>
-                  <strong>Số tầng:</strong> {selectedBuilding.number_of_floors}
-                </p>
-                <p>
-                  <strong>Mô tả:</strong> {selectedBuilding.description}
+                  <strong className="text-themeColor">Số tầng: </strong> {selectedBuilding.number_of_floors}
                 </p>
                 {/* Add more details as needed */}
               </div>
@@ -457,18 +467,25 @@ const CreateBillForm: React.FC<CreateBillFormProps> = ({
             <Label htmlFor="cost_room" className="text-red-500">
               Giá phòng (VNĐ) *
             </Label>
-            <Input
-              id="cost_room"
-              name="cost_room"
-              type="number"
-              value={bill.cost_room}
-              readOnly // Make the input read-only
+
+            <div
               className={`bg-gray-100 border rounded p-2 ${
                 errors.cost_room ? "border-red-500" : "border-gray-300"
               }`}
-              placeholder="Giá phòng tự động điền từ phòng đã chọn"
-              required
-            />
+              aria-readonly="true"
+              role="textbox"
+              tabIndex={0} // Makes the div focusable for accessibility
+            >
+              <span>
+                {bill.cost_room
+                  ? new Intl.NumberFormat("vi-VN", {
+                      style: "currency",
+                      currency: "VND",
+                    }).format(bill.cost_room)
+                  : "Giá phòng tự động điền từ phòng đã chọn"}
+              </span>
+            </div>
+
             {errors.cost_room && (
               <span className="text-red-500 text-sm">{errors.cost_room}</span>
             )}
@@ -479,11 +496,11 @@ const CreateBillForm: React.FC<CreateBillFormProps> = ({
             <Label htmlFor="cost_service">Chi phí dịch vụ (VNĐ)</Label>
             <table className="min-w-full bg-white border">
               <thead>
-                <tr>
-                  <th className="py-2 px-4 border-b text-left">Loại Chi Phí</th>
-                  <th className="py-2 px-4 border-b text-left">Chỉ số</th>
-                  <th className="py-2 px-4 border-b text-left">Đơn giá</th>
-                  <th className="py-2 px-4 border-b text-right">
+                <tr className="bg-themeColor text-white border-2 border-gray-300">
+                  <th className="py-2 px-4 bg-themeColor text-white border-2 border-gray-300">Loại Chi Phí</th>
+                  <th className="py-2 px-4 bg-themeColor text-white border-2 border-gray-300">Chỉ số</th>
+                  <th className="py-2 px-4 bg-themeColor text-white border-2 border-gray-300">Đơn giá</th>
+                  <th className="py-2 px-4 bg-themeColor text-white border-2 border-gray-300">
                     Số Tiền (VNĐ)
                   </th>
                 </tr>
@@ -491,47 +508,47 @@ const CreateBillForm: React.FC<CreateBillFormProps> = ({
               <tbody>
                 {/* Tiền Dịch Vụ */}
                 <tr>
-                  <td className="py-2 px-4 border-b">Tiền Dịch Vụ</td>
-                  <td className="py-2 px-4 border-b"></td>
-                  <td className="py-2 px-4 border-b"></td>
-                  <td className="py-2 px-4 border-b text-right">
-                    {serviceCost ? serviceCost.toLocaleString() : 0}
+                  <td className="py-2 px-4 border-2 ">Tiền Dịch Vụ</td>
+                  <td className="py-2 px-4 "></td>
+                  <td className="py-2 px-4 "></td>
+                  <td className="py-2 px-4 border-2  text-center">
+                    {serviceCost ? serviceCost.toLocaleString() : 0} đ
                   </td>
                 </tr>
                 {/* Tiền Điện Nước */}
                 <tr>
-                  <td className="py-2 px-4 border-b">Tiền Điện</td>
-                  <td className="py-2 px-4 border-b ">
+                  <td className="py-2 px-4 border-2 ">Tiền Điện</td>
+                  <td className="py-2 px-4 border-2 text-center">
                     {(serviceMeterReadingData?.electricity_new ?? 0) -
                       (serviceMeterReadingData?.electricity_old ?? 0)}
                   </td>
-                  <td className="py-2 px-4 border-b">
-                    {serviceMeterReadingData?.electricity_price}
+                  <td className="py-2 px-4 border-2 text-center">
+                    {serviceMeterReadingData?.electricity_price} đ
                   </td>
-                  <td className="py-2 px-4 border-b text-right">
-                    {electricityMoney ? electricityMoney.toLocaleString() : 0}
+                  <td className="py-2 px-4 border-2 text-center">
+                    {electricityMoney ? electricityMoney.toLocaleString() : 0} đ
                   </td>
                 </tr>
                 <tr>
-                  <td className="py-2 px-4 border-b">Tiền Nước</td>
-                  <td className="py-2 px-4 border-b">
+                  <td className="py-2 px-4 border-2 ">Tiền Nước</td>
+                  <td className="py-2 px-4 border-2 text-center">
                     {(serviceMeterReadingData?.water_new ?? 0) -
                       (serviceMeterReadingData?.water_old ?? 0)}
                   </td>
-                  <td className="py-2 px-4 border-b">
-                    {serviceMeterReadingData?.water_price}
+                  <td className="py-2 px-4 border-2 text-center">
+                    {serviceMeterReadingData?.water_price} đ
                   </td>
-                  <td className="py-2 px-4 border-b text-right">
-                    {waterMoney ? waterMoney.toLocaleString() : 0}
+                  <td className="py-2 px-4 border-2  text-center">
+                    {waterMoney ? waterMoney.toLocaleString() : 0} đ
                   </td>
                 </tr>
                 {/* Tổng Tiền */}
                 <tr>
-                  <td className="py-2 px-4 font-bold">Tổng Tiền</td>
+                  <td className="py-2 px-4 font-bold text-themeColor">Tổng Tiền</td>
                   <td className="py-2 px-4 font-bold"></td>
                   <td className="py-2 px-4 font-bold"></td>
-                  <td className="py-2 px-4 font-bold text-right">
-                    {bill?.cost_service?.toLocaleString()}
+                  <td className="py-2 px-4 font-bold text-center text-themeColor">
+                    {bill?.cost_service?.toLocaleString()} đ
                   </td>
                 </tr>
               </tbody>

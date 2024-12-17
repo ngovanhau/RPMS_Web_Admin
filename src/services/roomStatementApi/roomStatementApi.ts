@@ -11,6 +11,7 @@ export const getALlServicemeterreadings = async () => {
         useServiceMeterReadingsStore.getState().setReadings(response.data.data)
         return response
     } catch (error) {
+        useServiceMeterReadingsStore.getState().clearReadings()
         console.log(error);
     }
 }
@@ -23,6 +24,7 @@ export const getServicemeterByRoomId = async ( roomId : string) => {
         useServiceMeterReadingsStore.getState().setReading(response.data.data)
         return response
     } catch (error) {
+        useServiceMeterReadingsStore.getState().clearReadings()
         console.log(error);
     }
 }
@@ -35,6 +37,7 @@ export const getServicemeterByBuildingId = async ( buildingId : string ) => {
         useServiceMeterReadingsStore.getState().setReadings(response.data.data)
         return response
     } catch (error) {
+        useServiceMeterReadingsStore.getState().clearReadings()
         console.log(error)
     }
 }

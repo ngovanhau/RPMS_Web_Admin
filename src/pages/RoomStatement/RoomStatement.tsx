@@ -26,6 +26,7 @@ import MeterReadingForm from "./components/CreateForm";
 import EditMeterReadingForm from "./components/EditForm";
 import { createBill } from "@/services/invoiceApi/invoiceApi";
 import { Bell } from "lucide-react";
+import ServiceMeterReadingsDisplay from "./components/InfoForm";
 
 const DashBoardRoomStatement: React.FC = () => {
   const { toast } = useToast(); // Sử dụng hook useToast
@@ -56,7 +57,8 @@ const DashBoardRoomStatement: React.FC = () => {
   const [hasFetchedServiceMeters, setHasFetchedServiceMeters] = useState(false);
   const [selectedMeterReading, setSelectedMeterReading] =
     useState<ServiceMeterReadings | null>(null);
-
+  const [infoModal, setInfoModal] = useState<boolean>(false)
+  const [reading, setReading] = useState<ServiceMeterReadings | null>(null)
   useEffect(() => {
     fetchInitialData();
   }, []);
@@ -147,12 +149,13 @@ const DashBoardRoomStatement: React.FC = () => {
           (building) => building.id === buildingId
         );
         if (selectedBuilding) {
-          setSelectedBuilding(selectedBuilding);
-          await getServicemeterByBuildingId(selectedBuilding.id);
           setBuilding(selectedBuilding);
           await getRoomByBuildingId(buildingId);
+          setSelectedBuilding(selectedBuilding);
+          await getServicemeterByBuildingId(selectedBuilding.id);
         }
       } catch (error) {
+        useServiceMeterReadingsStore.getState().clearReadings();
         console.error("Lỗi khi chọn tòa nhà:", error);
         toast({
           title: "Lỗi",
@@ -193,6 +196,8 @@ const DashBoardRoomStatement: React.FC = () => {
         await createServicemeter(serviceMeterReading);
         if (selectedRoom) {
           await getServicemeterByRoomId(selectedRoom?.id);
+        } else {
+          await fetchInitialData()
         }
         setCreateFormOpen(false);
         // Thông báo thành công khi ghi chỉ số
@@ -217,7 +222,6 @@ const DashBoardRoomStatement: React.FC = () => {
     serviceMeterReading: ServiceMeterReadings
   ) => {
     try {
-      console.log("Tạo hóa đơn cho:", serviceMeterReading);
 
       // Lấy thông tin phòng từ API
       const response = await getRoomById(serviceMeterReading.room_id);
@@ -317,10 +321,15 @@ const DashBoardRoomStatement: React.FC = () => {
     }
   };
 
+  const handleViewDetails = (serviceMeterReadings: ServiceMeterReadings) => {
+    setReading(serviceMeterReadings)
+    setInfoModal(true)
+  };
+  
+
   return (
     <div className="flex flex-col flex-1 bg-gray-100 w-full overflow-y-hidden">
-
-      <div className="flex h-[95%] p-6 overflow-hidden">
+      <div className="flex h-[100%]  p-6 overflow-hidden">
         <div className="flex flex-1 flex-col py-4 px-4 rounded-[8px] w-full bg-white">
           {/* Filter Section */}
           <div className="flex items-center justify-between mb-6 gap-4">
@@ -359,21 +368,21 @@ const DashBoardRoomStatement: React.FC = () => {
 
           <div className="overflow-auto flex-1">
             <table className="w-full border-collapse">
-              <thead className="bg-[#001eb4] text-white">
+              <thead className="bg-themeColor text-white">
                 <tr>
-                  <th className="p-1 text-left rounded-tl-lg"></th>
-                  <th className="p-3 text-left rounded-tl-lg">Tên tòa nhà</th>
-                  <th className="p-3 text-left">Tên phòng</th>
-                  <th className="p-3 text-left">Trạng thái</th>
-                  <th className="p-3 text-left">Người ghi chỉ số</th>
-                  <th className="p-3 text-left">Ngày ghi chỉ số</th>
-                  <th className="p-3 text-left">Điện cũ</th>
-                  <th className="p-3 text-left">Điện mới</th>
-                  <th className="p-3 text-left">Chi phí điện</th>
-                  <th className="p-3 text-left">Nước cũ</th>
-                  <th className="p-3 text-left">Nước mới</th>
-                  <th className="p-3 text-left">Chi phí nước</th>
-                  <th className="p-3 text-left rounded-tr-lg">Tổng số tiền</th>
+                  <th className="border-2 border-gray-300 px-4 text-left rounded-tl-lg"></th>
+                  <th className="border-2 border-gray-300 px-4 h-14 text-sm text-left rounded-tl-lg">Tên tòa nhà</th>
+                  <th className="border-2 border-gray-300 px-4 h-14 text-sm text-left">Tên phòng</th>
+                  <th className="border-2 border-gray-300 px-4 h-14 text-sm text-left">Trạng thái</th>
+                  <th className="border-2 border-gray-300 px-4 h-14 text-sm text-left">Người ghi chỉ số</th>
+                  <th className="border-2 border-gray-300 px-4 h-14 text-sm text-left">Ngày ghi chỉ số</th>
+                  <th className="border-2 border-gray-300 px-4 h-14 text-sm text-left">Điện cũ</th>
+                  <th className="border-2 border-gray-300 px-4 h-14 text-sm text-left">Điện mới</th>
+                  <th className="border-2 border-gray-300 px-4 h-14 text-sm text-left">Chi phí điện</th>
+                  <th className="border-2 border-gray-300 px-4 h-14 text-sm text-left">Nước cũ</th>
+                  <th className="border-2 border-gray-300 px-4 h-14 text-sm text-left">Nước mới</th>
+                  <th className="border-2 border-gray-300 px-4 h-14 text-sm text-left">Chi phí nước</th>
+                  <th className="border-2 border-gray-300 px-4 h-14 text-sm text-left rounded-tr-lg">Tổng số tiền</th>
                 </tr>
               </thead>
               {selectedRoomId !== null ? (
@@ -385,6 +394,7 @@ const DashBoardRoomStatement: React.FC = () => {
                       onDelete={() => handleDelete(serviceMeterReading.id)}
                       onEdit={() => handleEdit(serviceMeterReading)}
                       onCreateBill={(data) => handleCreateBill(data)} // Truyền đúng kiểu hàm
+                      onViewDetails={handleViewDetails} // Define and pass this handler
                     />
                   </tbody>
                 ) : (
@@ -407,6 +417,7 @@ const DashBoardRoomStatement: React.FC = () => {
                       onDelete={() => handleDelete(serviceMeterReading.id)}
                       onEdit={() => handleEdit(serviceMeterReading)}
                       onCreateBill={(data) => handleCreateBill(data)} // Truyền đúng kiểu hàm
+                      onViewDetails={handleViewDetails} // Define and pass this handler
                     />
                   ))}
                 </tbody>
@@ -442,8 +453,8 @@ const DashBoardRoomStatement: React.FC = () => {
           <MeterReadingForm
             onCancel={handleCancel}
             onSubmit={handleSubMitCreateForm}
-            building={selectedBuilding}
-            room={selectedRoom}
+            // building={selectedBuilding}
+            // room={selectedRoom}
           />
         }
       />
@@ -462,6 +473,26 @@ const DashBoardRoomStatement: React.FC = () => {
             />
           )
         }
+      />
+
+      {/* Modal xem thông tin */}
+      <CustomModal
+      onClose={()=> setInfoModal(false)}
+      header="Thông tin chỉ số"
+      isOpen={infoModal}
+      children={
+        reading ?
+        (
+          <ServiceMeterReadingsDisplay reading={reading}/>
+        )
+        :
+        (
+          <div>
+            <span>Không có thông tin, vui lòng thử lại sau</span>
+          </div>
+        )
+
+      }
       />
     </div>
   );

@@ -26,6 +26,8 @@ import {
   getRoomByBuildingId,
 } from "@/services/buildingApi/buildingApi";
 import { createNotification } from "@/services/notificationApi/notificationApi";
+import CustomModal from "@/components/Modal/Modal";
+import ViewBillForm from "./components/ViewForm";
 
 const DashBoardInvoice: React.FC = () => {
   const { toast } = useToast();
@@ -50,6 +52,7 @@ const DashBoardInvoice: React.FC = () => {
 
   // Trạng thái modal
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [selectedBill, setSelectedBill] = useState<Bill | null>(null);
 
@@ -58,6 +61,11 @@ const DashBoardInvoice: React.FC = () => {
     setSelectedBill(bill);
     setIsEditModalOpen(true);
   };
+
+  const handleView = (bill : Bill) => {
+    setSelectedBill(bill)
+    setIsViewModalOpen(true)
+  }
 
   // Hàm đóng modal chỉnh sửa
   const handleCloseEditModal = () => {
@@ -338,11 +346,10 @@ const DashBoardInvoice: React.FC = () => {
     fetchInitialData();
   }, []);
   return (
-    <div className="flex flex-col flex-1 w-full bg-gray-100 h-screen overflow-auto">
-
+    <div className="flex flex-col flex-1 bg-gray-100 w-full overflow-y-hidden">
       {/* Main Content */}
-      <div className="flex flex-1 p-6 overflow-auto">
-        <Card className="flex flex-col rounded-[8px] p-6 w-full bg-white shadow-lg">
+      <div className="flex h-[100%]  p-6 overflow-hidden">
+        <div className="flex flex-1 flex-col py-4 px-4 rounded-[8px] w-full bg-white">
           {/* Filter Section với hai select: Tòa nhà và Phòng */}
           <div className="flex items-center justify-between mb-6 gap-4">
             <div className="flex gap-4">
@@ -385,21 +392,13 @@ const DashBoardInvoice: React.FC = () => {
             </div>
 
             {/* Các nút hành động */}
-            <div className="flex flex-wrap items-center gap-4">
+            <div className="flex flex-wrap items-center pr-6">
               <button
                 onClick={handleCreate} // Gọi hàm mở modal tạo hóa đơn
                 className="flex items-center gap-2 px-4 py-2 bg-themeColor text-white rounded hover:bg-blue-700 transition text-sm"
               >
                 <Plus className="w-5 h-5" />
                 Thêm hóa đơn
-              </button>
-              <button className="flex items-center gap-2 px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition text-sm">
-                <Filter className="w-5 h-5" />
-                Lọc
-              </button>
-              <button className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition text-sm">
-                <Download className="w-5 h-5" />
-                Xuất Excel
               </button>
             </div>
           </div>
@@ -410,8 +409,9 @@ const DashBoardInvoice: React.FC = () => {
             onDelete={handleDelete}
             bills={bills}
             onEdit={handleEdit}
+            onView={handleView}
           />
-        </Card>
+        </div>
       </div>
 
       {/* Form chỉnh sửa hóa đơn */}
@@ -428,6 +428,17 @@ const DashBoardInvoice: React.FC = () => {
         onClose={handleCloseCreateModal}
         onSubmit={handleSaveCreate}
       />
+
+      {/* Form xem thông tin */}
+      <CustomModal
+        isOpen={isViewModalOpen}
+        header="Thông tin hóa đơn"
+        onClose={()=>setIsViewModalOpen(false)}
+        children={
+          <ViewBillForm bill={selectedBill}/>
+        }
+      />
+
     </div>
   );
 };
