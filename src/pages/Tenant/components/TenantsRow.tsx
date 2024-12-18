@@ -51,7 +51,6 @@ const TenantRow: React.FC<TenantsRowProps> = ({
           <DropdownMenuContent className="bg-white ml-32">
             <DropdownMenuItem onSelect={handleDelete}>
             <FaTrash className="w-4 h-4 text-gray-600" />
-
               Xóa</DropdownMenuItem>
             <DropdownMenuItem onSelect={handleEditClick}>
             <FaEdit className="w-4 h-4 text-gray-600" />
@@ -82,9 +81,6 @@ const TenantRow: React.FC<TenantsRowProps> = ({
       </div>
       <div className="w-[26%] border border-gray-300 px-4  flex items-center justify-start">
         <span className="text-gray-600 font-semibold text-[15px] text-left">
-          {/* {tenant.date_of_birth instanceof Date
-            ? tenant.date_of_birth.toISOString().split("T")[0]
-            : tenant.date_of_birth} */}
             {tenant.email}
         </span>
       </div>

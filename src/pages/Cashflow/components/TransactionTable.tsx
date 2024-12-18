@@ -6,16 +6,15 @@ import { MoreHorizontal, Edit, Trash } from "lucide-react";
 interface TransactionsTableProps {
   transactions: Transaction[];
   onUpdateTransaction: (updatedTransaction: Transaction) => void;
-  onDeleteTransaction: (id : string) => void;
+  onDeleteTransaction: (id: string) => void;
 }
 
 const TransactionsTable: React.FC<TransactionsTableProps> = ({
   transactions,
   onUpdateTransaction,
-  onDeleteTransaction
+  onDeleteTransaction,
 }) => {
-  const [selectedTransaction, setSelectedTransaction] =
-    useState<Transaction | null>(null);
+  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState<number | null>(null);
 
@@ -28,17 +27,17 @@ const TransactionsTable: React.FC<TransactionsTableProps> = ({
     setIsModalOpen(false);
   };
 
-  const handleSave =  () => {
+  const handleSave = () => {
     if (selectedTransaction) {
       onUpdateTransaction(selectedTransaction);
-      closeModal()
+      closeModal();
     }
   };
 
-  const handleDelete = async ( transactionId : string) => {
-      await onDeleteTransaction(transactionId)
-      closeModal()
-  }
+  const handleDelete = async (transactionId: string) => {
+    await onDeleteTransaction(transactionId);
+    closeModal();
+  };
 
   const paymentMethodMap: { [key: string]: string } = {
     0: "Chuyển khoản",
@@ -47,35 +46,36 @@ const TransactionsTable: React.FC<TransactionsTableProps> = ({
 
   return (
     <div className="bg-white">
-      {transactions.length === 0 ? (
-        <div className="text-center h-[30vh] w-full flex justify-center items-center text-gray-500">
-          <span className="text-sm">Không có dữ liệu giao dịch</span>
-        </div>
-      ) : (
-        <div className="overflow-hidden rounded-[8px] h-[70vh]">
-          {/* Table Container */}
-          <div className="h-[70vh] overflow-y-auto">
-            <table className="w-full text-sm table-auto">
-              <thead className="sticky top-0 bg-themeColor h-12 text-white z-10">
+      <div className="overflow-hidden rounded-[8px] h-[70vh]">
+        {/* Table Container */}
+        <div className="h-[100%] overflow-y-auto">
+          <table className="w-full text-sm table-auto">
+            <thead className="sticky top-0 bg-themeColor h-12 text-white z-10">
+              <tr>
+                <th className="px-4 py-2 border-2 border-gray-300 text-left"></th>
+                <th className="px-4 py-2 border-2 border-gray-300 text-left">Tên</th>
+                <th className="px-4 py-2 border-2 border-gray-300 text-left">Nhóm giao dịch</th>
+                <th className="px-4 py-2 border-2 border-gray-300 text-left">Tòa nhà</th>
+                <th className="px-4 py-2 border-2 border-gray-300 text-left">Phòng</th>
+                <th className="px-4 py-2 border-2 border-gray-300 text-left">Khách hàng</th>
+                <th className="px-4 py-2 border-2 border-gray-300 text-left">Số tiền</th>
+                <th className="px-4 py-2 border-2 border-gray-300 text-left">Phương thức thanh toán</th>
+                <th className="px-4 py-2 border-2 border-gray-300 text-left">Ngày giao dịch</th>
+                <th className="px-4 py-2 border-2 border-gray-300 text-left">Ghi chú</th>
+              </tr>
+            </thead>
+            <tbody>
+              {transactions.length === 0 ? (
                 <tr>
-                  <th className="px-4 py-2 text-left"></th>
-                  <th className="px-4 py-2 text-left">Tên nhóm giao dịch</th>
-                  <th className="px-4 py-2 text-left">Tên hợp đồng</th>
-                  <th className="px-4 py-2 text-left">Ghi chú</th>
-                  <th className="px-4 py-2 text-left">Số tiền</th>
-                  <th className="px-4 py-2 text-left">
-                    Phương thức thanh toán
-                  </th>
-                  <th className="px-4 py-2 text-left">Ngày giao dịch</th>
+                  <td colSpan={10} className="text-center border-2 border-gray-300 py-4 text-gray-500">
+                    Chưa có giao dịch
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {transactions.map((transaction, index) => (
+              ) : (
+                transactions.map((transaction, index) => (
                   <tr
                     key={transaction.id}
-                    className={`${
-                      index % 2 === 0 ? "bg-gray-50" : "bg-white"
-                    } hover:bg-blue-100 h-14`}
+                    className={`${index % 2 === 0 ? "bg-gray-50" : "bg-white"} hover:bg-blue-100 h-14`}
                   >
                     <td className="px-4 py-2 relative">
                       {/* Dropdown Trigger */}
@@ -102,7 +102,7 @@ const TransactionsTable: React.FC<TransactionsTableProps> = ({
                           </button>
                           <button
                             className="w-full px-4 py-2 text-left text-sm flex items-center text-red-600 hover:bg-gray-100"
-                            onClick={()=> handleDelete(transaction.id)}
+                            // onClick={() => handleDelete(transaction.id)}
                           >
                             <Trash className="w-4 h-4 mr-2" />
                             Xóa
@@ -110,24 +110,29 @@ const TransactionsTable: React.FC<TransactionsTableProps> = ({
                         </div>
                       )}
                     </td>
-                    <td className="px-4 py-2">{transaction.transactiongroupname}</td>
-                    <td className="px-4 py-2">{transaction.contractname}</td>
-                    <td className="px-4 py-2">{transaction.note}</td>
-                    <td className="px-4 py-2">{transaction.amount.toLocaleString()} VND</td>
-                    <td className="px-4 py-2">{paymentMethodMap[transaction.paymentmethod]}</td>
-                    <td className="px-4 py-2">
+                    <td className="px-4 py-2 border-2 border-gray-300 text-left">{transaction.namereason}</td>
+                    <td className="px-4 py-2 border-2 border-gray-300 text-left">{transaction.transactiongroupid}</td>
+                    <td className="px-4 py-2 border-2 border-gray-300 text-left">{transaction.buildingname}</td>
+                    <td className="px-4 py-2 border-2 border-gray-300 text-left">{transaction.roomname}</td>
+                    <td className="px-4 py-2 border-2 border-gray-300 text-left">{transaction.customername}</td>
+                    <td className="px-4 py-2 border-2 border-gray-300 text-left">{transaction.amount.toLocaleString()}VND</td>
+                    <td className="px-4 py-2 border-2 border-gray-300 text-left">{paymentMethodMap[transaction.paymentmethod]}</td>
+                    <td className="px-4 py-2 border-2 border-gray-300 text-left">{transaction.date} </td>
+                    <td className="px-4 py-2 border-2 border-gray-300 text-left">{transaction.note} </td>
+
+                    <td className="px-4 py-2 border-2 border-gray-300 text-left">
                       {new Date(transaction.date).toLocaleDateString()}
                     </td>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
-      )}
+      </div>
 
       {/* Modal for editing transaction */}
-      <CustomModal
+      {/* <CustomModal
         header="Chỉnh sửa giao dịch"
         isOpen={isModalOpen}
         onClose={closeModal}
@@ -152,7 +157,7 @@ const TransactionsTable: React.FC<TransactionsTableProps> = ({
               <label className="text-sm font-semibold">Tên hợp đồng</label>
               <input
                 type="text"
-                value={selectedTransaction.contractname}
+                value={selectedTransaction.contractname || undefined}
                 onChange={(e) =>
                   setSelectedTransaction({
                     ...selectedTransaction,
@@ -205,7 +210,7 @@ const TransactionsTable: React.FC<TransactionsTableProps> = ({
             </div>
           </div>
         )}
-      </CustomModal>
+      </CustomModal> */}
     </div>
   );
 };

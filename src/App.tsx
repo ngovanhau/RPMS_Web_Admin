@@ -20,6 +20,7 @@ import DashBoardCashFlow from "./pages/Cashflow/Cashflow";
 import DashBoardBooking from "./pages/Booking/Booking";
 import ForgotPassword from "./pages/ForgotPassword/ForgotPassword";
 import { Toaster } from "./components/ui/toaster";
+import TransactionGroups from "./pages/TransactionGroup/TransactionGroups";
 const App: React.FC = () => {
   return (
     <Router>
@@ -46,6 +47,7 @@ const App: React.FC = () => {
           <Route path="/Problem" element={<DashBoardProblem />} />
           <Route path="/Income-expense" element={<DashBoardCashFlow />} />
           <Route path="/Booking" element={<DashBoardBooking />} />
+          <Route path="/transaction-group" element={<TransactionGroups />} />
         </Route>
       </Routes>
     </Router>

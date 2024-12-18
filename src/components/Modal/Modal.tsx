@@ -9,7 +9,7 @@ interface CustomModalProps {
   overlayClassName?: string;
   headerClassName?: string;
   contentClassName?: string;
-  modalWrapperClassName?: string; // New prop for outer wrapper class
+  modalWrapperClassName?: string; 
 }
 
 const CustomModal: React.FC<CustomModalProps> = ({

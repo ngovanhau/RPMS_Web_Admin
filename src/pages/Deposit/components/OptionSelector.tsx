@@ -18,7 +18,7 @@ const OptionSelector: React.FC<OptionSelectorProps> = ({
   onBuildingChange,
   showBuildingSelector = true, // Mặc định là true
 }) => (
-  <div className="flex justify-between items-center border-b pb-4 mb-4">
+  <div className="flex justify-between items-center border-b pb-4 mb-2">
     {/* Danh sách nút lựa chọn */}
     <div className="flex gap-4">
       {options.map((option) => (
@@ -37,7 +37,7 @@ const OptionSelector: React.FC<OptionSelectorProps> = ({
     </div>
 
     {/* Hiển thị phần chọn tòa nhà nếu `showBuildingSelector` là true */}
-    {showBuildingSelector && (
+    {/* {showBuildingSelector && (
       <div className="flex items-center gap-2">
         <label htmlFor="building-select" className="font-medium text-sm">
           Tòa nhà
@@ -55,7 +55,7 @@ const OptionSelector: React.FC<OptionSelectorProps> = ({
           ))}
         </select>
       </div>
-    )}
+    )} */}
   </div>
 );
 

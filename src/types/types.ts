@@ -233,16 +233,23 @@ export interface TransactionGroup {
 
 export interface Transaction {
   id: string;
-  date: string; // ISO 8601 format
-  amount: number;
+  buildingid: string;
+  buildingname: string;
+  roomid: string;
+  roomname: string;
+  customerid: string;
+  customername: string;
+  namereason: string;
   transactiongroupid: string;
   transactiongroupname: string;
   paymentmethod: string;
-  contractid?: string | null; 
-  contractname?: string | null;
+  date: string;
   note: string;
-  image: string; // URL or base64-encoded string
-};
+  amount: number;
+  image: string;
+}
+
+
 
 
 export interface Booking {

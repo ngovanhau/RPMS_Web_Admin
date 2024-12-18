@@ -20,6 +20,14 @@ import CustomModal from "@/components/Modal/Modal";
 import NewTransactionForm from "./TransactionCreateForm";
 import { getContractByBuildingId } from "@/services/contractApi/contractApi";
 import useContractStore from "@/stores/contractStore";
+import { Minus, Plus, Wallet } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface TransactionsProps {}
 
@@ -35,6 +43,10 @@ const Transactions: React.FC<TransactionsProps> = () => {
   const [selectedBuildingId, setSelectedBuildingId] = useState<string | null>(
     null
   );
+  const [transactionType, setTransactionType] = useState<string | null>(null);
+  const [startDate, setStartDate] = useState<string>("");
+  const [endDate, setEndDate] = useState<string>("");
+
   const [isModalOpen, setIsModalOpen] = useState(false); // State for modal
   const [loading, setLoading] = useState<boolean>(false); // State for loading
   const [error, setError] = useState<string | null>(null); // State for error messages
@@ -64,11 +76,13 @@ const Transactions: React.FC<TransactionsProps> = () => {
   };
 
   // Fetch transactions based on user role and selected building
-  const fetchTransactions = async (buildingId: string | null = selectedBuildingId) => {
+  const fetchTransactions = async (
+    buildingId: string | null = selectedBuildingId
+  ) => {
     if (!buildingId) return;
     setLoading(true);
     try {
-        await getTransactionByBuildingId(buildingId); 
+      await getTransactionByBuildingId(buildingId);
     } catch (error: any) {
       console.error("Error fetching transactions:", error);
       setError("Failed to fetch transactions.");
@@ -76,7 +90,7 @@ const Transactions: React.FC<TransactionsProps> = () => {
       setLoading(false);
     }
   };
-  
+
   useEffect(() => {
     if (
       userData?.role === "MANAGEMENT" &&
@@ -97,24 +111,18 @@ const Transactions: React.FC<TransactionsProps> = () => {
     }
   }, [buildings, userData?.role, selectedBuildingId]);
 
-
-
-  const handleBuildingSelect = async (
-    event: React.ChangeEvent<HTMLSelectElement>
-  ) => {
-    const buildingId = event.target.value;
+  const handleBuildingSelect = async (buildingId: string) => {
     setSelectedBuildingId(buildingId);
     try {
-      // For selected building, fetch contracts (if needed)
+      // Fetch contracts for the selected building
       await getContractByBuildingId(buildingId);
-      fetchTransactions(buildingId);  // Trigger transaction fetch for this building
+      fetchTransactions(buildingId); // Trigger transaction fetch for this building
     } catch (error: any) {
       console.error("Error handling building selection:", error);
       setError("Failed to select building.");
     }
   };
-  
-  
+
   // Open and close modal
   const handleCreateTransaction = () => {
     setIsModalOpen(true);
@@ -139,8 +147,6 @@ const Transactions: React.FC<TransactionsProps> = () => {
       setLoading(false);
     }
   };
-  
-  
 
   // Handle updating a transaction
   const handleUpdateTransaction = async (updatedTransaction: Transaction) => {
@@ -156,111 +162,184 @@ const Transactions: React.FC<TransactionsProps> = () => {
       setLoading(false);
     }
   };
-  
-    // Handle deleting a transaction
-    const handleDeleteTransaction = async (transactionId: string) => {
-      setLoading(true);
-      setError(null);
-      try {
-        await deleteTransaction(transactionId);
-        await fetchTransactions(); // Refresh the data after deleting transaction
-      } catch (error: any) {
-        console.error("Error deleting transaction:", error);
-        setError("Failed to delete transaction.");
-      } finally {
-        setLoading(false);
-      }
-    };
-    
 
-    useEffect(() => {
-      const initializeBuilding = async () => {
-        if (
-          userData?.role === "MANAGEMENT" &&
-          buildings.length > 0 &&
-          !selectedBuildingId
-        ) {
-          const firstBuilding = buildings[0];
-          setSelectedBuildingId(firstBuilding.id);
-          // Không gọi fetchTransactions ở đây
-          try {
-            await getContractByBuildingId(firstBuilding.id);
-          } catch (error) {
-            console.error("Error fetching contracts:", error);
-            setError("Failed to fetch contracts.");
-          }
-        }
-      };
-      initializeBuilding();
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [buildings, userData?.role]);
-    
-  
-    // Fetch initial data when component mounts
-    useEffect(() => {
-      fetchInitialData();
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
-  
-    useEffect(() => {
-      if (!selectedBuildingId && buildings.length > 0) {
+  // Handle deleting a transaction
+  const handleDeleteTransaction = async (transactionId: string) => {
+    setLoading(true);
+    setError(null);
+    try {
+      await deleteTransaction(transactionId);
+      await fetchTransactions(); // Refresh the data after deleting transaction
+    } catch (error: any) {
+      console.error("Error deleting transaction:", error);
+      setError("Failed to delete transaction.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const initializeBuilding = async () => {
+      if (
+        userData?.role === "MANAGEMENT" &&
+        buildings.length > 0 &&
+        !selectedBuildingId
+      ) {
         const firstBuilding = buildings[0];
         setSelectedBuildingId(firstBuilding.id);
-        fetchTransactions(firstBuilding.id);
+        // Không gọi fetchTransactions ở đây
+        try {
+          await getContractByBuildingId(firstBuilding.id);
+        } catch (error) {
+          console.error("Error fetching contracts:", error);
+          setError("Failed to fetch contracts.");
+        }
       }
-    }, [buildings, selectedBuildingId]); 
-    
+    };
+    initializeBuilding();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [buildings, userData?.role]);
+
+  // Fetch initial data when component mounts
+  useEffect(() => {
+    fetchInitialData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (!selectedBuildingId && buildings.length > 0) {
+      const firstBuilding = buildings[0];
+      setSelectedBuildingId(firstBuilding.id);
+      fetchTransactions(firstBuilding.id);
+    }
+  }, [buildings, selectedBuildingId]);
 
   return (
-    <div className="">
-      {/* Display Error Message */}
-      {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
-          <span className="block sm:inline">{error}</span>
-          <span
-            className="absolute top-0 bottom-0 right-0 px-4 py-3"
-            onClick={() => setError(null)}
-          >
-            <svg
-              className="fill-current h-6 w-6 text-red-500"
-              role="button"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 20 20"
-            >
-              <title>Close</title>
-              <path d="M14.348 5.652a.5.5 0 10-.707-.707L10 8.586 6.36 4.945a.5.5 0 10-.707.707L9.293 10l-4.647 4.648a.5.5 0 00.707.707L10 11.414l3.64 3.64a.5.5 0 00.707-.707L10.707 10l3.64-3.648z" />
-            </svg>
-          </span>
+    <div className="flex flex-1 flex-col gap-[2%]">
+      <div className="flex flex-row w-full justify-between items-center gap-[2%]">
+        <div className="flex flex-row w-1/3 bg-white justify-between items-center p-4 rounded-[8px]">
+          <div className="flex flex-col ">
+            <span className="font-semibold text-xl text-themeColor">
+              4,762,000
+            </span>
+            <span className="text-sm">Tổng thu</span>
+          </div>
+          <div className="p-2 bg-gray-200 rounded-full">
+            <Plus className="text-themeColor" />
+          </div>
         </div>
-      )}
-
-      {/* Filter Section */}
-      <div className="flex flex-wrap gap-4 mb-4">
-        {/* Building and Room Selectors */}
-        <div className="flex flex-wrap gap-4">
-          <select
-            className="p-2 border rounded w-48"
-            value={selectedBuildingId || ""}
-            onChange={handleBuildingSelect}
-          >
-            <option value="">Tòa nhà</option>
-            {buildings.map((building) => (
-              <option key={building.id} value={building.id}>
-                {building.building_name}
-              </option>
-            ))}
-          </select>
+        <div className="flex flex-row w-1/3 bg-white justify-between items-center p-4 rounded-[8px]">
+          <div className="flex flex-col ">
+            <span className="font-semibold text-xl text-themeColor">
+              4,762,000
+            </span>
+            <span className="text-sm">Tổng chi</span>
+          </div>
+          <div className="p-2 bg-gray-200 rounded-full">
+            <Minus className="text-themeColor" />
+          </div>
         </div>
-
-        {/* Other Filters */}
+        <div className="flex flex-row w-1/3 bg-white justify-between items-center p-4 rounded-[8px]">
+          <div className="flex flex-col ">
+            <span className="font-semibold text-xl text-themeColor">
+              4,762,000
+            </span>
+            <span className="text-sm">Thu - chi</span>
+          </div>
+          <div className="p-2 bg-gray-200 rounded-full">
+            <Wallet className="text-themeColor" />
+          </div>
+        </div>
       </div>
 
-      {/* Transactions Table */}
+      <div className="flex flex-1 w-full flex-col bg-white rounded-[8px] p-4 gap-4">
+        <div className="w-full flex flex-row mt-2 font-semibold text-themeColor">
+          <span className="text-xl">Thu chi</span>
+        </div>
+       <div className="w-full flex flex-row gap-[4%]">
+          <div className="w-1/4 flex gap-2 flex-col">
+            {/* Building Select */}
+            <label htmlFor="buildingSelect" className="text-sm text-gray-600 font-semibold">
+              Tòa nhà
+            </label>
+            <Select
+              value={selectedBuildingId || ""}
+              onValueChange={(value) => handleBuildingSelect(value)}
+            >
+              <SelectTrigger className="p-2 border h-10 rounded w-full border-gray-200">
+                <SelectValue placeholder="Chọn tòa nhà" />
+              </SelectTrigger>
+              <SelectContent className="bg-white">
+                {buildings.map((building) => (
+                  <SelectItem key={building.id} value={building.id}>
+                    {building.building_name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+  
+          <div className="w-1/4 flex gap-2 flex-col">
+            {/* Transaction Type Select */}
+            <label
+              htmlFor="transactionTypeSelect"
+              className="text-sm text-gray-600 font-semibold"
+            >
+              Loại (thu/chi)
+            </label>
+            <Select
+              value={transactionType || ""}
+              onValueChange={setTransactionType}
+            >
+              <SelectTrigger className="p-2 border h-10 rounded w-full border-gray-200">
+                <SelectValue placeholder="Chọn loại thu chi" />
+              </SelectTrigger>
+              <SelectContent className="bg-white">
+                <SelectItem value="income">Thu</SelectItem>
+                <SelectItem value="expense">Chi</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+  
+          <div className="w-1/4 flex gap-2 flex-col">
+            {/* Start Date */}
+            <label htmlFor="startDate" className="text-sm text-gray-600 font-semibold">
+              Ngày bắt đầu
+            </label>
+            <input
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              id="startDate"
+              className="p-2 border h-10 rounded w-full"
+              placeholder="Ngày bắt đầu"
+            />
+          </div>
+  
+          <div className="w-1/4 flex gap-2 flex-col">
+            {/* End Date */}
+            <label htmlFor="endDate" className="text-sm text-gray-600 font-semibold">
+              Ngày kết thúc
+            </label>
+            <input
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              id="endDate"
+              className="p-2 border h-10 rounded w-full"
+              placeholder="Ngày kết thúc"
+            />
+          </div>
+       </div>
+             {/* Transactions Table */}
       <TransactionsTable
         onDeleteTransaction={handleDeleteTransaction}
         onUpdateTransaction={handleUpdateTransaction}
         transactions={transactionList}
       />
+      </div>
+
+
 
       {/* Fixed Button */}
       <div
@@ -277,7 +356,6 @@ const Transactions: React.FC<TransactionsProps> = () => {
         onClose={handleModalClose}
       >
         <NewTransactionForm
-          contractList={contractList}
           onSubmit={handleFormSubmit}
           onCancel={handleModalClose}
         />

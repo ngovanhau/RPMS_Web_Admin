@@ -98,9 +98,9 @@ const DashBoardPermission: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col flex-1 bg-gray-100 w-full overflow-y-hidden">
+    <div className="flex flex-col flex-1 bg-gray-100 w-full">
 
-      <div className="flex h-[95%] p-6 overflow-hidden">
+      <div className="flex h-[100%] p-6 overflow-hidden">
         <div className="flex flex-1 rounded-[8px] flex-col py-4 px-4 w-full bg-white">
           <div className="flex flex-row items-center gap-4 mb-4">
             <label className="text-base font-semibold text-themeColor">
@@ -109,7 +109,7 @@ const DashBoardPermission: React.FC = () => {
             <select
               value={selectedBuilding?.id || ""}
               onChange={handleSelectChange}
-              className="border p-2 rounded-md"
+              className="border p-2 rounded-md min-w-[200px]"
             >
               <option value="" disabled>
                 Chọn tòa nhà

@@ -56,9 +56,8 @@ const Tenant: React.FC = () => {
 
   return (
     <div className="flex flex-col flex-1 bg-gray-100 w-full overflow-y-hidden">
-
-      <div className="flex h-[95%] p-4  overflow-hidden">
-        <div className="flex flex-1 flex-col rounded-[8px] py-4 px-4 w-full bg-white">
+      <div className="flex flex-1 p-6">
+        <div className="flex h-[75%] flex-col rounded-[8px] py-4 px-4 w-full bg-white">
           <div className="flex flex-row justify-between items-center pb-4 border-b">
             <div className="flex flex-row items-center gap-6">
               <div className="py-1 px-2 rounded-[6px] flex justify-center items-center ">

@@ -348,7 +348,7 @@ const DashBoardInvoice: React.FC = () => {
   return (
     <div className="flex flex-col flex-1 bg-gray-100 w-full overflow-y-hidden">
       {/* Main Content */}
-      <div className="flex h-[100%]  p-6 overflow-hidden">
+      <div className="flex h-[100%] p-6 overflow-hidden">
         <div className="flex flex-1 flex-col py-4 px-4 rounded-[8px] w-full bg-white">
           {/* Filter Section với hai select: Tòa nhà và Phòng */}
           <div className="flex items-center justify-between mb-6 gap-4">

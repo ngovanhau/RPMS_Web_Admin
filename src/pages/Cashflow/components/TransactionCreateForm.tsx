@@ -8,39 +8,45 @@ import { UploadOutlined } from "@ant-design/icons";
 import Viewer from "react-viewer";
 import { uploadImage, deleteImage } from "@/services/imageApi/imageApi";
 import { RcFile, UploadChangeParam } from "antd/es/upload";
+import { Building, Room } from "@/types/types";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useBuildingStore } from "@/stores/buildingStore";
 
 interface NewTransactionFormProps {
   onSubmit: (transaction: Partial<Transaction>) => void;
   onCancel: () => void;
-  contractList: Contract[]; // Contract list passed as a prop
 }
 
 const NewTransactionForm: React.FC<NewTransactionFormProps> = ({
   onSubmit,
   onCancel,
-  contractList,
 }) => {
   // Initialize contractid and contractname as empty strings
   const [formData, setFormData] = useState<Partial<Transaction>>({
     id: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-    date: "",
-    amount: 0,
+    buildingid: "",
+    roomid: "",
+    customerid: "",
+    namereason: "",
     transactiongroupid: "",
-    transactiongroupname: "",
     paymentmethod: "",
-    contractid: "", // Changed from default UUID to empty string
-    contractname: "", // Ensure this is also empty
+    date: "",
     note: "",
-    image: "", // Initialize as empty string
+    amount: 0,
+    image: "",
   });
-
+  const buildingList = useBuildingStore((state) => state.buildings);
   const [selectedFile, setSelectedFile] = useState<File | null>(null); // State to store the file
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false); // Loading state
   const [previewVisible, setPreviewVisible] = useState<boolean>(false); // For image preview
 
-  const transactionGroupList = useTransactionGroupStore(
-    (state) => state.transactionGroups
-  );
+  console.log(formData.buildingid)
 
   useEffect(() => {
     fetchInitialData();
@@ -113,8 +119,6 @@ const NewTransactionForm: React.FC<NewTransactionFormProps> = ({
       const finalFormData: Partial<Transaction> = {
         ...formData,
         image: imageUrl, // image is always a string
-        contractid: formData.contractid ? formData.contractid : undefined, // Set to undefined if empty
-        contractname: formData.contractname ? formData.contractname : undefined, // Set to undefined if empty
       };
 
       // Submit the form data
@@ -138,164 +142,22 @@ const NewTransactionForm: React.FC<NewTransactionFormProps> = ({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 overflow-hidden">
-      {/* Date Field */}
-      <div>
-        <label className="block font-medium text-gray-700">
-          Ngày giao dịch
-        </label>
-        <input
-          type="date"
-          name="date"
-          value={formData.date || ""}
-          onChange={handleInputChange}
-          className="w-full p-2 border rounded"
-          required
-        />
-      </div>
-
-      {/* Amount Field */}
-      <div>
-        <label className="block font-medium text-gray-700">Số tiền</label>
-        <input
-          type="number"
-          name="amount"
-          value={formData.amount || ""}
-          onChange={handleInputChange}
-          className="w-full p-2 border rounded"
-          required
-          min="0"
-          step="0.01"
-        />
-      </div>
-
-      {/* Transaction Group Field */}
-      <div>
-        <label className="block font-medium text-gray-700">
-          Nhóm giao dịch
-        </label>
-        <select
-          name="transactiongroupid"
-          value={formData.transactiongroupid || ""}
-          onChange={(e) => {
-            const selectedId = e.target.value;
-            const selectedGroup = transactionGroupList.find(
-              (item) => item.id === selectedId
-            );
-            setFormData((prev) => ({
-              ...prev,
-              transactiongroupid: selectedId,
-              transactiongroupname: selectedGroup ? selectedGroup.name : "",
-            }));
-          }}
-          className="w-full p-2 border rounded"
-          required
-        >
-          <option value="">Chọn nhóm</option>
-          {transactionGroupList.map((item) => (
-            <option key={item.id} value={item.id}>
-              {item.name}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {/* Payment Method Field */}
-      <div>
-        <label className="block font-medium text-gray-700">
-          Phương thức thanh toán
-        </label>
-        <select
-          name="paymentmethod"
-          value={formData.paymentmethod || ""}
-          onChange={(e) => {
-            const selectedValue = e.target.value;
-            setFormData((prev) => ({
-              ...prev,
-              paymentmethod: selectedValue,
-            }));
-          }}
-          className="w-full p-2 border rounded"
-          required
-        >
-          <option value="">Chọn phương thức</option>
-          <option value="1">Tiền mặt</option>
-          <option value="0">Chuyển khoản</option>
-        </select>
-      </div>
-
-      {/* Contract Field (Optional) */}
-      <div>
-        <label className="block font-medium text-gray-700">
-          Hợp đồng liên quan
-        </label>
-        <select
-          name="contractid"
-          value={formData.contractid || ""}
-          onChange={(e) => {
-            const selectedId = e.target.value;
-            const selectedContract = contractList.find(
-              (contract) => contract.id === selectedId
-            );
-            setFormData((prev) => ({
-              ...prev,
-              contractid: selectedId,
-              contractname: selectedContract
-                ? selectedContract.contract_name
-                : "",
-            }));
-          }}
-          className="w-full p-2 border rounded"
-          /* Removed the `required` attribute to make it optional */
-        >
-          <option value="">Chọn hợp đồng (Không bắt buộc)</option>
-          {contractList.map((contract) => (
-            <option key={contract.id} value={contract.id}>
-              {contract.contract_name}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {/* Note Field */}
-      <div>
-        <label className="block font-medium text-gray-700">Ghi chú</label>
-        <textarea
-          name="note"
-          value={formData.note || ""}
-          onChange={handleInputChange}
-          placeholder="Nhập ghi chú"
-          className="w-full p-2 border rounded"
-          rows={4}
-        ></textarea>
-      </div>
-
-      {/* Image Upload Field */}
-      <div>
-        <label className="block font-medium text-gray-700">
-          Tải lên hình ảnh (chỉ 1 ảnh)
-        </label>
-        <Upload
-          beforeUpload={() => false} // Prevent automatic upload
-          onChange={handleFileChange}
-          listType="picture-card"
-          className="w-full p-2 border rounded"
-          maxCount={1}
-          onPreview={handlePreview}
-        >
-          {formData.image ? null : (
-            <div>
-              <UploadOutlined />
-              <div className="mt-2">Chọn ảnh</div>
-            </div>
-          )}
-        </Upload>
-        {formData.image && (
-          <Viewer
-            visible={previewVisible}
-            onClose={handleCancelPreview}
-            images={[{ src: formData.image, alt: "Uploaded Image" }]}
-          />
-        )}
+      <div className="flex flex-row w-full">
+        <div className="flex flex-col w-1/3 gap-2">
+          <span className="">Tòa nhà</span>
+          <Select onValueChange={(value) => setFormData((prev) => ({...prev, buildingid: value}))}>
+            <SelectTrigger className="w-full border-gray-300 rounded-[8px]">
+              <SelectValue placeholder="Theme" />
+            </SelectTrigger>
+            <SelectContent className="bg-white">
+              {buildingList.map((building) => (
+                <SelectItem key={building.id} value={building.id}>
+                  {building.building_name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       {/* Action Buttons */}
