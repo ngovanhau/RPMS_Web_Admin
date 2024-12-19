@@ -22,8 +22,6 @@ export const uploadImage = async (file: File): Promise<string> => {
       },
     });
 
-    console.log("Đây là response ", response);
-
     if (response.status === 201 || response.status === 200) {
       // Kiểm tra cấu trúc response trả về từ API
       if (response.data?.isSuccess && response.data?.data) {

@@ -2,7 +2,13 @@ import { createTenant } from "@/services/tenantApi/tenant";
 import { Tenant } from "@/types/types";
 import React, { useState, useEffect } from "react";
 import { getroombystatus } from "@/services/tenantApi/tenant";
-import { uploadImage } from "@/services/uploadApi/upload";
+// import { uploadImage } from "@/services/uploadApi/upload";
+import { Upload } from "antd";
+import type { GetProp, UploadFile, UploadProps } from "antd";
+import ImgCrop from "antd-img-crop";
+import { uploadImage } from "@/services/imageApi/imageApi";
+
+type FileType = Parameters<GetProp<UploadProps, "beforeUpload">>[0];
 
 interface TenantFormProps {
   onSuccess: () => void;
@@ -29,6 +35,8 @@ const TenantForm: React.FC<TenantFormProps> = ({ onSuccess, onClose }) => {
     roomName: "",
   });
 
+  const [fileList, setFileList] = useState<UploadFile[]>([]);
+
   const [rooms, setRooms] = useState<Room[]>([]);
 
   useEffect(() => {
@@ -38,7 +46,7 @@ const TenantForm: React.FC<TenantFormProps> = ({ onSuccess, onClose }) => {
   const fetchAvailableRooms = async () => {
     try {
       const response = await getroombystatus(0);
-      setRooms(response.data); 
+      setRooms(response.data);
     } catch (error) {
       console.error("Failed to fetch rooms:", error);
     }
@@ -56,6 +64,25 @@ const TenantForm: React.FC<TenantFormProps> = ({ onSuccess, onClose }) => {
     }));
   };
 
+  const onChange: UploadProps["onChange"] = ({ fileList: newFileList }) => {
+    setFileList(newFileList);
+  };
+
+  const onPreview = async (file: UploadFile) => {
+    let src = file.url as string;
+    if (!src) {
+      src = await new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file.originFileObj as FileType);
+        reader.onload = () => resolve(reader.result as string);
+      });
+    }
+    const image = new Image();
+    image.src = src;
+    const imgWindow = window.open(src);
+    imgWindow?.document.write(image.outerHTML);
+  };
+
   const handleImageUpload = async (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
@@ -66,7 +93,7 @@ const TenantForm: React.FC<TenantFormProps> = ({ onSuccess, onClose }) => {
       for (const file of files) {
         try {
           const response = await uploadImage(file);
-          uploadedImageUrls.push(response.data.url); // Assuming response.data.url contains the image URL
+          uploadedImageUrls.push(response); // Assuming response.data.url contains the image URL
         } catch (error) {
           console.error("Failed to upload image:", error);
         }
@@ -79,22 +106,66 @@ const TenantForm: React.FC<TenantFormProps> = ({ onSuccess, onClose }) => {
     }
   };
 
+  // const handleSubmit = async (event: React.FormEvent) => {
+  //   event.preventDefault();
+
+  //   // Tạo một bản sao của tenant mà không có `choose_room` nếu nó trống
+  //   const { choose_room, ...otherTenantData } = tenant;
+  //   const tenantData = choose_room ? tenant : otherTenantData;
+
+  //   try {
+  //     await createTenant(tenantData);
+  //     onSuccess();
+  //     onClose();
+  //   } catch (error) {
+  //     console.error("Failed to create tenant:", error);
+  //   }
+  // };
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-  
-    // Tạo một bản sao của tenant mà không có `choose_room` nếu nó trống
-    const { choose_room, ...otherTenantData } = tenant;
-    const tenantData = choose_room ? tenant : otherTenantData;
-  
+
     try {
-      await createTenant(tenantData); 
+      // 1. Tải lên tất cả các ảnh trong fileList và thu thập URL
+      const uploadedImageUrls: string[] = await Promise.all(
+        fileList.map(async (file) => {
+          if (file.originFileObj) {
+            const uploadedUrl = await uploadImage(file.originFileObj as File);
+            console.log(uploadedUrl);
+            return uploadedUrl;
+          }
+          return ""; // Trả về chuỗi rỗng nếu không có file origin
+        })
+      );
+
+      // 2. Lọc các URL không rỗng
+      const validImageUrls = uploadedImageUrls.filter((url) => url !== "");
+      console.log("validImageUrls", validImageUrls);
+
+      // 3. Tạo một bản sao của imageCCCDs với các URL mới
+      const updatedImageCCCDs = [...tenant.imageCCCDs, ...validImageUrls];
+
+      // 4. Chuẩn bị dữ liệu tenant với imageCCCDs đã cập nhật
+      const { choose_room, ...otherTenantData } = tenant;
+      const tenantData = choose_room
+        ? { ...tenant, imageCCCDs: updatedImageCCCDs }
+        : { ...otherTenantData, imageCCCDs: updatedImageCCCDs };
+
+      // 5. Gửi dữ liệu tenant đến server
+      await createTenant(tenantData);
+
+      // 6. Cập nhật state tenant với các URL ảnh đã upload
+      setTenant((prevTenant) => ({
+        ...prevTenant,
+        imageCCCDs: updatedImageCCCDs,
+      }));
+
+      // 7. Gọi hàm onSuccess và đóng modal
       onSuccess();
       onClose();
     } catch (error) {
       console.error("Failed to create tenant:", error);
     }
   };
-  
 
   return (
     <form onSubmit={handleSubmit} className="w-full p-6 bg-white">
@@ -244,23 +315,23 @@ const TenantForm: React.FC<TenantFormProps> = ({ onSuccess, onClose }) => {
           >
             Ngày cấp
           </label>
-        <input
-          type="date"
-          id="date_of_issue"
-          value={
-            tenant.date_of_issue
-              ? tenant.date_of_issue.toISOString().split("T")[0]
-              : ""
-          }
-          onChange={(e) =>
-            setTenant((prev) => ({
-              ...prev,
-              date_of_issue: new Date(e.target.value),
-            }))
-          }
-          className="w-full p-2 border rounded-md"
-        />
-                </div>
+          <input
+            type="date"
+            id="date_of_issue"
+            value={
+              tenant.date_of_issue
+                ? tenant.date_of_issue.toISOString().split("T")[0]
+                : ""
+            }
+            onChange={(e) =>
+              setTenant((prev) => ({
+                ...prev,
+                date_of_issue: new Date(e.target.value),
+              }))
+            }
+            className="w-full p-2 border rounded-md"
+          />
+        </div>
 
         {/* Address */}
         <div className="col-span-2">
@@ -287,23 +358,19 @@ const TenantForm: React.FC<TenantFormProps> = ({ onSuccess, onClose }) => {
           >
             Ảnh CMND/CCCD
           </label>
-          <input
-            type="file"
-            id="imageCCCDs"
-            multiple
-            onChange={handleImageUpload}
-            className="w-full p-2 border border-dashed rounded-md cursor-pointer"
-          />
-          <div className="flex flex-wrap mt-2">
-            {tenant.imageCCCDs.map((url, index) => (
-              <img
-                key={index}
-                src={url}
-                alt={`Ảnh CMND/CCCD ${index + 1}`}
-                className="w-20 h-20 object-cover m-1"
-              />
-            ))}
-          </div>
+          <ImgCrop rotationSlider>
+            <Upload
+              multiple
+              maxCount={4}
+              listType="picture-card"
+              fileList={fileList}
+              onChange={onChange}
+              beforeUpload={() => false} // Ngăn chặn upload tự động
+              onPreview={onPreview}
+            >
+              {fileList.length < 5 && "+ Upload"}
+            </Upload>
+          </ImgCrop>
         </div>
       </div>
 
