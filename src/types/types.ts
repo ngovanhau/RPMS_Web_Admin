@@ -247,6 +247,7 @@ export interface Transaction {
   note: string;
   amount: number;
   image: string;
+  type:number
 }
 
 

@@ -177,7 +177,7 @@ const DashBoardRoom: React.FC = () => {
 
   return (
     <div className="flex flex-col flex-1 bg-gray-200 w-full overflow-y-hidden">
-      <div className="flex h-[95%] flex-row justify-between bg-gray-200 p-4 ">
+      <div className="flex h-[87%] flex-row justify-between bg-gray-200 p-4 ">
         <div className="w-[24%] h-full rounded-[8px] overflow-hidden flex flex-col bg-white">
           <div className="h-[90%] relative  w-full overflow-y-scroll scrollbar-hide border-b">
             <div className="flex absolute top-0 left-0 w-full">

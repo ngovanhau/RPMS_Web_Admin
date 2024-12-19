@@ -182,7 +182,7 @@ const DashBoardBooking: React.FC = () => {
   return (
     <div className="flex flex-col flex-1 bg-gray-100 w-full overflow-y-hidden relative">
       {/* Nội dung chính */}
-      <div className="flex h-[95%] p-4 overflow-hidden">
+      <div className="flex h-[100%] p-4 overflow-hidden">
         
         <div className="flex flex-1 rounded-[8px] flex-col py-4 px-4 w-full bg-white">
           <OptionSelector

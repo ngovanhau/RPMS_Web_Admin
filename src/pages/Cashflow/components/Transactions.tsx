@@ -28,6 +28,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import EditTransactionForm from "./TransactionEditForm";
 
 interface TransactionsProps {}
 
@@ -43,14 +44,63 @@ const Transactions: React.FC<TransactionsProps> = () => {
   const [selectedBuildingId, setSelectedBuildingId] = useState<string | null>(
     null
   );
-  const [transactionType, setTransactionType] = useState<string | null>(null);
+  const [transactionType, setTransactionType] = useState<number>(2);
   const [startDate, setStartDate] = useState<string>("");
   const [endDate, setEndDate] = useState<string>("");
 
   const [isModalOpen, setIsModalOpen] = useState(false); // State for modal
   const [loading, setLoading] = useState<boolean>(false); // State for loading
-  const [error, setError] = useState<string | null>(null); // State for error messages
+  const [error, setError] = useState<string | null>(null); // State for error messages\
+  const [totalIncome, setTotalIncome] = useState<number>(0); // Tổng thu
+  const [totalExpense, setTotalExpense] = useState<number>(0); // Tổng chi
+  const [netBalance, setNetBalance] = useState<number>(0); // Thu Chi (Tổng thu - Tổng chi)
+
+  useEffect(() => {
+    // Tính tổng thu (type === 0)
+    const income = transactionList
+      .filter((transaction) => transaction.type === 0)
+      .reduce((sum, transaction) => sum + transaction.amount, 0);
+  
+    // Tính tổng chi (type === 1)
+    const expense = transactionList
+      .filter((transaction) => transaction.type === 1)
+      .reduce((sum, transaction) => sum + transaction.amount, 0);
+  
+    // Cập nhật state
+    setTotalIncome(income);
+    setTotalExpense(expense);
+    setNetBalance(income - expense); // Thu Chi = Tổng thu - Tổng chi
+  }, [transactionList]);
+  
   // Fetch initial data based on user role
+  const filterTransactions = () => {
+    if (!startDate && !endDate) {
+      return transactionList;
+    }
+
+    return transactionList.filter((transaction) => {
+      const transactionDate = new Date(transaction.date).getTime();
+      const startTimestamp = startDate ? new Date(startDate).getTime() : null;
+      const endTimestamp = endDate ? new Date(endDate).getTime() : null;
+
+      // Kiểm tra nếu transactionDate nằm trong khoảng startDate và endDate
+      return (
+        (!startTimestamp || transactionDate >= startTimestamp) &&
+        (!endTimestamp || transactionDate <= endTimestamp)
+      );
+    });
+  };
+
+  function convertToISOAtMidnight(dateString: string): string {
+    // Kiểm tra nếu chuỗi đầu vào có định dạng đúng YYYY-MM-DD
+    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+    if (!dateRegex.test(dateString)) {
+      throw new Error("Input date must be in the format YYYY-MM-DD");
+    }
+
+    // Trả về chuỗi ISO với thời gian cố định là 00:00:00
+    return `${dateString}T00:00:00Z`;
+  }
 
   const fetchInitialData = async () => {
     setLoading(true);
@@ -220,7 +270,7 @@ const Transactions: React.FC<TransactionsProps> = () => {
         <div className="flex flex-row w-1/3 bg-white justify-between items-center p-4 rounded-[8px]">
           <div className="flex flex-col ">
             <span className="font-semibold text-xl text-themeColor">
-              4,762,000
+            {totalIncome.toLocaleString("vi-VN")} VNĐ            
             </span>
             <span className="text-sm">Tổng thu</span>
           </div>
@@ -231,7 +281,7 @@ const Transactions: React.FC<TransactionsProps> = () => {
         <div className="flex flex-row w-1/3 bg-white justify-between items-center p-4 rounded-[8px]">
           <div className="flex flex-col ">
             <span className="font-semibold text-xl text-themeColor">
-              4,762,000
+              {totalExpense.toLocaleString("vi-VN")} VNĐ
             </span>
             <span className="text-sm">Tổng chi</span>
           </div>
@@ -242,7 +292,7 @@ const Transactions: React.FC<TransactionsProps> = () => {
         <div className="flex flex-row w-1/3 bg-white justify-between items-center p-4 rounded-[8px]">
           <div className="flex flex-col ">
             <span className="font-semibold text-xl text-themeColor">
-              4,762,000
+              {netBalance.toLocaleString("vi-VN")} VNĐ
             </span>
             <span className="text-sm">Thu - chi</span>
           </div>
@@ -256,10 +306,13 @@ const Transactions: React.FC<TransactionsProps> = () => {
         <div className="w-full flex flex-row mt-2 font-semibold text-themeColor">
           <span className="text-xl">Thu chi</span>
         </div>
-       <div className="w-full flex flex-row gap-[4%]">
+        <div className="w-full flex flex-row gap-[4%]">
           <div className="w-1/4 flex gap-2 flex-col">
             {/* Building Select */}
-            <label htmlFor="buildingSelect" className="text-sm text-gray-600 font-semibold">
+            <label
+              htmlFor="buildingSelect"
+              className="text-sm text-gray-600 font-semibold"
+            >
               Tòa nhà
             </label>
             <Select
@@ -278,7 +331,7 @@ const Transactions: React.FC<TransactionsProps> = () => {
               </SelectContent>
             </Select>
           </div>
-  
+
           <div className="w-1/4 flex gap-2 flex-col">
             {/* Transaction Type Select */}
             <label
@@ -288,22 +341,26 @@ const Transactions: React.FC<TransactionsProps> = () => {
               Loại (thu/chi)
             </label>
             <Select
-              value={transactionType || ""}
-              onValueChange={setTransactionType}
+              value={transactionType?.toString()}
+              onValueChange={(value) => setTransactionType(Number(value))}
             >
               <SelectTrigger className="p-2 border h-10 rounded w-full border-gray-200">
                 <SelectValue placeholder="Chọn loại thu chi" />
               </SelectTrigger>
               <SelectContent className="bg-white">
-                <SelectItem value="income">Thu</SelectItem>
-                <SelectItem value="expense">Chi</SelectItem>
+                <SelectItem value="2">Tất cả</SelectItem>
+                <SelectItem value="0">Thu</SelectItem>
+                <SelectItem value="1">Chi</SelectItem>
               </SelectContent>
             </Select>
           </div>
-  
+
           <div className="w-1/4 flex gap-2 flex-col">
             {/* Start Date */}
-            <label htmlFor="startDate" className="text-sm text-gray-600 font-semibold">
+            <label
+              htmlFor="startDate"
+              className="text-sm text-gray-600 font-semibold"
+            >
               Ngày bắt đầu
             </label>
             <input
@@ -315,10 +372,13 @@ const Transactions: React.FC<TransactionsProps> = () => {
               placeholder="Ngày bắt đầu"
             />
           </div>
-  
+
           <div className="w-1/4 flex gap-2 flex-col">
             {/* End Date */}
-            <label htmlFor="endDate" className="text-sm text-gray-600 font-semibold">
+            <label
+              htmlFor="endDate"
+              className="text-sm text-gray-600 font-semibold"
+            >
               Ngày kết thúc
             </label>
             <input
@@ -330,16 +390,15 @@ const Transactions: React.FC<TransactionsProps> = () => {
               placeholder="Ngày kết thúc"
             />
           </div>
-       </div>
-             {/* Transactions Table */}
-      <TransactionsTable
-        onDeleteTransaction={handleDeleteTransaction}
-        onUpdateTransaction={handleUpdateTransaction}
-        transactions={transactionList}
-      />
+        </div>
+        {/* Transactions Table */}
+        <TransactionsTable
+          filterType={transactionType}
+          onDeleteTransaction={handleDeleteTransaction}
+          onUpdateTransaction={handleUpdateTransaction}
+          transactions={filterTransactions()} // Truyền danh sách đã lọc
+        />
       </div>
-
-
 
       {/* Fixed Button */}
       <div
@@ -354,6 +413,7 @@ const Transactions: React.FC<TransactionsProps> = () => {
         header="Tạo giao dịch"
         isOpen={isModalOpen}
         onClose={handleModalClose}
+        className="max-w-4xl"
       >
         <NewTransactionForm
           onSubmit={handleFormSubmit}

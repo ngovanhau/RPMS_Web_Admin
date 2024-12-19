@@ -29,10 +29,10 @@ const App: React.FC = () => {
         {/* Route Login nằm ngoài layout */}
         <Route path="/" element={<Login />} />
         <Route path="/Forgotpassword" element={<ForgotPassword />} />
-        {/* DashboardLayout bao bọc các tuyến đường khác */}
+        {/* DashboardLayout bao bọc các tuyến khác */}
         <Route element={<DashboardLayout />}>
-          <Route path="Dashboard" element={<DashboardHome />} />
-          <Route path="Service" element={<DashBoardService />} />
+          <Route path="/Dashboard" element={<DashboardHome />} />
+          <Route path="/Service" element={<DashBoardService />} />
           <Route path="/building" element={<DashBoardBuidling />} />
           <Route path="/room" element={<DashBoardRoom />} />
           <Route path="/Profile" element={<Profile />} />
@@ -45,7 +45,7 @@ const App: React.FC = () => {
           <Route path="/RoomStatement" element={<DashBoardRoomStatement />} />
           <Route path="/Invoice" element={<DashBoardInvoice />} />
           <Route path="/Problem" element={<DashBoardProblem />} />
-          <Route path="/Income-expense" element={<DashBoardCashFlow />} />
+          <Route path="/income-expense" element={<DashBoardCashFlow />} />
           <Route path="/Booking" element={<DashBoardBooking />} />
           <Route path="/transaction-group" element={<TransactionGroups />} />
         </Route>

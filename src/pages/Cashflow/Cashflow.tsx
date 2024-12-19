@@ -13,15 +13,11 @@ import { getAllTransaction, getTransactionByBuildingId } from "@/services/transa
 import { Bell } from "lucide-react";
 
 const DashBoardCashFlow: React.FC = () => {
-  const buildings = useBuildingStore((state) => state.buildings);
-
   return (
     <div className="flex flex-col flex-1 bg-gray-100 w-full overflow-y-hidden">
       {/* Main Content */}
-      <div className="flex h-[100%] p-6 overflow-hidden">
-        <div className="flex flex-1 flex-col py-4 px-4 rounded-[8px] w-full">
-            <Transactions/>
-        </div>
+      <div className="flex flex-1  p-6 overflow-hidden">
+        <Transactions/>
       </div>
     </div>
   );

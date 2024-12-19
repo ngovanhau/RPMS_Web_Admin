@@ -48,8 +48,8 @@ const DashBoardService: React.FC = () => {
   return (
     <div className="flex flex-col flex-1 bg-gray-100  w-full overflow-y-hidden">
 
-      <div className="flex h-[95%] p-6 overflow-hidden">
-        <div className="flex flex-1 flex-col py-4 px-4 w-full bg-white">
+      <div className="flex h-[100%] p-6 overflow-hidden">
+        <div className="flex flex-1 rounded-[8px] flex-col py-4 px-4 w-full bg-white">
           {/* Header */}
           <div className="flex flex-row justify-between items-center pb-4 border-b">
             <div className="flex flex-row items-center gap-6">

@@ -14,9 +14,10 @@ import useTenantStore from "@/stores/tenantStore";
 import { deleteImage, uploadImage } from "@/services/imageApi/imageApi";
 import Viewer from "react-viewer";
 import { Upload, message } from "antd";
+import type { GetProp, UploadFile, UploadProps } from "antd";
 import ImgCrop from "antd-img-crop";
-import type { UploadFile, UploadProps } from "antd";  
 import { getRoomById } from "@/services/buildingApi/buildingApi";
+type FileType = Parameters<GetProp<UploadProps, "beforeUpload">>[0];
 
 interface CreateContractFormProps {
   onSubmit: (contract: Contract) => void;
@@ -39,7 +40,6 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({
     customerId: "",
     service: "",
     clause: "",
-    // image: [] as string[], // Explicitly type image as string[]
     image: "",
     customerName: "",
   });
@@ -49,10 +49,62 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({
   const [visible, setVisible] = useState(false); // Trạng thái xem ảnh
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [fileList, setFileList] = useState<UploadFile[]>([]);
-
+console.log(contract.image)
   // Access services from the store
   const services = useServiceStore.getState().services;
   const listCustomer = useTenantStore.getState().tenantsWithoutRoom;
+
+  // const onChange: UploadProps["onChange"] = ({ fileList: newFileList }) => {
+  //   setFileList(newFileList);
+  // };
+
+  const onChange: UploadProps['onChange'] = async ({ file }) => {
+    if (file.originFileObj && file.status === 'uploading') {
+      try {
+        const imageUrl = await uploadImage(file.originFileObj); // Gọi API upload ảnh
+        if (imageUrl) {
+          const updatedFile: UploadFile = {
+            ...file,
+            url: imageUrl,
+            status: 'done', // Đánh dấu trạng thái là hoàn tất
+          };
+  
+          // Cập nhật vào danh sách file để hiển thị
+          setFileList([updatedFile]);
+  
+          // Lưu URL ảnh vào trạng thái contract
+          setContract((prevState) => ({
+            ...prevState,
+            image: imageUrl,
+          }));
+  
+          message.success('Ảnh đã tải lên thành công!');
+        } else {
+          throw new Error('Không nhận được URL ảnh từ API.');
+        }
+      } catch (error) {
+        console.error('Lỗi tải ảnh:', error);
+        message.error('Tải ảnh thất bại. Vui lòng thử lại.');
+        setFileList([]); // Reset fileList nếu lỗi
+      }
+    }
+  };
+  ;
+
+  const onPreview = async (file: UploadFile) => {
+    let src = file.url as string;
+    if (!src) {
+      src = await new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file.originFileObj as FileType);
+        reader.onload = () => resolve(reader.result as string);
+      });
+    }
+    const image = new Image();
+    image.src = src;
+    const imgWindow = window.open(src);
+    imgWindow?.document.write(image.outerHTML);
+  };
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -66,13 +118,16 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({
     onSubmit(contract as Contract);
   };
 
-  const handleRoomChange = async (selectedRoom: { value: string; label: string }) => {
-    const response = await getRoomById(selectedRoom.value)
+  const handleRoomChange = async (selectedRoom: {
+    value: string;
+    label: string;
+  }) => {
+    const response = await getRoomById(selectedRoom.value);
     setContract((prevState) => ({
       ...prevState,
       room: selectedRoom.label,
       roomId: selectedRoom.value,
-      room_fee: response?.data.data.room_price
+      room_fee: response?.data.data.room_price,
     }));
   };
 
@@ -87,7 +142,6 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({
     }));
   };
 
-  
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -144,22 +198,20 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({
 
   // Xóa ảnh
   const handleRemoveImage = async () => {
-    if(contract.image ){
-      await deleteImage(contract?.image)
-          setContract((prevState) => ({
-      ...prevState,
-      image: "",
-    }));
+    if (contract.image) {
+      await deleteImage(contract?.image);
+      setContract((prevState) => ({
+        ...prevState,
+        image: "",
+      }));
+      setFileList([]); // Xóa file khỏi giao diện
     }
-
-
   };
   const handleImageClick = () => {
     if (contract.image) {
       setVisible(true); // Show viewer
     }
   };
-  
 
   const handleCloseViewer = () => {
     setVisible(false); // Đóng viewer
@@ -334,7 +386,7 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({
           <label className="block text-sm font-semibold text-gray-600 mb-1">
             Ảnh Hợp Đồng
           </label>
-          <input
+          {/* <input
             type="file"
             accept="image/*"
             onChange={(e) => {
@@ -344,37 +396,18 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({
               }
             }}
             className="border rounded-lg p-3 w-full focus:ring-2 focus:ring-blue-400 focus:outline-none"
-          />
-          {uploading && (
-            <div className="mt-2">
-              <p className="text-blue-500 text-sm">Đang tải ảnh...</p>
-            </div>
-          )}
-        </div>
-      </div>
-
-      <div className="w-full flex justify-end">
-        <div className="w-[50%] flex justify-start flex-col">
-          <text>Ảnh hợp đồng</text>
-          {contract.image && (
-            <div className="mt-6 grid grid-cols-1 gap-6">
-              <div className="relative w-full h-64 overflow-hidden rounded-lg border-2 border-gray-300 shadow-lg flex items-center justify-center">
-                <img
-                  src={contract.image}
-                  alt={`Uploaded image`}
-                  className="w-full h-full object-cover rounded-md cursor-pointer"
-                  onClick={handleImageClick} // Bấm vào ảnh
-                />
-                <button
-                  type="button"
-                  onClick={handleRemoveImage}
-                  className="absolute top-2 right-2 bg-red-600 text-white rounded-full p-2 text-xs hover:bg-red-700 w-6 h-6 flex items-center justify-center"
-                >
-                  X
-                </button>
-              </div>
-            </div>
-          )}
+          /> */}
+          <ImgCrop rotationSlider>
+            <Upload
+              listType="picture-card"
+              fileList={fileList}
+              onChange={onChange}
+              onPreview={onPreview}
+              onRemove={handleRemoveImage}
+            >
+              {fileList.length === 0 && "+ Upload"}{" "}
+            </Upload>
+          </ImgCrop>
         </div>
       </div>
 
