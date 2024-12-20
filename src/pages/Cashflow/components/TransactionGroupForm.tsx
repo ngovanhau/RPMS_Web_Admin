@@ -18,7 +18,7 @@ const TransactionGroupForm: React.FC<TransactionGroupFormProps> = ({
       id: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
       type: 0,
       name: "",
-      image: "", // This will hold the image URL after uploading
+      image: "",
       note: "",
     }
   );
@@ -89,26 +89,6 @@ const TransactionGroupForm: React.FC<TransactionGroupFormProps> = ({
         </select>
       </div>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700">Hình ảnh</label>
-        <input
-          type="file"
-          name="image"
-          accept="image/*"
-          onChange={handleFileChange}
-          className="mt-1 p-2 border rounded w-full"
-        />
-        {formData.image && (
-          <div className="mt-2">
-            <img
-              src={formData.image}
-              alt="Preview"
-              className="w-32 h-32 object-cover rounded"
-            />
-          </div>
-        )}
-        {loading && <p>Đang tải hình ảnh...</p>} {/* Show loading text during upload */}
-      </div>
 
       <div>
         <label className="block text-sm font-medium text-gray-700">Ghi chú</label>

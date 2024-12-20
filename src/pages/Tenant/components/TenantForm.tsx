@@ -374,12 +374,19 @@ const TenantForm: React.FC<TenantFormProps> = ({ onSuccess, onClose }) => {
         </div>
       </div>
 
-      <div className="flex justify-between mt-6">
+      <div className="flex justify-end space-x-4">
+        <button
+          type="button"
+          onClick={onClose}
+          className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+        >
+          Hủy
+        </button>
         <button
           type="submit"
-          className="bg-themeColor text-white py-2 px-6 rounded-md"
+          className="px-4 py-2 text-white rounded hover:bg-blue-700 bg-themeColor"
         >
-          Thêm mới
+          Lưu
         </button>
       </div>
     </form>

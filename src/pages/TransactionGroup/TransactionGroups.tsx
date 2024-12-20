@@ -128,15 +128,15 @@ const TransactionGroups = () => {
               <div className="rounded-lg border">
                 <table className="w-full">
                   <thead>
-                    <tr className="bg-themeColor text-white">
-                      <th className="w-16 px-4 py-3 border-2 border-gray-300 text-left text-sm font-medium "></th>
-                      <th className="px-4 py-3 border-2 border-gray-300 text-left text-sm font-medium">
+                    <tr className="bg-themeColor text-white text-xl">
+                      <th className="w-16 px-4 py-3 border-2 border-gray-300 text-left font-medium "></th>
+                      <th className="px-4 py-3 border-2 border-gray-300 text-left font-medium">
                         Tên nhóm
                       </th>
-                      <th className="px-4 py-3 border-2 border-gray-300 text-left text-sm font-medium ">
+                      <th className="px-4 py-3 border-2 border-gray-300 text-left font-medium ">
                         Loại
                       </th>
-                      <th className="px-4 py-3 border-2 border-gray-300 text-left text-sm font-medium ">
+                      <th className="px-4 py-3 border-2 border-gray-300 text-left  font-medium ">
                         Ghi chú
                       </th>
                     </tr>
@@ -145,7 +145,7 @@ const TransactionGroups = () => {
                     {filteredGroups.map((group, index) => (
                       <tr
                         key={group.id}
-                        className="hover:bg-gray-50 transition-colors"
+                        className="hover:bg-gray-50 transition-colors text-md font-semibold"
                       >
                         <td className="px-4 py-3 border-2 border-gray-300">
                           <DropdownMenu>
@@ -169,7 +169,7 @@ const TransactionGroups = () => {
                                 className="flex items-center space-x-2 text-red-600"
                                 onClick={() => handleDeleteGroup(group)}
                               >
-                                <FaTrashAlt size={16} />
+                                <FaTrashAlt className="text-gray-500" size={16} />
                                 <span>Xóa</span>
                               </DropdownMenuItem>
                             </DropdownMenuContent>
@@ -205,7 +205,7 @@ const TransactionGroups = () => {
       </button>
 
       <CustomModal
-        header={editingGroup ? "Chỉnh sửa nhóm" : "Thêm nhóm mới"}
+        header={editingGroup ? "Chỉnh sửa" : "Thêm mới"}
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
       >

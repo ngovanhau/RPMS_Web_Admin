@@ -281,7 +281,7 @@ const CreateDeposit: React.FC<CreateDepositProps> = ({
           <option value="">Chọn khách hàng</option>
           {customers.map((customer) => (
             <option key={customer.id} value={customer.id}>
-              {customer.customer_name} - {customer.phone_number}
+              {customer.customer_name}
             </option>
           ))}
         </select>

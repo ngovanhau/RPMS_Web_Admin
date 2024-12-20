@@ -410,7 +410,7 @@ const Transactions: React.FC<TransactionsProps> = () => {
 
       {/* Custom Modal */}
       <CustomModal
-        header="Tạo giao dịch"
+        header="Thêm mới"
         isOpen={isModalOpen}
         onClose={handleModalClose}
         className="max-w-4xl"

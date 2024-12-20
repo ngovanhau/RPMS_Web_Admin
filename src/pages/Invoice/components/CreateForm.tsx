@@ -201,16 +201,16 @@ const CreateBillForm: React.FC<CreateBillFormProps> = ({
   const handleClearMoney = () => {
     setBill((prevState) => ({
       ...prevState,
-      cost_service : 0
-    }))
-    setWaterMoney(0)
-    setElectricityMoney(0)
-  }
+      cost_service: 0,
+    }));
+    setWaterMoney(0);
+    setElectricityMoney(0);
+  };
 
   // Handle room selection change with logging and setting cost_room, customer_id, nameCustomer
   const handleRoomChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
     const { name, value } = e.target;
-    handleClearMoney()
+    handleClearMoney();
     // Find the selected room based on the selected value
     const selectedRoom = rooms.find((room) => room.id === value);
     const contract = contracts.find(
@@ -343,7 +343,7 @@ const CreateBillForm: React.FC<CreateBillFormProps> = ({
 
   return (
     <CustomModal
-      header="Tạo hóa đơn mới"
+      header="Thêm mới"
       isOpen={isOpen}
       onClose={onClose}
       className="max-w-2xl"
@@ -400,11 +400,13 @@ const CreateBillForm: React.FC<CreateBillFormProps> = ({
             {selectedBuilding && (
               <div className="mt-2 px-2 py-4 border border-gray-200 rounded bg-gray-50">
                 <p>
-                  <strong className="text-themeColor">Địa chỉ: </strong> {selectedBuilding.address},{" "}
-                  {selectedBuilding.district}, {selectedBuilding.city}
+                  <strong className="text-themeColor">Địa chỉ: </strong>{" "}
+                  {selectedBuilding.address}, {selectedBuilding.district},{" "}
+                  {selectedBuilding.city}
                 </p>
                 <p>
-                  <strong className="text-themeColor">Số tầng: </strong> {selectedBuilding.number_of_floors}
+                  <strong className="text-themeColor">Số tầng: </strong>{" "}
+                  {selectedBuilding.number_of_floors}
                 </p>
                 {/* Add more details as needed */}
               </div>
@@ -497,9 +499,15 @@ const CreateBillForm: React.FC<CreateBillFormProps> = ({
             <table className="min-w-full bg-white border">
               <thead>
                 <tr className="bg-themeColor text-white border-2 border-gray-300">
-                  <th className="py-2 px-4 bg-themeColor text-white border-2 border-gray-300">Loại Chi Phí</th>
-                  <th className="py-2 px-4 bg-themeColor text-white border-2 border-gray-300">Chỉ số</th>
-                  <th className="py-2 px-4 bg-themeColor text-white border-2 border-gray-300">Đơn giá</th>
+                  <th className="py-2 px-4 bg-themeColor text-white border-2 border-gray-300">
+                    Loại Chi Phí
+                  </th>
+                  <th className="py-2 px-4 bg-themeColor text-white border-2 border-gray-300">
+                    Chỉ số
+                  </th>
+                  <th className="py-2 px-4 bg-themeColor text-white border-2 border-gray-300">
+                    Đơn giá
+                  </th>
                   <th className="py-2 px-4 bg-themeColor text-white border-2 border-gray-300">
                     Số Tiền (VNĐ)
                   </th>
@@ -544,7 +552,9 @@ const CreateBillForm: React.FC<CreateBillFormProps> = ({
                 </tr>
                 {/* Tổng Tiền */}
                 <tr>
-                  <td className="py-2 px-4 font-bold text-themeColor">Tổng Tiền</td>
+                  <td className="py-2 px-4 font-bold text-themeColor">
+                    Tổng Tiền
+                  </td>
                   <td className="py-2 px-4 font-bold"></td>
                   <td className="py-2 px-4 font-bold"></td>
                   <td className="py-2 px-4 font-bold text-center text-themeColor">
@@ -641,10 +651,19 @@ const CreateBillForm: React.FC<CreateBillFormProps> = ({
 
           {/* Action Buttons */}
           <div className="flex justify-end space-x-4">
-            <Button variant="outline" onClick={onClose}>
+            <Button
+              className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+              variant="outline"
+              onClick={onClose}
+            >
               Hủy
             </Button>
-            <Button onClick={handleSubmit}>Tạo hóa đơn</Button>
+            <Button
+              className="px-4 py-2 text-white rounded hover:bg-blue-700 bg-themeColor"
+              onClick={handleSubmit}
+            >
+              Lưu
+            </Button>
           </div>
         </div>
       </Card>

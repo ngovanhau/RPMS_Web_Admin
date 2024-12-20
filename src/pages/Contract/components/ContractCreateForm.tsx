@@ -49,7 +49,6 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({
   const [visible, setVisible] = useState(false); // Trạng thái xem ảnh
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [fileList, setFileList] = useState<UploadFile[]>([]);
-console.log(contract.image)
   // Access services from the store
   const services = useServiceStore.getState().services;
   const listCustomer = useTenantStore.getState().tenantsWithoutRoom;
@@ -411,12 +410,19 @@ console.log(contract.image)
         </div>
       </div>
 
-      <div className="flex justify-end mt-6">
+      <div className="flex justify-end space-x-4">
+        <button
+          type="button"
+          // onClick={onClose}
+          className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+        >
+          Hủy
+        </button>
         <button
           type="submit"
-          className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold shadow-md transition duration-300"
+          className="px-4 py-2 text-white rounded hover:bg-blue-700 bg-themeColor"
         >
-          Xác Nhận
+          Lưu
         </button>
       </div>
       {/* React Viewer - Hiển thị ảnh khi người dùng bấm vào ảnh */}

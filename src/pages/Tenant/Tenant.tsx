@@ -267,7 +267,7 @@ const Tenant: React.FC = () => {
       <CustomModal
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
-        header="Thêm mới Tenant"
+        header="Thêm mới"
       >
         <TenantForm
           onSuccess={handleSuccess}
