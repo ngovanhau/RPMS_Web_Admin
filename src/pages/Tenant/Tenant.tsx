@@ -30,7 +30,7 @@ import {
 import { MoreHorizontal, PlusCircle } from "lucide-react";
 import { FaEdit, FaTrash } from "react-icons/fa";
 
-const ITEMS_PER_PAGE = 8; // Số phần tử mỗi trang
+const ITEMS_PER_PAGE = 10; // Số phần tử mỗi trang
 
 const Tenant: React.FC = () => {
   const { userData } = useAuthStore();
@@ -116,13 +116,13 @@ const Tenant: React.FC = () => {
           <div className="flex flex-row justify-between items-center pb-4 border-b">
             <div className="flex flex-row items-center gap-6">
               <div className="py-1 px-2 rounded-[6px] flex justify-center items-center ">
-                <span className="text-base text-themeColor font-bold">
+                <span className="text-xl text-black font-bold">
                   Danh sách khách hàng
                 </span>
               </div>
               <span className="text-base"></span>
             </div>
-            <div className="flex flex-row h-12 gap-4">
+            <div className="flex flex-row gap-4">
             <input
                 type="text"
                 placeholder="Tìm kiếm khách hàng"
@@ -131,8 +131,8 @@ const Tenant: React.FC = () => {
                 className="p-2 border border-gray-300 rounded shadow w-[250px] focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               <div
-                className="bg-themeColor flex flex-row justify-center items-center gap-2 text-base h-12 text-white py-2 w-44 rounded-[6px] shadow hover:bg-themeColor transition duration-300 cursor-pointer"
-                title="Thêm Mới"
+                className="bg-themeColor flex items-center justify-center gap-2 text-base h-11 text-white py-2 px-4 rounded-[6px] shadow hover:bg-opacity-90 transition duration-300 cursor-pointer"
+                style={{ backgroundColor: "#004392" }}                
                 onClick={() => {
                   setSelectedTenant(null);
                   setIsAddModalOpen(true);
@@ -145,11 +145,11 @@ const Tenant: React.FC = () => {
           </div>
 
           {/* Tenant Table */}
-          <div className="w-full rounded-[8px] h-[750px] overflow-hidden">
+          <div className="w-full rounded-[8px] overflow-hidden">
             <table className="w-full h-full">
-              <thead>
+              <thead >
                 <tr className="bg-themeColor text-white">
-                  <th className="w-16 p-4 border-2 border-gray-300 ">Thao tác</th>
+                  <th className="w-26 p-1 border-2 border-gray-300 ">Thao tác</th>
                   <th className="p-4 border-2 border-gray-300 text-left">
                     Tên khách thuê
                   </th>
@@ -167,10 +167,10 @@ const Tenant: React.FC = () => {
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200">
+              <tbody className="divide-y divide-gray-200 font-semibold">
                 {currentTenants.map((tenant) => (
-                  <tr key={tenant.id} className="hover:bg-gray-50 h-14">
-                    <td className="p-4 h-14 border border-gray-300">
+                  <tr key={tenant.id} className="hover:bg-gray-50 ">
+                    <td className="p-4 border border-gray-300">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <button>
@@ -193,19 +193,19 @@ const Tenant: React.FC = () => {
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </td>
-                    <td className="p-4 h-14 border border-gray-300">
+                    <td className="p-4 border border-gray-300">
                       {tenant.customer_name}
                     </td>
-                    <td className="p-4 h-14 border border-gray-300">
-                      {tenant.roomName}
+                    <td className="p-4 border border-gray-300">
+                      {tenant.roomName ? (tenant.roomName) : ('Chưa có')}
                     </td>
-                    <td className="p-4 h-14 border border-gray-300">
+                    <td className="p-4 border border-gray-300">
                       {tenant.phone_number}
                     </td>
-                    <td className="p-4 h-14 border border-gray-300">
+                    <td className="p-4 border border-gray-300">
                       {tenant.cccd}
                     </td>
-                    <td className="p-4 h-14 border border-gray-300">
+                    <td className="p-4 border border-gray-300">
                       {tenant.email}
                     </td>
                   </tr>
@@ -217,14 +217,14 @@ const Tenant: React.FC = () => {
                   }).map((_, index) => (
                     <tr
                       key={`empty-${index}`}
-                      className="border-none h-14 shadow-none"
+                      className="border-none shadow-none"
                     >
-                      <td className="border-none shadow-none bg-white h-14"></td>
-                      <td className="border-none shadow-none bg-white h-14"></td>
-                      <td className="border-none shadow-none bg-white h-14"></td>
-                      <td className="border-none shadow-none bg-white h-14"></td>
-                      <td className="border-none shadow-none bg-white h-14"></td>
-                      <td className="border-none shadow-none bg-white h-14"></td>
+                      <td className="border-none shadow-none bg-white "></td>
+                      <td className="border-none shadow-none bg-white "></td>
+                      <td className="border-none shadow-none bg-white "></td>
+                      <td className="border-none shadow-none bg-white "></td>
+                      <td className="border-none shadow-none bg-white "></td>
+                      <td className="border-none shadow-none bg-white "></td>
                     </tr>
                   ))}
               </tbody>

@@ -26,12 +26,24 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MoreHorizontal } from "lucide-react";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination"; // Import Pagination components
 
 const TransactionGroups = () => {
   const userData = useAuthStore((state) => state.userData);
   const transactionGroupList = useTransactionGroupStore(
     (state) => state.transactionGroups
   );
+  const ITEMS_PER_PAGE = 8; // Số phần tử mỗi trang
+
+  // Thêm state để quản lý trang hiện tại
+  const [currentPage, setCurrentPage] = useState(1);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingGroup, setEditingGroup] = useState<TransactionGroup | null>(null);
@@ -62,22 +74,40 @@ const TransactionGroups = () => {
   };
 
   const handleSaveGroup = async (group: TransactionGroup) => {
-    if (editingGroup) {
-      // If editing, update the group
-      await updateTransactionGroup(group.id, group);
-    } else {
-      // If adding a new group
-      await createTransactionGroup(group);
-    }
+    try {
+      if (editingGroup) {
+        // If editing, update the group
+        await updateTransactionGroup(group.id, group);
+      } else {
+        // If adding a new group
+        await createTransactionGroup(group);
+      }
 
-    // After creating or updating, close the modal and refresh the list
-    setIsModalOpen(false);
-    await getAllTransactionGroup();
+      // After creating or updating, close the modal and refresh the list
+      setIsModalOpen(false);
+      await getAllTransactionGroup();
+      setCurrentPage(1); // Reset về trang đầu tiên sau khi cập nhật dữ liệu
+    } catch (error) {
+      console.error("Error saving group:", error);
+      // Bạn có thể thêm thông báo lỗi ở đây
+    }
   };
 
   const handleDeleteGroup = async (group: TransactionGroup) => {
-    await deleteTransactionGroup(group.id);
-    await getAllTransactionGroup();
+    try {
+      await deleteTransactionGroup(group.id);
+      await getAllTransactionGroup();
+      // Nếu trang hiện tại vượt quá tổng số trang sau khi xóa, chuyển về trang cuối
+      const newTotalPages = Math.ceil(
+        filteredGroups.length / ITEMS_PER_PAGE
+      );
+      if (currentPage > newTotalPages) {
+        setCurrentPage(newTotalPages > 0 ? newTotalPages : 1);
+      }
+    } catch (error) {
+      console.error("Error deleting group:", error);
+      // Bạn có thể thêm thông báo lỗi ở đây
+    }
   };
 
   const filteredGroups = transactionGroupList.filter((group) => {
@@ -87,9 +117,25 @@ const TransactionGroups = () => {
     return true;
   });
 
+  // Tính toán tổng số trang dựa trên danh sách đã lọc
+  const totalPages = Math.ceil(filteredGroups.length / ITEMS_PER_PAGE);
+
+  // Điều chỉnh currentPage nếu nó vượt quá tổng số trang
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages > 0 ? totalPages : 1);
+    }
+  }, [totalPages, currentPage]);
+
+  // Lấy phần tử của trang hiện tại từ danh sách đã lọc
+  const currentTrasaction = filteredGroups.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
   return (
-    <div className="flex flex-col flex-1 bg-gray-100 w-full overflow-y-hidden">
-      <div className="flex h-[100%] p-6 overflow-hidden">
+    <div className="flex flex-col flex-1 bg-gray-100 w-full">
+      <div className="flex flex-col flex-1 p-6 overflow-auto">
         <Card className="flex flex-col flex-1 shadow-none border-none bg-white">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
             <CardTitle className="text-xl font-bold text-themeColor">
@@ -97,7 +143,10 @@ const TransactionGroups = () => {
             </CardTitle>
             <Select
               value={filterType}
-              onValueChange={(value) => setFilterType(value)}
+              onValueChange={(value) => {
+                setFilterType(value);
+                setCurrentPage(1); // Reset về trang đầu tiên khi thay đổi bộ lọc
+              }}
             >
               <SelectTrigger className="w-[180px] rounded-[8px] border-themeColor text-themeColor">
                 <SelectValue placeholder="Chọn loại giao dịch" />
@@ -130,7 +179,7 @@ const TransactionGroups = () => {
                 <p className="text-gray-500">Không có dữ liệu</p>
               </div>
             ) : (
-              <div className="rounded-lg border">
+              <div className="rounded-lg border overflow-auto">
                 <table className="w-full">
                   <thead>
                     <tr className="bg-themeColor text-white text-xl">
@@ -147,7 +196,7 @@ const TransactionGroups = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredGroups.map((group, index) => (
+                    {currentTrasaction.map((group, index) => (
                       <tr
                         key={group.id}
                         className="hover:bg-gray-50 transition-colors text-md font-semibold"
@@ -185,7 +234,11 @@ const TransactionGroups = () => {
                         </td>
                         <td className="px-4 py-3 border-2 border-gray-300">
                           <span
-                            className={`inline-flex items-center py-0.5 rounded-full text-md font-medium `}
+                            className={`inline-flex items-center py-0.5 px-2 rounded-full text-md font-medium ${
+                              group.type === 0
+                                ? "bg-green-100 text-green-800"
+                                : "bg-red-100 text-red-800"
+                            }`}
                           >
                             {group.type === 0 ? "Thu" : "Chi"}
                           </span>
@@ -200,6 +253,39 @@ const TransactionGroups = () => {
               </div>
             )}
           </CardContent>
+          {/* Thêm phần phân trang ở đây */}
+          {filteredGroups.length > ITEMS_PER_PAGE && (
+            <div className="mt-4 flex justify-center">
+              <Pagination>
+                <PaginationPrevious
+                  onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                >
+                  Trước
+                </PaginationPrevious>
+                <PaginationContent>
+                  {Array.from({ length: totalPages }, (_, i) => (
+                    <PaginationItem key={i + 1}>
+                      <PaginationLink
+                        onClick={() => setCurrentPage(i + 1)}
+                        className={`px-3 py-1 rounded ${
+                          currentPage === i + 1
+                            ? "bg-themeColor text-white"
+                            : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                        }`}
+                      >
+                        {i + 1}
+                      </PaginationLink>
+                    </PaginationItem>
+                  ))}
+                </PaginationContent>
+                <PaginationNext
+                  onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                >
+                  Sau
+                </PaginationNext>
+              </Pagination>
+            </div>
+          )}
         </Card>
       </div>
       <button
@@ -226,4 +312,3 @@ const TransactionGroups = () => {
 };
 
 export default TransactionGroups;
-

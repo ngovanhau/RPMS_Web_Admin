@@ -43,14 +43,14 @@ export const sidebarItems = [
         icon: FaCalendarAlt, 
       },
       {
-        type: "deposit",
-        label: "Đặt cọc",
-        icon: FaMoneyBill,
-      },
-      {
         type: "Tenant",
         label: "Khách hàng",
         icon: FaUserFriends,
+      },
+      {
+        type: "deposit",
+        label: "Đặt cọc",
+        icon: FaMoneyBill,
       },
       {
         type: "Contract",

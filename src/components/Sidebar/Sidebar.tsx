@@ -57,7 +57,7 @@ import './Sidebar.css';
   };
 
   return (
-    <div className="flex flex-col h-full w-full border-2">
+    <div className="flex flex-col h-full w-full ">
       <div className="h-[5%] flex items-center justify-start px-10">
         <img className="h-10 w-10 " src={logo} />
       </div>
@@ -73,7 +73,7 @@ import './Sidebar.css';
 
               <div className="flex flex-col text-left">
                 <span className="font-bold text-sm">{userData?.lastName}</span>
-
+                <span className="font-semibold text-xs">{userData?.role}</span>
               </div>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-[200px] bg-white rounded-xl border border-themeColor font-semibold text-gray-800">

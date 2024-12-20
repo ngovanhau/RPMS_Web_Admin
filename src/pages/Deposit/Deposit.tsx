@@ -19,10 +19,15 @@ import {
 import useDepositStore from "@/stores/depositStore";
 import OptionSelector from "../Deposit/components/OptionSelector";
 import { MoreHorizontal, PlusCircle } from "lucide-react";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@radix-ui/react-dropdown-menu";
 import { IoEye } from "react-icons/io5";
 import { FaEdit, FaTrash } from "react-icons/fa";
-import DepositDetail from "./components/DepositDetail" 
+import DepositDetail from "./components/DepositDetail";
 
 const DashBoard: React.FC = () => {
   const [selectedBuildingId, setSelectedBuildingId] = useState<string | null>(
@@ -42,7 +47,12 @@ const DashBoard: React.FC = () => {
   const rooms = useBuildingStore((state) => state.roomList);
   const deposit = useDepositStore((state) => state.deposits);
 
-  const options = ["Đang chờ phòng", "Quá hạn", "Khách hủy cọc", "Đã tạo hợp đồng"];
+  const options = [
+    "Đang chờ phòng",
+    "Quá hạn",
+    "Khách hủy cọc",
+    "Đã tạo hợp đồng",
+  ];
 
   const statusMap: { [key: number]: string } = {
     0: "Đang chờ phòng",
@@ -52,11 +62,10 @@ const DashBoard: React.FC = () => {
   };
 
   const filtered = deposit
-  .filter((item) => statusMap[item.status] === selectedOption)
-  .filter((item) =>
-    item.customername.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
+    .filter((item) => statusMap[item.status] === selectedOption)
+    .filter((item) =>
+      item.customername.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
   const fetchInitialData = async () => {
     try {
@@ -108,7 +117,7 @@ const DashBoard: React.FC = () => {
   const handleDelete = async (id: string) => {
     const isConfirmed = window.confirm("Bạn có chắc chắn muốn xóa không?");
     if (!isConfirmed) return;
-  
+
     try {
       await deleteDepositById(id);
       if (selectedBuildingId) {
@@ -134,26 +143,25 @@ const DashBoard: React.FC = () => {
         // Nếu thêm mới
         await createDeposit(deposit);
       }
-  
+
       // Làm mới danh sách bookings ngay sau khi thêm mới
       if (selectedBuildingId) {
         await getDepositByBuildingId(selectedBuildingId);
       } else {
         await getAllDeposit();
       }
-  
+
       // Đặt lại trạng thái modal và selectedBooking
       setIsModalOpen(false);
       setSelectedDeposit(null);
       setIsEditing(false);
-  
+
       // Làm mới toàn bộ dữ liệu
       refreshDeposits(); // Gọi lại hàm fetchInitialData
     } catch (error) {
       console.error("Error adding/updating booking:", error);
     }
   };
-
 
   const handleStatusChange = async (deposit: Deposit, newStatus: number) => {
     try {
@@ -184,19 +192,18 @@ const DashBoard: React.FC = () => {
     <div className="flex flex-col flex-1 bg-gray-100 w-full overflow-y-hidden relative">
       {/* Nội dung chính */}
       <div className="flex h-[100%] p-4 overflow-hidden">
-        
         <div className="flex flex-1 rounded-[8px] flex-col py-4 px-4 w-full bg-white">
           <OptionSelector
             options={options}
             selectedOption={selectedOption}
             // deposits={deposits}
             onOptionChange={setSelectedOption}
-            onBuildingChange={handleBuildingSelect} buildings={[]}         
-            />
+            onBuildingChange={handleBuildingSelect}
+            buildings={[]}
+          />
           {/* Add Button */}
           <div className="relative">
-            
-          <div className="flex justify-end items-center mb-4 gap-4">
+            <div className="flex justify-end items-center mb-4 gap-4">
               <h2 className="text-xl font-semibold text-gray-800 ml-0 pl-0 text-left w-full">
                 Danh sách đặt cọc
               </h2>
@@ -223,25 +230,42 @@ const DashBoard: React.FC = () => {
                 Thêm
               </div>
             </div>
-            
+
             {/* Bảng */}
             <div className="overflow-y-auto max-h-[70vh] border border-gray-200 rounded-md mt-4">
               <table className="w-full border-collapse">
-              <thead className="sticky top-0 bg-themeColor text-white z-10 h-25">
-              <tr>
-                <th className="border border-gray-300 p-2 w-[100px]">Thao tác</th>
-                <th className="border border-gray-300 p-2 w-[200px]">Tên Khách hàng</th>
-                <th className="border border-gray-300 p-2 w-[150px]">Tên phòng</th>
-                <th className="border border-gray-300 p-2 w-[150px]">Số tiền cọc</th>
-                <th className="border border-gray-300 p-2 w-[200px]">Phương thức thanh toán</th>
-                <th className="border border-gray-300 p-2 w-[220px]">Ngày dự kiến nhận phòng</th>
-                <th className="border border-gray-300 p-2 w-[150px]">Trạng thái</th>
-              </tr>
-            </thead>
+                <thead className="sticky top-0 bg-themeColor text-white z-10 h-25">
+                  <tr>
+                    <th className="border border-gray-300 p-2 w-[100px]">
+                      Thao tác
+                    </th>
+                    <th className="border border-gray-300 p-2 w-[200px]">
+                      Tên Khách hàng
+                    </th>
+                    <th className="border border-gray-300 p-2 w-[150px]">
+                      Tên phòng
+                    </th>
+                    <th className="border border-gray-300 p-2 w-[150px]">
+                      Số tiền cọc
+                    </th>
+                    <th className="border border-gray-300 p-2 w-[200px]">
+                      Phương thức thanh toán
+                    </th>
+                    <th className="border border-gray-300 p-2 w-[220px]">
+                      Ngày dự kiến nhận phòng
+                    </th>
+                    <th className="border border-gray-300 p-2 w-[150px]">
+                      Trạng thái
+                    </th>
+                  </tr>
+                </thead>
                 <tbody>
                   {deposit.length > 0 ? (
                     filtered.map((deposit, index) => (
-                      <tr key={deposit.id} className="hover:bg-gray-100 transition">
+                      <tr
+                        key={deposit.id}
+                        className="hover:bg-gray-100 transition"
+                      >
                         {/* Cột thao tác */}
                         <td className="border border-gray-300 p-2 text-center">
                           <div className="flex items-center justify-center space-x-2">
@@ -261,14 +285,14 @@ const DashBoard: React.FC = () => {
                                   onClick={() => handleEditClick(deposit)}
                                   className="flex items-center space-x-2 p-2 hover:bg-gray-100 rounded-md cursor-pointer"
                                 >
-                                  <FaEdit/>
+                                  <FaEdit />
                                   <span className="text-sm">Chỉnh sửa</span>
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
                                   onClick={() => handleDelete(deposit.id)} // Gọi hàm xóa booking
                                   className="flex items-center space-x-2 p-2 hover:bg-gray-100 rounded-md cursor-pointer"
                                 >
-                                  <FaTrash/>
+                                  <FaTrash />
                                   <span className="text-sm">Xóa</span>
                                 </DropdownMenuItem>
                               </DropdownMenuContent>
@@ -288,31 +312,49 @@ const DashBoard: React.FC = () => {
                             </button>
                           </div>
                         </td>
-
                         {/* Các cột khác */}
-                        <td className="font-semibold text-gray-800 border border-gray-300 p-2">{deposit.customername}</td>
-                        <td className="font-semibold text-gray-800 border border-gray-300 p-2">{deposit.roomname}</td>
-                        <td className="font-semibold text-gray-800 border border-gray-300 p-2">{deposit.deposit_amount}</td>
                         <td className="font-semibold text-gray-800 border border-gray-300 p-2">
-                          {Number(deposit.payment_method) === 1 ? "Chuyển khoản" : "Tiền mặt"}
+                          {deposit.customername}
+                        </td>
+                        <td className="font-semibold text-gray-800 border border-gray-300 p-2">
+                          {deposit.roomname}
+                        </td>
+                        <td className="font-semibold text-gray-800 border border-gray-300 p-2">
+                          {deposit.deposit_amount.toLocaleString("vi-VN")}
+                        </td>{" "}
+                        <td className="font-semibold text-gray-800 border border-gray-300 p-2">
+                          {Number(deposit.payment_method) === 1
+                            ? "Chuyển khoản"
+                            : "Tiền mặt"}
                         </td>
                         <td className="font-semibold text-gray-800 border border-gray-300 p-2  whitespace-nowrap">
-                          {new Date(deposit.move_in_date).toLocaleDateString("vi-VN", {
-                            day: "2-digit",
-                            month: "2-digit",
-                            year: "numeric",
-                          })}{" "}
-                          {new Date(deposit.move_in_date).toLocaleTimeString("vi-VN", {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                            hour12: false,
-                          })}
+                          {new Date(deposit.move_in_date).toLocaleDateString(
+                            "vi-VN",
+                            {
+                              day: "2-digit",
+                              month: "2-digit",
+                              year: "numeric",
+                            }
+                          )}{" "}
+                          {new Date(deposit.move_in_date).toLocaleTimeString(
+                            "vi-VN",
+                            {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                              hour12: false,
+                            }
+                          )}
                         </td>
                         <td className="font-semibold text-gray-800 border border-gray-300 p-2 text-center">
                           <select
                             value={deposit.status}
                             onClick={(e) => e.stopPropagation()}
-                            onChange={(e) => handleStatusChange(deposit, Number(e.target.value))}
+                            onChange={(e) =>
+                              handleStatusChange(
+                                deposit,
+                                Number(e.target.value)
+                              )
+                            }
                             className="p-1 border rounded bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-themeColor"
                           >
                             <option value={0}>Đang chờ phòng</option>
@@ -341,12 +383,12 @@ const DashBoard: React.FC = () => {
       </div>
       {/* Modal thêm đặt chỗ */}
       <CustomModal
-        header={isEditing ? "Chỉnh sửa" : "Thêm mới"} 
+        header={isEditing ? "Chỉnh sửa" : "Thêm mới"}
         isOpen={isModalOpen}
         onClose={() => {
           setIsModalOpen(false);
-          setSelectedDeposit(null); 
-          setIsEditing(false); 
+          setSelectedDeposit(null);
+          setIsEditing(false);
         }}
       >
         <CreateDeposit
