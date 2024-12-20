@@ -1,17 +1,20 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { TransactionGroup } from "@/types/types";
 import { uploadImage } from "@/services/imageApi/imageApi";
+import { updateTransactionGroup } from "@/services/transactiongroupApi/transactiongroupApi";
 
 interface TransactionGroupFormProps {
   initialData?: TransactionGroup; // Dữ liệu ban đầu cho chỉnh sửa
   onSubmit: (data: TransactionGroup) => void; // Hàm gọi lại khi submit
   onCancel: () => void; // Hàm gọi lại khi hủy bỏ
+  onUpdate: () => void; // Hàm để refresh lại danh sách sau khi cập nhật
 }
 
 const TransactionGroupForm: React.FC<TransactionGroupFormProps> = ({
   initialData,
   onSubmit,
   onCancel,
+  onUpdate, // Add onUpdate function to refresh the list
 }) => {
   const [formData, setFormData] = useState<TransactionGroup>(
     initialData || {
@@ -54,12 +57,24 @@ const TransactionGroupForm: React.FC<TransactionGroupFormProps> = ({
     }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (formData.name.trim() === "") {
       alert("Tên nhóm không được để trống!");
       return;
     }
-    onSubmit({ ...formData, id: formData.id || String(Date.now()) });
+
+    if (initialData) {
+      // If editing, call updateTransactionGroup
+      await updateTransactionGroup(formData.id, formData);
+      // Close the modal and refresh the transaction group list
+      onUpdate(); // Trigger the update in the parent component
+      onCancel(); // Close the modal
+    } else {
+      // If creating new, call onSubmit
+      onSubmit({ ...formData, id: formData.id || String(Date.now()) });
+      // Close the modal and refresh the transaction group list
+      onCancel(); // Close the modal
+    }
   };
 
   return (
@@ -88,7 +103,6 @@ const TransactionGroupForm: React.FC<TransactionGroupFormProps> = ({
           <option value={1}>Chi</option>
         </select>
       </div>
-
 
       <div>
         <label className="block text-sm font-medium text-gray-700">Ghi chú</label>

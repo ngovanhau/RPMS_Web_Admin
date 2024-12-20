@@ -48,15 +48,16 @@ export const sidebarItems = [
         icon: FaMoneyBill,
       },
       {
-        type: "Contract",
-        label: "Hợp đồng thuê",
-        icon: FaFileContract,
-      },
-      {
         type: "Tenant",
         label: "Khách hàng",
         icon: FaUserFriends,
       },
+      {
+        type: "Contract",
+        label: "Hợp đồng thuê",
+        icon: FaFileContract,
+      },
+      
     ],
   },
   {

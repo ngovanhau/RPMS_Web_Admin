@@ -24,7 +24,7 @@ const useAccountStore = create<AccountStore>((set, get) => ({
 
   addAccounts: (newAccounts: User[]): void =>
     set((state) => {
-      const filteredAccounts = newAccounts.filter((account) => account.role !== "USER");
+      const filteredAccounts = newAccounts.filter((account) => account.role !== "USER" && account.role !== "ADMIN");
       const uniqueAccountsMap = new Map<string, User>();
       state.accounts.forEach((account) => uniqueAccountsMap.set(account.username, account));
       filteredAccounts.forEach((account) => uniqueAccountsMap.set(account.username, account));
