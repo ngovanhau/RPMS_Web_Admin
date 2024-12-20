@@ -69,12 +69,12 @@ export const getRoomsByBuildingIdAndStatus = async (
     const response = await api.get(
       `/room/getroombybuildingidandstatus?BuildingId=${buildingId}&status=${status}`
     );
-
     const rooms = response.data?.data || []; 
-    useBuildingStore.getState().setRooms(response.data.data.rooms); 
+    console.log('Đây là mảng rooms ', rooms)
+    useBuildingStore.getState().setRooms(response.data.data); 
     return rooms; 
   } catch (error) {
-    useBuildingStore.getState().setRooms([]); 
+    useBuildingStore.getState().setRooms([])
     console.error("Lỗi khi lấy danh sách phòng:", error);
     return [];
   }

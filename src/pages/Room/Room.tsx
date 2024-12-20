@@ -231,7 +231,7 @@ const DashBoardRoom: React.FC = () => {
             </div>
 
             <div className="flex flex-col w-full mt-[60px]">
-              {roomList.length > 0 ? (
+              {roomList && roomList.length > 0 ? (
                 roomList.map((room, index) => (
                   <RoomCard
                     onSelect={() => handleClickRoomCard(room.id)}

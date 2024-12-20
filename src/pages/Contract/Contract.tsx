@@ -35,7 +35,6 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 
-const ITEMS_PER_PAGE = 8; // Số phần tử mỗi trang
 
 const DashBoardContract: React.FC = () => {
   const [selectedContract, setSelectedContract] = useState<Contract | null>(
@@ -329,7 +328,7 @@ const DashBoardContract: React.FC = () => {
 
       {/* Edit Contract Modal */}
       <CustomModal
-        header="Sửa hợp đồng"
+        header="Chỉnh sửa"
         isOpen={isOpenEditModal} // Use separate modal state for editing
         onClose={() => setIsOpenEditModal(false)}
       >

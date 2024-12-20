@@ -25,7 +25,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { MoreHorizontal } from "lucide-react";
+import { Eye, MoreHorizontal } from "lucide-react";
 import {
   Pagination,
   PaginationContent,
@@ -34,6 +34,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination"; // Import Pagination components
+import TransactionGroupDetail from "./components/TransactionGroupDetail";
 
 const TransactionGroups = () => {
   const userData = useAuthStore((state) => state.userData);
@@ -44,11 +45,13 @@ const TransactionGroups = () => {
 
   // Thêm state để quản lý trang hiện tại
   const [currentPage, setCurrentPage] = useState(1);
-
+  const [selectedTransactionGroup, setSelectedTransactionGroup] = useState<TransactionGroup | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingGroup, setEditingGroup] = useState<TransactionGroup | null>(null);
+  const [editingGroup, setEditingGroup] = useState<TransactionGroup | null>(
+    null
+  );
   const [filterType, setFilterType] = useState("all");
-
+  const [isModalDetailOpen, setIsModalDetailOpen] = useState(false)
   const fetchInitialData = async () => {
     try {
       if (userData?.role === "ADMIN" || userData?.role === "MANAGEMENT") {
@@ -98,9 +101,7 @@ const TransactionGroups = () => {
       await deleteTransactionGroup(group.id);
       await getAllTransactionGroup();
       // Nếu trang hiện tại vượt quá tổng số trang sau khi xóa, chuyển về trang cuối
-      const newTotalPages = Math.ceil(
-        filteredGroups.length / ITEMS_PER_PAGE
-      );
+      const newTotalPages = Math.ceil(filteredGroups.length / ITEMS_PER_PAGE);
       if (currentPage > newTotalPages) {
         setCurrentPage(newTotalPages > 0 ? newTotalPages : 1);
       }
@@ -132,6 +133,11 @@ const TransactionGroups = () => {
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
   );
+
+  const onViewDetails = (transactionGroup : TransactionGroup) => {
+    setSelectedTransactionGroup(transactionGroup)
+    setIsModalDetailOpen(true)
+  }
 
   return (
     <div className="flex flex-col flex-1 bg-gray-100 w-full">
@@ -201,7 +207,7 @@ const TransactionGroups = () => {
                         key={group.id}
                         className="hover:bg-gray-50 transition-colors text-md font-semibold"
                       >
-                        <td className="px-4 py-3 border-2 border-gray-300">
+                        <td className="px-4 py-3 border-2 border-gray-300 flex flex-row justify-center items-center">
                           <DropdownMenu>
                             <DropdownMenuTrigger className="focus:outline-none ">
                               <div className="p-2 hover:bg-gray-100 rounded-full">
@@ -223,11 +229,19 @@ const TransactionGroups = () => {
                                 className="flex items-center space-x-2"
                                 onClick={() => handleDeleteGroup(group)}
                               >
-                                <FaTrashAlt className="text-gray-500" size={16} />
+                                <FaTrashAlt
+                                  className="text-gray-500"
+                                  size={16}
+                                />
                                 <span>Xóa</span>
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
+                          <div
+                            onClick={() => onViewDetails(group)}
+                          >
+                            <Eye className="mr-2 h-5 w-5 text-black" />
+                          </div>
                         </td>
                         <td className="px-4 py-3 border-2 border-gray-300 text-md text-gray-900">
                           {group.name}
@@ -258,7 +272,9 @@ const TransactionGroups = () => {
             <div className="mt-4 flex justify-center">
               <Pagination>
                 <PaginationPrevious
-                  onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                  onClick={() =>
+                    setCurrentPage((prev) => Math.max(prev - 1, 1))
+                  }
                 >
                   Trước
                 </PaginationPrevious>
@@ -279,7 +295,9 @@ const TransactionGroups = () => {
                   ))}
                 </PaginationContent>
                 <PaginationNext
-                  onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                  onClick={() =>
+                    setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                  }
                 >
                   Sau
                 </PaginationNext>
@@ -306,6 +324,15 @@ const TransactionGroups = () => {
           onCancel={() => setIsModalOpen(false)}
           onUpdate={fetchInitialData} // Pass the fetch function to refresh the list
         />
+      </CustomModal>
+
+
+      <CustomModal
+      header="Chi tiết"
+      isOpen={isModalDetailOpen}
+      onClose={()=>setIsModalDetailOpen(false)}
+      >
+        <TransactionGroupDetail data={selectedTransactionGroup || {}} onClose={()=>setIsModalDetailOpen(false)}/>
       </CustomModal>
     </div>
   );

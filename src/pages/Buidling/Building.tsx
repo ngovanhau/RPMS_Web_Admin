@@ -218,7 +218,7 @@ const DashBoardBuilding: React.FC = () => {
               <div className="w-2/4 flex justify-center pl-4 items-start flex-col h-full ">
                 <span className="text-themeColor font-bold">Phòng</span>
                 <span className="text-global font-semibold">
-                  {roomList.length}
+                  {roomList?.length}
                 </span>
               </div>
               <div className="w-1/4 "></div>
@@ -346,7 +346,7 @@ const DashBoardBuilding: React.FC = () => {
             </div>
 
             <div className="h-full w-[38.5%] bg-white rounded-[8px]  overflow-hidden ">
-              {roomList.length > 0 ? (
+              {roomList && roomList.length > 0 ? (
                 roomList.map((room, index) => (
                   <RoomCard key={index} room={room} />
                 ))

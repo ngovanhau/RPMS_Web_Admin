@@ -22,6 +22,7 @@ import { getServiceMeterReadingByRoomId } from "@/services/invoiceApi/invoiceApi
 import { getContractByBuildingId } from "@/services/contractApi/contractApi";
 import useContractStore from "@/stores/contractStore";
 import { getServicemeterByRoomId } from "@/services/roomStatementApi/roomStatementApi";
+import { getRoomsByBuildingIdAndStatus } from "@/services/bookingApi/bookingApi";
 
 interface CreateBillFormProps {
   isOpen: boolean;
@@ -169,7 +170,7 @@ const CreateBillForm: React.FC<CreateBillFormProps> = ({
       setSelectedBuilding(building);
 
       // Fetch rooms for the selected building
-      await getRoomByBuildingId(selectedBuildingId);
+      await getRoomsByBuildingIdAndStatus(selectedBuildingId,1);
       await getContractByBuildingId(selectedBuildingId);
       setBill((prev) => ({
         ...prev,

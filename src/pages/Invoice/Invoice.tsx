@@ -28,6 +28,15 @@ import {
 import { createNotification } from "@/services/notificationApi/notificationApi";
 import CustomModal from "@/components/Modal/Modal";
 import ViewBillForm from "./components/ViewForm";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 const DashBoardInvoice: React.FC = () => {
   const { toast } = useToast();

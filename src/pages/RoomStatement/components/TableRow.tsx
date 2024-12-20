@@ -82,7 +82,7 @@ const TableRow: React.FC<TableRowProps> = ({
         {ServiceMeterReadings.electricity_new}
       </td>
       <td className="border-2 border-gray-300 px-4 py-2 whitespace-nowrap text-sm">
-        {ServiceMeterReadings.electricity_cost}
+        {ServiceMeterReadings.electricity_cost.toLocaleString()} đ
       </td>
       <td className="border-2 border-gray-300 px-4 py-2 whitespace-nowrap text-sm">
         {ServiceMeterReadings.water_old}
@@ -91,10 +91,10 @@ const TableRow: React.FC<TableRowProps> = ({
         {ServiceMeterReadings.water_new}
       </td>
       <td className="border-2 border-gray-300 px-4 py-2 whitespace-nowrap text-sm">
-        {ServiceMeterReadings.water_cost}
+        {ServiceMeterReadings.water_cost.toLocaleString()} đ
       </td>
       <td className="border-2 border-gray-300 px-4 py-2 whitespace-nowrap text-sm font-semibold">
-        {ServiceMeterReadings.total_amount} đ
+        {ServiceMeterReadings.total_amount.toLocaleString()} đ
       </td>
     </tr>
   );

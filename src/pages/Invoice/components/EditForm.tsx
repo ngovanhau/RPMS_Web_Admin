@@ -54,7 +54,7 @@ const EditBillForm: React.FC<EditBillFormProps> = ({
 
   return (
     <CustomModal
-      header="Chỉnh sửa hóa đơn"
+      header="Chỉnh sửa"
       isOpen={isOpen}
       onClose={onClose}
       className="w-full max-w-2xl"
@@ -188,15 +188,15 @@ const EditBillForm: React.FC<EditBillFormProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400"
+            className="px-4 rounded-[8px] py-2 text-sm font-medium text-gray-700 bg-gray-100  hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400"
           >
             Hủy
           </button>
           <button
             type="submit"
-            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            className="px-4 rounded-[8px] py-2 text-sm font-medium text-white bg-blue-600  hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
           >
-            Lưu thay đổi
+            Lưu
           </button>
         </div>
       </form>

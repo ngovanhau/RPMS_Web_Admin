@@ -1,5 +1,5 @@
 // InvoiceTable.tsx
-import React from "react";
+import React, { useMemo, useState } from "react";
 import { Bill } from "@/types/types";
 import { AiOutlineCheck, AiOutlineEdit, AiOutlineDelete } from "react-icons/ai";
 
@@ -18,13 +18,23 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Ellipsis, Eye } from "lucide-react";
+import { IoEye } from "react-icons/io5";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 interface InvoiceTableProps {
   bills: Bill[];
   onEdit: (bill: Bill) => void;
   onDelete: (id: string) => void;
   onApproved: (bill: Bill) => void;
-  onView: (bill : Bill) => void
+  onView: (bill: Bill) => void;
 }
 
 const formatPercentage = (value: number) => {
@@ -40,8 +50,28 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
   onEdit,
   onApproved,
   onDelete,
-  onView
+  onView,
 }) => {
+  const ITEMS_PER_PAGE = 8; // Số lượng hóa đơn mỗi trang
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // Tính toán số trang
+  const totalPages = Math.ceil(bills.length / ITEMS_PER_PAGE);
+
+  // Lấy danh sách hóa đơn cho trang hiện tại
+  const currentBills = useMemo(() => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
+    return bills.slice(startIndex, endIndex);
+  }, [bills, currentPage]);
+
+  // Hàm xử lý thay đổi trang
+  const handlePageChange = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
+
   const formatCurrency = (amount: number) =>
     new Intl.NumberFormat("vi-VN", {
       style: "currency",
@@ -87,174 +117,203 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
   };
 
   return (
-    // Container có chiều rộng cố định và cho phép scroll
-    <div className="w-full max-w-[80vw] overflow-x-auto">
-      <table className="w-full table-auto text-sm text-left">
-        {" "}
-        {/* Thay từ text-base xuống text-sm */}
-        <thead className="text-sm border-2 min-w-[200px] border-gray-300 px-4 h-14 bg-themeColor text-white text-center">
-          <tr>
-            {[
-              "",
-              "Tên hóa đơn",
-              "Khách hàng",
-              "Phòng",
-              "Ngày tạo",
-              "Hạn thanh toán",
-              "Tiền phòng",
-              "Tiền dịch vụ",
-              "Tổng tiền",
-              "Tiền phạt",
-              "Giảm giá",
-              "Thành tiền",
-              "Đã thanh toán",
-              "Tiền nợ",
-              "Ghi chú",
-            ].map((header, index) => (
-              <th
-                key={index}
-                className="border border-gray-300 px-4  py-2 whitespace-nowrap text-center"
-              >
-                {header}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {bills.map((bill) => {
-            const isPaid = bill.status_payment === 1;
-            return (
-              <tr
-                key={bill.id}
-                className="border-b hover:bg-blue-50 text-blue-900 h-12"
-              >
-                <td className="px-4 py-2 border-2 border-gray-300 whitespace-nowrap text-center text-sm">
-                  <div className="flex gap-2 justify-center">
-                    {bill.status === 0 ? (
-                      // Actions khi hóa đơn chưa được duyệt
-                      <>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger>
-                            <Ellipsis />
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent className="bg-white">
-                            <DropdownMenuItem onClick={() => onApproved(bill)} >
-                              <div
-                                className="flex flex-row gap-4"
-                              >
-                                <AiOutlineCheck className="h-4 w-4 text-green-500 hover:text-green-700 cursor-pointer" />
-                                <span className="text-gray-700">Duyệt</span>
-                              </div>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => onEdit(bill)}>
-                              <div
-                                className="flex flex-row gap-4"
-                              >
-                                <AiOutlineEdit className="h-4 w-4 text-blue-500 hover:text-blue-700 cursor-pointer" />
-                                <span className="text-gray-700">Chỉnh sửa</span>
-                              </div>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => onView(bill)} >
-                              <div
-                                className="flex flex-row gap-4"
-                              >
-                                <Eye size={16} color=""/>
-                                <span className="text-gray-700">Xem chi tiết</span>
-                              </div>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => onDelete(bill.id)}>
-                              <div
-                                className="flex flex-row gap-4"
-                              >
-                                <AiOutlineDelete className="h-4 w-4 text-red-500 hover:text-red-700 cursor-pointer" />
-                                <span className="text-gray-700">Xóa</span>
-                              </div>
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </>
-                    ) : (
-                      // Actions khi hóa đơn đã được duyệt
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger>
-                            <AiOutlineDelete className="h-4 w-4 text-red-500 opacity-50 cursor-not-allowed" />
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>Không thể xóa</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    )}
-                  </div>
-                </td>
-                <td className="border-2 min-w-[200px] border-gray-300 px-4 h-14 text-sm text-left">
-                  {bill.bill_name || "-"}
-                </td>
-                <td className="border-2 min-w-[200px] border-gray-300 px-4 h-14 text-sm text-left">
-                  {bill.customer_name || "-"}
-                </td>
-                <td className="border-2 min-w-[200px] border-gray-300 px-4 h-14 text-sm text-left">
-                  {bill.roomname || "-"}
-                </td>
-                <td className="border-2 border-gray-300 px-4 h-14 text-sm text-left">
-                  {formatDate(bill.date)}
-                </td>
-                <td className="border-2 border-gray-300 px-4 h-14 text-sm text-left">
-                  {formatDate(bill.due_date)}
-                </td>
-                <td className="border-2 border-gray-300 px-4 h-14 text-sm text-left">
-                  {formatCurrency(bill.cost_room)}
-                </td>
-                <td className="border-2 border-gray-300 px-4 h-14 text-sm text-left">
-                  {formatCurrency(bill.cost_service)}
-                </td>
-                <td className="border border-gray-300 px-4  text-red-400 font-bold py-2 whitespace-nowrap text-sm">
-                  {formatCurrency(bill.total_amount)}
-                </td>
-                <td className="border-2 border-gray-300 px-4 h-14 text-sm text-left">
-                  {formatCurrency(bill.penalty_amount)}
-                </td>
-                <td className="border-2 border-gray-300 px-4 h-14 text-sm text-left">
-                  {bill.discount !== undefined && bill.discount !== null
-                    ? formatPercentage(bill.discount)
-                    : "-"}
-                </td>
-
-                <td className="border border-gray-300 px-4  py-2 font-bold whitespace-nowrap text-sm">
-                  {formatCurrency(calculateFinalAmount(bill))}
-                </td>
-
-                {/* Cột "Đã thanh toán" */}
-                <td
-                  className={`border border-gray-300 px-4  py-2 font-bold whitespace-nowrap text-center ${
-                    isPaid ? "text-red-500" : "text-sm"
-                  }`}
-                >
-                  {isPaid
-                    ? formatCurrency(bill.total_amount)
-                    : formatCurrency(0)}
-                </td>
-
-                {/* Cột "Tiền nợ" */}
-                <td
-                  className={`border border-gray-300 px-4  py-2 font-bold whitespace-nowrap text-center ${
-                    !isPaid ? "text-red-500" : "text-sm"
-                  }`}
-                >
-                  {!isPaid
-                    ? formatCurrency(bill.total_amount)
-                    : formatCurrency(0)}
-                </td>
-
-                <td className="border border-gray-300 px-4  py-2 min-w-[200px] text-sm">
-                  {bill.note || "-"}
-                </td>
+    <div className="h-[100%] w-full">
+      <div className="h-[80%] w-full">
+        <div className="w-full max-w-[82vw] overflow-x-auto">
+          <table className="w-full table-auto text-sm text-left">
+            {" "}
+            {/* Thay từ text-base xuống text-sm */}
+            <thead className="text-sm border-2 min-w-[200px] border-gray-300 px-4 h-14 bg-themeColor text-white text-center">
+              <tr>
+                {[
+                  "Thao tác",
+                  "Tên hóa đơn",
+                  "Khách hàng",
+                  "Phòng",
+                  "Ngày tạo",
+                  "Hạn thanh toán",
+                  "Tiền phòng",
+                  "Tiền dịch vụ",
+                  "Tổng tiền",
+                  "Tiền phạt",
+                  "Giảm giá",
+                  "Thành tiền",
+                  "Đã thanh toán",
+                  "Tiền nợ",
+                  "Ghi chú",
+                ].map((header, index) => (
+                  <th
+                    key={index}
+                    className="border border-gray-300 px-4  py-2 whitespace-nowrap text-center"
+                  >
+                    {header}
+                  </th>
+                ))}
               </tr>
-            );
-          })}
-        </tbody>
-      </table>
+            </thead>
+            <tbody>
+              {currentBills.map((bill) => {
+                const isPaid = bill.status_payment === 1;
+                return (
+                  <tr
+                    key={bill.id}
+                    className="border-b hover:bg-blue-50 text-blue-900 h-12"
+                  >
+                    <td className="px-4 py-2 border-2 border-gray-300 whitespace-nowrap text-center text-sm">
+                      <div className="flex gap-2 justify-center">
+                        {bill.status === 0 ? (
+                          // Actions khi hóa đơn chưa được duyệt
+                          <>
+                            <div className="flex flex-row justify-start gap-2 items-center">
+                              <DropdownMenu>
+                                <DropdownMenuTrigger>
+                                  <Ellipsis />
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent className="bg-white">
+                                  <DropdownMenuItem
+                                    onClick={() => onEdit(bill)}
+                                  >
+                                    <div className="flex flex-row gap-4">
+                                      <AiOutlineEdit className="h-4 w-4 text-blue-500 hover:text-blue-700 cursor-pointer" />
+                                      <span className="text-gray-700">
+                                        Chỉnh sửa
+                                      </span>
+                                    </div>
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    onClick={() => onDelete(bill.id)}
+                                  >
+                                    <div className="flex flex-row gap-4">
+                                      <AiOutlineDelete className="h-4 w-4 text-red-500 hover:text-red-700 cursor-pointer" />
+                                      <span className="text-gray-700">Xóa</span>
+                                    </div>
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                              <div onClick={() => onView(bill)}>
+                                <div className="flex flex-row gap-4">
+                                  <IoEye className="w-5 h-5 text-gray-600" />
+                                </div>
+                              </div>
+                            </div>
+                          </>
+                        ) : (
+                          // Actions khi hóa đơn đã được duyệt
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger>
+                                <AiOutlineDelete className="h-4 w-4 text-red-500 opacity-50 cursor-not-allowed" />
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Không thể xóa</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        )}
+                      </div>
+                    </td>
+                    <td className="border-2 min-w-[200px] border-gray-300 px-4 h-14 text-sm text-left">
+                      {bill.bill_name || "-"}
+                    </td>
+                    <td className="border-2 min-w-[200px] border-gray-300 px-4 h-14 text-sm text-left">
+                      {bill.customer_name || "-"}
+                    </td>
+                    <td className="border-2 min-w-[200px] border-gray-300 px-4 h-14 text-sm text-left">
+                      {bill.roomname || "-"}
+                    </td>
+                    <td className="border-2 border-gray-300 px-4 h-14 text-sm text-left">
+                      {formatDate(bill.date)}
+                    </td>
+                    <td className="border-2 border-gray-300 px-4 h-14 text-sm text-left">
+                      {formatDate(bill.due_date)}
+                    </td>
+                    <td className="border-2 border-gray-300 px-4 h-14 text-sm text-left">
+                      {formatCurrency(bill.cost_room)}
+                    </td>
+                    <td className="border-2 border-gray-300 px-4 h-14 text-sm text-left">
+                      {formatCurrency(bill.cost_service)}
+                    </td>
+                    <td className="border border-gray-300 px-4  text-red-400 font-bold py-2 whitespace-nowrap text-sm">
+                      {formatCurrency(bill.total_amount)}
+                    </td>
+                    <td className="border-2 border-gray-300 px-4 h-14 text-sm text-left">
+                      {formatCurrency(bill.penalty_amount)}
+                    </td>
+                    <td className="border-2 border-gray-300 px-4 h-14 text-sm text-left">
+                      {bill.discount !== undefined && bill.discount !== null
+                        ? formatPercentage(bill.discount)
+                        : "-"}
+                    </td>
+
+                    <td className="border border-gray-300 px-4  py-2 font-bold whitespace-nowrap text-sm">
+                      {formatCurrency(calculateFinalAmount(bill))}
+                    </td>
+
+                    {/* Cột "Đã thanh toán" */}
+                    <td
+                      className={`border border-gray-300 px-4  py-2 font-bold whitespace-nowrap text-center ${
+                        isPaid ? "text-red-500" : "text-sm"
+                      }`}
+                    >
+                      {isPaid
+                        ? formatCurrency(bill.total_amount)
+                        : formatCurrency(0)}
+                    </td>
+
+                    {/* Cột "Tiền nợ" */}
+                    <td
+                      className={`border border-gray-300 px-4  py-2 font-bold whitespace-nowrap text-center ${
+                        !isPaid ? "text-red-500" : "text-sm"
+                      }`}
+                    >
+                      {!isPaid
+                        ? formatCurrency(bill.total_amount)
+                        : formatCurrency(0)}
+                    </td>
+
+                    <td className="border border-gray-300 px-4  py-2 min-w-[200px] text-sm">
+                      {bill.note || "-"}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+          {/* Phân trang */}
+        </div>
+      </div>
+      <div className="h-[20%] w-full">
+        <div className="flex justify-center mt-4">
+          <Pagination>
+            <PaginationPrevious
+              onClick={() => handlePageChange(currentPage - 1)}
+            >
+              Trước
+            </PaginationPrevious>
+            <PaginationContent>
+              {Array.from({ length: totalPages }, (_, index) => index + 1).map(
+                (page) => (
+                  <PaginationItem key={page}>
+                    <button
+                      onClick={() => handlePageChange(page)}
+                      className={`px-3 py-1 rounded ${
+                        currentPage === page
+                          ? "bg-themeColor text-white"
+                          : "bg-white text-themeColor border border-themeColor"
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  </PaginationItem>
+                )
+              )}
+            </PaginationContent>
+            <PaginationNext onClick={() => handlePageChange(currentPage + 1)}>
+              Tiếp
+            </PaginationNext>
+          </Pagination>
+        </div>
+      </div>
     </div>
   );
 };

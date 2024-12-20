@@ -30,6 +30,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { CalendarDays } from "lucide-react";
+import { getRoomsByBuildingIdAndStatus } from "@/services/bookingApi/bookingApi";
 
 interface NewTransactionFormProps {
   onSubmit: (transaction: Partial<Transaction>) => void;
@@ -83,7 +84,7 @@ const NewTransactionForm: React.FC<NewTransactionFormProps> = ({
 
   const handleBuildingSelect = async (value: string) => {
     setFormData((prev) => ({ ...prev, buildingid: value }));
-    await getRoomByBuildingId(value);
+    await getRoomsByBuildingIdAndStatus(value, 1);
     await getContractByBuildingId(value);
   };
 

@@ -47,21 +47,26 @@ const EditContractForm: React.FC<EditContractFormProps> = ({
   const onChange: UploadProps["onChange"] = async ({ file }) => {
     if (file.originFileObj && file.status === "uploading") {
       try {
-        const imageUrl = await uploadImage(file.originFileObj); 
+        // Xóa ảnh cũ trước khi tải ảnh mới
+        await handleRemoveImage();
+  
+        // Tải ảnh mới
+        const imageUrl = await uploadImage(file.originFileObj);
         if (imageUrl) {
           const updatedFile: UploadFile = {
-            ...file,
-            url: imageUrl,
+            uid: '-1', // Định danh tạm thời
+            name: file.name || "image.png", // Tên ảnh
+            url: imageUrl, // URL của ảnh mới
             status: "done",
           };
-
+  
+          // Cập nhật giao diện và trạng thái hợp đồng
           setFileList([updatedFile]);
-
-          setContract((prevState) => ({
+          setModifiedData((prevState) => ({
             ...prevState,
             image: imageUrl,
           }));
-
+  
           message.success("Ảnh đã tải lên thành công!");
         } else {
           throw new Error("Không nhận được URL ảnh từ API.");
@@ -73,17 +78,30 @@ const EditContractForm: React.FC<EditContractFormProps> = ({
       }
     }
   };
-    // Xóa ảnh
-    const handleRemoveImage = async () => {
-      if (contract.image) {
-        await deleteImage(contract?.image);
-        setContract((prevState) => ({
+  
+  // Xóa ảnh
+  const handleRemoveImage = async () => {
+    if (contract.image) {
+      try {
+        // Gọi API để xóa ảnh trên server
+        await deleteImage(contract.image);
+        // Xóa ảnh trong state contract
+        setModifiedData((prevState) => ({
           ...prevState,
           image: "",
         }));
-        setFileList([]); // Xóa file khỏi giao diện
+  
+        // Xóa ảnh khỏi giao diện
+        setFileList([]);
+  
+        message.success("Ảnh đã được xóa!");
+      } catch (error) {
+        console.error("Lỗi khi xóa ảnh:", error);
+        message.error("Xóa ảnh thất bại. Vui lòng thử lại.");
       }
-    };
+    }
+  };
+  
 
   const onPreview = async (file: UploadFile) => {
     let src = file.url as string;
@@ -126,28 +144,31 @@ const EditContractForm: React.FC<EditContractFormProps> = ({
   };
 
   // Fetch initial data (rooms and customers)
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     try {
-  //       await getallService();
-  //       await getCustomerNoRoom();
-  //       const responseRoom = await getroombystatus(0);
-  //       setListRoom(responseRoom.data);
-  //         if (contract?.image) {
-  //         const updatedFile: UploadFile = {
-  //           ...file,
-  //           url: contract.im,
-  //           status: "done",
-  //         };
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        await getallService();
+        await getCustomerNoRoom();
 
-  //         setFileList([updatedFile]);
-  //     } catch (error) {
-  //       console.error("Error fetching data:", error);
-  //     }
-  //   };
+        const responseRoom = await getroombystatus(0);
+        setListRoom(responseRoom.data);
 
-  //   fetchData();
-  // }, []);
+        if (contract?.image) {
+          const updatedFile: UploadFile = {
+            uid: '-1',
+            name: 'image.png',
+            url: contract.image,
+            status: "done",
+          };
+          setFileList([updatedFile]);
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   // Format service options for react-select
   const serviceOptions = services.map((service) => ({
@@ -167,7 +188,6 @@ const EditContractForm: React.FC<EditContractFormProps> = ({
     label: customer.customer_name,
   }));
 
-
   // Helper function to safely convert to ISO string
   const formatDateToISO = (date: Date | string | undefined) => {
     if (date instanceof Date) {
@@ -182,10 +202,6 @@ const EditContractForm: React.FC<EditContractFormProps> = ({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6 bg-white p-8 mx-auto">
-      <h2 className="text-2xl font-bold text-gray-700 mb-6 text-center">
-        Chỉnh Sửa Hợp Đồng
-      </h2>
-
       {/* Form Fields */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Contract Name */}
@@ -329,26 +345,32 @@ const EditContractForm: React.FC<EditContractFormProps> = ({
         <label className="block text-sm font-semibold text-gray-600 mb-1">
           Ảnh hợp đồng
         </label>
-           <Upload
-              listType="picture-card"
-              fileList={fileList}
-              onChange={onChange}
-              onPreview={onPreview}
-              onRemove={handleRemoveImage}
-            >
-              {fileList.length === 0 && "+ Upload"}{" "}
-            </Upload>
+        <Upload
+          listType="picture-card"
+          fileList={fileList}
+          onChange={onChange}
+          onPreview={onPreview}
+          onRemove={handleRemoveImage}
+          maxCount={1}
+        >
+          {fileList.length === 0 && "+ Upload"}{" "}
+        </Upload>
       </div>
 
-      
-
       {/* Submit Button */}
-      <div className="flex justify-center">
+      <div className="flex justify-end space-x-4">
+        <button
+          type="button"
+          // onClick={onClose}
+          className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+        >
+          Hủy
+        </button>
         <button
           type="submit"
-          className="bg-blue-500 text-white py-2 px-6 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+          className="px-4 py-2 text-white rounded hover:bg-blue-700 bg-themeColor"
         >
-          {uploading ? "Đang tải..." : "Cập nhật hợp đồng"}
+          Lưu
         </button>
       </div>
     </form>

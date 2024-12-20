@@ -19,6 +19,16 @@ import {
   getServicemeterByBuildingId,
   getServicemeterByRoomId,
 } from "@/services/roomStatementApi/roomStatementApi";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+
 import useServiceMeterReadingsStore from "@/stores/roomStatementStore";
 import { HiSearch, HiBell, HiPlus } from "react-icons/hi";
 import CustomModal from "@/components/Modal/Modal";
@@ -55,16 +65,20 @@ const DashBoardRoomStatement: React.FC = () => {
   const hasFetchedBuildingsRef = useRef(false);
   const [hasFetchedBuildings, setHasFetchedBuildings] = useState(false);
   const [hasFetchedServiceMeters, setHasFetchedServiceMeters] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
   const [selectedMeterReading, setSelectedMeterReading] =
     useState<ServiceMeterReadings | null>(null);
-  const [infoModal, setInfoModal] = useState<boolean>(false)
-  const [reading, setReading] = useState<ServiceMeterReadings | null>(null)
+  const [infoModal, setInfoModal] = useState<boolean>(false);
+  const [reading, setReading] = useState<ServiceMeterReadings | null>(null);
+  // Thêm state cho phân trang
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 8; // Số phần tử mỗi trang
+
   useEffect(() => {
     fetchInitialData();
   }, []);
 
   const fetchInitialData = useCallback(async () => {
-    if (hasFetchedBuildingsRef.current) return; // Kiểm tra giá trị từ useRef
     try {
       if (userData?.role === "ADMIN") {
         const buildingsData = (await getAllBuildings())?.data.data;
@@ -196,8 +210,10 @@ const DashBoardRoomStatement: React.FC = () => {
         await createServicemeter(serviceMeterReading);
         if (selectedRoom) {
           await getServicemeterByRoomId(selectedRoom?.id);
+        } else if (selectedBuilding) {
+          await getServicemeterByBuildingId(selectedBuilding.id)
         } else {
-          await fetchInitialData()
+          await fetchInitialData();
         }
         setCreateFormOpen(false);
         // Thông báo thành công khi ghi chỉ số
@@ -222,7 +238,6 @@ const DashBoardRoomStatement: React.FC = () => {
     serviceMeterReading: ServiceMeterReadings
   ) => {
     try {
-
       // Lấy thông tin phòng từ API
       const response = await getRoomById(serviceMeterReading.room_id);
 
@@ -322,10 +337,38 @@ const DashBoardRoomStatement: React.FC = () => {
   };
 
   const handleViewDetails = (serviceMeterReadings: ServiceMeterReadings) => {
-    setReading(serviceMeterReadings)
-    setInfoModal(true)
+    setReading(serviceMeterReadings);
+    setInfoModal(true);
   };
-  
+
+  // Xử lý tìm kiếm và phân trang
+  const filteredservicemeterList = servicemeterList.filter(
+    (serviceMeterReadings: ServiceMeterReadings) =>
+      (serviceMeterReadings.room_name || "")
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase())
+  );
+
+  const totalPages = Math.max(
+    Math.ceil(filteredservicemeterList.length / ITEMS_PER_PAGE),
+    1
+  );
+
+  const currentFilteredServicemeterList = filteredservicemeterList.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
+  const handlePageChange = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
+
+  // Đặt lại trang khi searchTerm hoặc selectedBuildingId thay đổi
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, selectedBuildingId]);
 
   return (
     <div className="flex flex-col flex-1 bg-gray-100 w-full overflow-y-hidden">
@@ -349,7 +392,7 @@ const DashBoardRoomStatement: React.FC = () => {
                   ))}
               </select>
 
-              {roomList  && roomList?.length > 0 && (
+              {roomList && roomList?.length > 0 && (
                 <select
                   className="border border-gray-300 px-4 rounded-[8px] py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   onChange={(e) => handleRoomSelect(e.target.value)}
@@ -366,36 +409,87 @@ const DashBoardRoomStatement: React.FC = () => {
             </div>
           </div>
 
-          <div className="overflow-auto flex-1">
-            <table className="w-full border-collapse">
-              <thead className="bg-themeColor text-white">
-                <tr>
-                  <th className="border-2 border-gray-300 px-4 text-left rounded-tl-lg"></th>
-                  <th className="border-2 border-gray-300 px-4 h-14 text-sm text-left rounded-tl-lg">Tên tòa nhà</th>
-                  <th className="border-2 border-gray-300 px-4 h-14 text-sm text-left">Tên phòng</th>
-                  <th className="border-2 border-gray-300 px-4 h-14 text-sm text-left">Trạng thái</th>
-                  <th className="border-2 border-gray-300 px-4 h-14 text-sm text-left">Người ghi chỉ số</th>
-                  <th className="border-2 border-gray-300 px-4 h-14 text-sm text-left">Ngày ghi chỉ số</th>
-                  <th className="border-2 border-gray-300 px-4 h-14 text-sm text-left">Điện cũ</th>
-                  <th className="border-2 border-gray-300 px-4 h-14 text-sm text-left">Điện mới</th>
-                  <th className="border-2 border-gray-300 px-4 h-14 text-sm text-left">Chi phí điện</th>
-                  <th className="border-2 border-gray-300 px-4 h-14 text-sm text-left">Nước cũ</th>
-                  <th className="border-2 border-gray-300 px-4 h-14 text-sm text-left">Nước mới</th>
-                  <th className="border-2 border-gray-300 px-4 h-14 text-sm text-left">Chi phí nước</th>
-                  <th className="border-2 border-gray-300 px-4 h-14 text-sm text-left rounded-tr-lg">Tổng số tiền</th>
-                </tr>
-              </thead>
-              {selectedRoomId !== null ? (
-                serviceMeterReading ? (
+          <div className="overflow-auto w-full h-[100%] ">
+            <div className="h-[80%] w-full">
+              <table className="w-full border-collapse">
+                <thead className="bg-themeColor text-white">
+                  <tr>
+                    <th className="border-2 border-gray-300 px-4 h-14 text-left rounded-tl-lg"></th>
+                    <th className="border-2 border-gray-300 px-4 h-14 text-sm text-left rounded-tl-lg">
+                      Tên tòa nhà
+                    </th>
+                    <th className="border-2 border-gray-300 px-4 h-14 text-sm text-left">
+                      Tên phòng
+                    </th>
+                    <th className="border-2 border-gray-300 px-4 h-14 text-sm text-left">
+                      Trạng thái
+                    </th>
+                    <th className="border-2 border-gray-300 px-4 h-14 text-sm text-left">
+                      Người ghi chỉ số
+                    </th>
+                    <th className="border-2 border-gray-300 px-4 h-14 text-sm text-left">
+                      Ngày ghi chỉ số
+                    </th>
+                    <th className="border-2 border-gray-300 px-4 h-14 text-sm text-left">
+                      Điện cũ
+                    </th>
+                    <th className="border-2 border-gray-300 px-4 h-14 text-sm text-left">
+                      Điện mới
+                    </th>
+                    <th className="border-2 border-gray-300 px-4 h-14 text-sm text-left">
+                      Chi phí điện
+                    </th>
+                    <th className="border-2 border-gray-300 px-4 h-14 text-sm text-left">
+                      Nước cũ
+                    </th>
+                    <th className="border-2 border-gray-300 px-4 h-14 text-sm text-left">
+                      Nước mới
+                    </th>
+                    <th className="border-2 border-gray-300 px-4 h-14 text-sm text-left">
+                      Chi phí nước
+                    </th>
+                    <th className="border-2 border-gray-300 px-4 h-14 text-sm text-left rounded-tr-lg">
+                      Tổng số tiền
+                    </th>
+                  </tr>
+                </thead>
+                {selectedRoomId !== null ? (
+                  serviceMeterReading ? (
+                    <tbody>
+                      <TableRow
+                        key={serviceMeterReading.id}
+                        ServiceMeterReadings={serviceMeterReading}
+                        onDelete={() => handleDelete(serviceMeterReading.id)}
+                        onEdit={() => handleEdit(serviceMeterReading)}
+                        onCreateBill={(data) => handleCreateBill(data)}
+                        onViewDetails={handleViewDetails}
+                      />
+                    </tbody>
+                  ) : (
+                    <tbody>
+                      <tr>
+                        <td colSpan={12} className="text-center">
+                          <div className="flex items-center justify-center h-[300px] w-full text-gray-400 text-lg">
+                            Không có dữ liệu
+                          </div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  )
+                ) : servicemeterList.length > 0 ? (
                   <tbody>
-                    <TableRow
-                      key={serviceMeterReading.id}
-                      ServiceMeterReadings={serviceMeterReading}
-                      onDelete={() => handleDelete(serviceMeterReading.id)}
-                      onEdit={() => handleEdit(serviceMeterReading)}
-                      onCreateBill={(data) => handleCreateBill(data)} // Truyền đúng kiểu hàm
-                      onViewDetails={handleViewDetails} // Define and pass this handler
-                    />
+                    {currentFilteredServicemeterList.map(
+                      (serviceMeterReading) => (
+                        <TableRow
+                          key={serviceMeterReading.id}
+                          ServiceMeterReadings={serviceMeterReading}
+                          onDelete={() => handleDelete(serviceMeterReading.id)}
+                          onEdit={() => handleEdit(serviceMeterReading)}
+                          onCreateBill={(data) => handleCreateBill(data)}
+                          onViewDetails={handleViewDetails}
+                        />
+                      )
+                    )}
                   </tbody>
                 ) : (
                   <tbody>
@@ -407,32 +501,47 @@ const DashBoardRoomStatement: React.FC = () => {
                       </td>
                     </tr>
                   </tbody>
-                )
-              ) : servicemeterList.length > 0 ? (
-                <tbody>
-                  {servicemeterList.map((serviceMeterReading) => (
-                    <TableRow
-                      key={serviceMeterReading.id}
-                      ServiceMeterReadings={serviceMeterReading}
-                      onDelete={() => handleDelete(serviceMeterReading.id)}
-                      onEdit={() => handleEdit(serviceMeterReading)}
-                      onCreateBill={(data) => handleCreateBill(data)} // Truyền đúng kiểu hàm
-                      onViewDetails={handleViewDetails} // Define and pass this handler
-                    />
-                  ))}
-                </tbody>
-              ) : (
-                <tbody>
-                  <tr>
-                    <td colSpan={12} className="text-center">
-                      <div className="flex items-center justify-center h-[300px] w-full text-gray-400 text-lg">
-                        Không có dữ liệu
-                      </div>
-                    </td>
-                  </tr>
-                </tbody>
+                )}
+              </table>
+            </div>
+            <div className="h-[20%] w-full flex justify-center items-center">
+              {/* Phần hiển thị phân trang */}
+              {totalPages && (
+                <div className="flex justify-center mt-4">
+                  <Pagination>
+                    <PaginationPrevious
+                      onClick={() => handlePageChange(currentPage - 1)}
+                    >
+                      Trước
+                    </PaginationPrevious>
+                    <PaginationContent>
+                      {Array.from(
+                        { length: Math.max(totalPages, 1) },
+                        (_, index) => index + 1
+                      ).map((page) => (
+                        <PaginationItem key={page}>
+                          <PaginationLink
+                            onClick={() => handlePageChange(page)}
+                            className={`px-3 py-1 rounded ${
+                              currentPage === page
+                                ? "bg-themeColor text-white"
+                                : "bg-white text-themeColor border border-themeColor"
+                            }`}
+                          >
+                            {page}
+                          </PaginationLink>
+                        </PaginationItem>
+                      ))}
+                    </PaginationContent>
+                    <PaginationNext
+                      onClick={() => handlePageChange(currentPage + 1)}
+                    >
+                      Tiếp
+                    </PaginationNext>
+                  </Pagination>
+                </div>
               )}
-            </table>
+            </div>
           </div>
         </div>
       </div>
@@ -477,22 +586,18 @@ const DashBoardRoomStatement: React.FC = () => {
 
       {/* Modal xem thông tin */}
       <CustomModal
-      onClose={()=> setInfoModal(false)}
-      header="Thông tin chỉ số"
-      isOpen={infoModal}
-      children={
-        reading ?
-        (
-          <ServiceMeterReadingsDisplay reading={reading}/>
-        )
-        :
-        (
-          <div>
-            <span>Không có thông tin, vui lòng thử lại sau</span>
-          </div>
-        )
-
-      }
+        onClose={() => setInfoModal(false)}
+        header="Thông tin chỉ số"
+        isOpen={infoModal}
+        children={
+          reading ? (
+            <ServiceMeterReadingsDisplay reading={reading} />
+          ) : (
+            <div>
+              <span>Không có thông tin, vui lòng thử lại sau</span>
+            </div>
+          )
+        }
       />
     </div>
   );

@@ -29,6 +29,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import EditTransactionForm from "./TransactionEditForm";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+import ViewTransaction from "./TransactionDetail";
 
 interface TransactionsProps {}
 
@@ -44,6 +54,8 @@ const Transactions: React.FC<TransactionsProps> = () => {
   const [selectedBuildingId, setSelectedBuildingId] = useState<string | null>(
     null
   );
+  const [isOpenDetailModal, setIsOpenDetailModal] = useState(false);
+
   const [transactionType, setTransactionType] = useState<number>(2);
   const [startDate, setStartDate] = useState<string>("");
   const [endDate, setEndDate] = useState<string>("");
@@ -54,24 +66,26 @@ const Transactions: React.FC<TransactionsProps> = () => {
   const [totalIncome, setTotalIncome] = useState<number>(0); // Tổng thu
   const [totalExpense, setTotalExpense] = useState<number>(0); // Tổng chi
   const [netBalance, setNetBalance] = useState<number>(0); // Thu Chi (Tổng thu - Tổng chi)
+  const [selectedTransaction, setSelectedTransaction] =
+    useState<Transaction | null>(null);
 
   useEffect(() => {
     // Tính tổng thu (type === 0)
     const income = transactionList
       .filter((transaction) => transaction.type === 0)
       .reduce((sum, transaction) => sum + transaction.amount, 0);
-  
+
     // Tính tổng chi (type === 1)
     const expense = transactionList
       .filter((transaction) => transaction.type === 1)
       .reduce((sum, transaction) => sum + transaction.amount, 0);
-  
+
     // Cập nhật state
     setTotalIncome(income);
     setTotalExpense(expense);
     setNetBalance(income - expense); // Thu Chi = Tổng thu - Tổng chi
   }, [transactionList]);
-  
+
   // Fetch initial data based on user role
   const filterTransactions = () => {
     if (!startDate && !endDate) {
@@ -182,6 +196,10 @@ const Transactions: React.FC<TransactionsProps> = () => {
     setIsModalOpen(false);
   };
 
+  const handleModalDetailClose = () => {
+    setIsOpenDetailModal(false);
+  };
+
   // Handle form submission
   const handleFormSubmit = async (transaction: Partial<Transaction>) => {
     setLoading(true);
@@ -270,7 +288,7 @@ const Transactions: React.FC<TransactionsProps> = () => {
         <div className="flex flex-row w-1/3 bg-white justify-between items-center p-4 rounded-[8px]">
           <div className="flex flex-col ">
             <span className="font-semibold text-xl text-themeColor">
-            {totalIncome.toLocaleString("vi-VN")} VNĐ            
+              {totalIncome.toLocaleString("vi-VN")} VNĐ
             </span>
             <span className="text-sm">Tổng thu</span>
           </div>
@@ -393,6 +411,10 @@ const Transactions: React.FC<TransactionsProps> = () => {
         </div>
         {/* Transactions Table */}
         <TransactionsTable
+          onSelect={(transaction) => {
+            setSelectedTransaction(transaction);
+            setIsOpenDetailModal(true);
+          }}
           filterType={transactionType}
           onDeleteTransaction={handleDeleteTransaction}
           onUpdateTransaction={handleUpdateTransaction}
@@ -418,6 +440,18 @@ const Transactions: React.FC<TransactionsProps> = () => {
         <NewTransactionForm
           onSubmit={handleFormSubmit}
           onCancel={handleModalClose}
+        />
+      </CustomModal>
+
+      <CustomModal
+        header="Chi tiết"
+        isOpen={isOpenDetailModal}
+        onClose={handleModalDetailClose}
+        className="max-w-4xl"
+      >
+        <ViewTransaction
+          transaction={selectedTransaction || {}}
+          onClose={handleModalDetailClose}
         />
       </CustomModal>
     </div>

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Transaction } from "@/types/types";
 import CustomModal from "@/components/Modal/Modal";
-import { MoreHorizontal, Edit, Trash } from "lucide-react";
+import { MoreHorizontal, Edit, Trash, Eye } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,6 +20,7 @@ import {
 import EditTransactionForm from "./TransactionEditForm";
 
 interface TransactionsTableProps {
+  onSelect: (transaction: Transaction) => void;
   filterType: number;
   transactions: Transaction[];
   onUpdateTransaction: (updatedTransaction: Transaction) => void;
@@ -27,6 +28,7 @@ interface TransactionsTableProps {
 }
 
 const TransactionsTable: React.FC<TransactionsTableProps> = ({
+  onSelect,
   filterType,
   transactions,
   onUpdateTransaction,
@@ -37,7 +39,7 @@ const TransactionsTable: React.FC<TransactionsTableProps> = ({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
+  const itemsPerPage = 8;
 
   const filteredTransactions =
     filterType === 2
@@ -82,7 +84,9 @@ const TransactionsTable: React.FC<TransactionsTableProps> = ({
             <table className="w-full text-sm table-auto">
               <thead className="sticky top-0 bg-themeColor h-12 text-white z-10">
                 <tr>
-                  <th className="px-4 py-2 border-2 border-gray-300 text-left"></th>
+                  <th className="px-4 py-2 border-2 border-gray-300 text-left">
+                    Thao tác
+                  </th>
                   <th className="px-4 py-2 border-2 border-gray-300 text-left">
                     Tên
                   </th>
@@ -147,6 +151,13 @@ const TransactionsTable: React.FC<TransactionsTableProps> = ({
                               <Edit className="w-4 h-4 mr-2 " />
                               Sửa
                             </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => onSelect(transaction)}
+                            >
+                              <Eye className="mr-2 h-4 w-4 text-purple-500" />
+                              Xem chi tiết
+                            </DropdownMenuItem>
+
                             <DropdownMenuItem
                               onClick={() => handleDelete(transaction.id)}
                               className="flex flex-row"
@@ -240,7 +251,7 @@ const TransactionsTable: React.FC<TransactionsTableProps> = ({
       </div>
       {selectedTransaction && (
         <CustomModal
-          header="Sửa giao dịch"
+          header="Chỉnh sửa"
           onClose={() => setIsEditModalOpen(false)}
           isOpen={isEditModalOpen}
           children={

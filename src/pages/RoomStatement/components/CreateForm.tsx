@@ -8,7 +8,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Building, Room, ServiceMeterReadings } from "@/types/types";
 import useAuthStore from "@/stores/userStore";
-import { getServicemeterByBuildingId, getServicemeterByRoomId } from "@/services/roomStatementApi/roomStatementApi";
+import {
+  getServicemeterByBuildingId,
+  getServicemeterByRoomId,
+} from "@/services/roomStatementApi/roomStatementApi";
 import useServiceMeterReadingsStore from "@/stores/roomStatementStore";
 import { toast } from "@/hooks/use-toast";
 import {
@@ -24,6 +27,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { getRoomsByBuildingIdAndStatus } from "@/services/bookingApi/bookingApi";
 
 interface MeterReadingFormProps {
   onSubmit: (meterReading: ServiceMeterReadings) => void;
@@ -70,48 +74,46 @@ const MeterReadingForm: React.FC<MeterReadingFormProps> = ({
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
-
   const clearData = () => {
     setMeterReading((prevState) => ({
-        ...prevState,
-        electricity_old: 0,
-        electricity_new: 0,
-        electricity_price: 0,
-        electricity_cost: 0,
-        water_old: 0,
-        water_new: 0,
-        water_price: 0,
-        water_cost: 0,
-        total_amount: 0,
-    }))
-  }
+      ...prevState,
+      electricity_old: 0,
+      electricity_new: 0,
+      electricity_price: 0,
+      electricity_cost: 0,
+      water_old: 0,
+      water_new: 0,
+      water_price: 0,
+      water_cost: 0,
+      total_amount: 0,
+    }));
+  };
   useEffect(() => {
     getInitialData();
   }, []);
 
   useEffect(() => {
-    if(selectedRoom){
-    getServicemeterByRoomId(selectedRoom?.id);
-    setMeterReading(prevState => ({
+    if (selectedRoom) {
+      getServicemeterByRoomId(selectedRoom?.id);
+      setMeterReading((prevState) => ({
         ...prevState,
         room_name: selectedRoom?.room_name || null,
-        room_id: selectedRoom?.id
-    }))
-          clearData()
-}
+        room_id: selectedRoom?.id,
+      }));
+      clearData();
+    }
   }, [selectedRoom]);
 
-  
   useEffect(() => {
     if (selectedBuilding) {
-      getRoomByBuildingId(selectedBuilding.id);
-      getServicemeterByBuildingId(selectedBuilding.id)
+      getRoomsByBuildingIdAndStatus(selectedBuilding.id, 1);
+      getServicemeterByBuildingId(selectedBuilding.id);
       setMeterReading((prevState) => ({
         ...prevState,
         building_id: selectedBuilding.id || null,
-        building_name: selectedBuilding.building_name
-      }))
-      clearData()
+        building_name: selectedBuilding.building_name,
+      }));
+      clearData();
     }
   }, [selectedBuilding]);
 
@@ -144,21 +146,32 @@ const MeterReadingForm: React.FC<MeterReadingFormProps> = ({
     }
   };
 
+  // const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const { name, value } = e.target;
+  //   setMeterReading((prevState) => ({
+  //     ...prevState,
+  //     [name]:
+  //       name.includes("price") ||
+  //       name.includes("status") ||
+  //       name.includes("id") ||
+  //       name.includes("recordid") ||
+  //       name.includes("record_date")
+  //         ? parseFloat(value) || 0
+  //         : value,
+  //   }));
+  // };
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+
+    // Loại bỏ dấu phân cách hàng nghìn khi nhập liệu
+    const numericValue = value.replace(/[^0-9]/g, ""); // Chỉ giữ lại số
+
     setMeterReading((prevState) => ({
       ...prevState,
-      [name]:
-        name.includes("price") ||
-        name.includes("status") ||
-        name.includes("id") ||
-        name.includes("recordid") ||
-        name.includes("record_date")
-          ? parseFloat(value) || 0
-          : value,
+      [name]: numericValue ? parseFloat(numericValue) : 0, // Lưu giá trị số
     }));
   };
-
 
   const validate = (): boolean => {
     const newErrors: { [key: string]: string } = {};
@@ -247,8 +260,7 @@ const MeterReadingForm: React.FC<MeterReadingFormProps> = ({
                 <Select
                   onValueChange={(value) => {
                     const selected =
-                      roomList.find((room) => room.id === value) ||
-                      null;
+                      roomList.find((room) => room.id === value) || null;
                     setSelectedRoom(selected);
                   }}
                 >
@@ -256,11 +268,13 @@ const MeterReadingForm: React.FC<MeterReadingFormProps> = ({
                     <SelectValue placeholder="Chọn phòng" />
                   </SelectTrigger>
                   <SelectContent className="bg-white">
-                    {roomList.map((room) => (
-                      <SelectItem  key={room.id} value={room.id}>
-                        {room.room_name}
-                      </SelectItem>
-                    ))}
+                    {roomList &&
+                      roomList.length > 0 &&
+                      roomList.map((room) => (
+                        <SelectItem key={room.id} value={room.id}>
+                          {room.room_name}
+                        </SelectItem>
+                      ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -334,7 +348,7 @@ const MeterReadingForm: React.FC<MeterReadingFormProps> = ({
                         name="electricity_new"
                         type="number"
                         placeholder="Nhập chỉ số mới"
-                        value={meterReading.electricity_new}
+                        value={meterReading.electricity_new || ""} // Hiển thị chuỗi rỗng nếu giá trị null hoặc undefined
                         onChange={handleChange}
                         className={`border ${
                           errors.electricity_new
@@ -368,9 +382,15 @@ const MeterReadingForm: React.FC<MeterReadingFormProps> = ({
                       <Input
                         id="electricity_price"
                         name="electricity_price"
-                        type="number"
+                        type="text" // Đổi sang text để hiển thị giá trị định dạng
                         placeholder="Nhập giá tiền mỗi đơn vị"
-                        value={meterReading.electricity_price}
+                        value={
+                          meterReading.electricity_price
+                            ? new Intl.NumberFormat("vi-VN").format(
+                                meterReading.electricity_price
+                              )
+                            : "" // Hiển thị định dạng nếu có giá trị
+                        }
                         onChange={handleChange}
                         className={`border ${
                           errors.electricity_price
@@ -384,12 +404,50 @@ const MeterReadingForm: React.FC<MeterReadingFormProps> = ({
                             : undefined
                         }
                       />
+
                       {errors.electricity_price && (
                         <span
                           id="electricity_price-error"
                           className="text-red-500 text-sm mt-1"
                         >
                           {errors.electricity_price}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex flex-col">
+                      <Label
+                        htmlFor="record_date"
+                        className="mb-2 text-gray-700 font-medium"
+                      >
+                        Ngày Ghi Chỉ Số
+                      </Label>
+                      <div className="relative">
+                        <Input
+                          type="date"
+                          id="record_date"
+                          name="record_date"
+                          value={
+                            meterReading.record_date.toISOString().split("T")[0]
+                          }
+                          onChange={handleChange}
+                          className={`border ${
+                            errors.record_date
+                              ? "border-red-500"
+                              : "border-gray-300"
+                          } rounded-md focus:border-blue-500 focus:ring-blue-500 pl-10`}
+                          aria-invalid={!!errors.record_date}
+                          aria-describedby={
+                            errors.record_date ? "record_date-error" : undefined
+                          }
+                        />
+                        <CalendarIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                      </div>
+                      {errors.record_date && (
+                        <span
+                          id="record_date-error"
+                          className="text-red-500 text-sm mt-1"
+                        >
+                          {errors.record_date}
                         </span>
                       )}
                     </div>
@@ -401,7 +459,7 @@ const MeterReadingForm: React.FC<MeterReadingFormProps> = ({
                     </h4>
                     <div className="flex justify-between">
                       <p className="text-gray-600">
-                        <span className="font-medium">Đơn Vị Tiêu Thụ:</span>
+                        <span className="font-medium">Đơn Vị Tiêu Thụ: </span>
                         {Math.max(
                           0,
                           meterReading.electricity_new -
@@ -472,9 +530,15 @@ const MeterReadingForm: React.FC<MeterReadingFormProps> = ({
                       <Input
                         id="water_new"
                         name="water_new"
-                        type="number"
+                        type="text" // Đổi sang "text" để hiển thị định dạng
                         placeholder="Nhập chỉ số mới"
-                        value={meterReading.water_new}
+                        value={
+                          meterReading.water_new
+                            ? new Intl.NumberFormat("vi-VN").format(
+                                meterReading.water_new
+                              )
+                            : ""
+                        }
                         onChange={handleChange}
                         className={`border ${
                           errors.water_new
@@ -486,6 +550,7 @@ const MeterReadingForm: React.FC<MeterReadingFormProps> = ({
                           errors.water_new ? "water_new-error" : undefined
                         }
                       />
+
                       {errors.water_new && (
                         <span
                           id="water_new-error"
@@ -506,9 +571,15 @@ const MeterReadingForm: React.FC<MeterReadingFormProps> = ({
                       <Input
                         id="water_price"
                         name="water_price"
-                        type="number"
+                        type="text" // Đổi sang "text" để hiển thị định dạng
                         placeholder="Nhập giá tiền mỗi đơn vị"
-                        value={meterReading.water_price}
+                        value={
+                          meterReading.water_price
+                            ? new Intl.NumberFormat("vi-VN").format(
+                                meterReading.water_price
+                              )
+                            : ""
+                        }
                         onChange={handleChange}
                         className={`border ${
                           errors.water_price
@@ -520,6 +591,7 @@ const MeterReadingForm: React.FC<MeterReadingFormProps> = ({
                           errors.water_price ? "water_price-error" : undefined
                         }
                       />
+
                       {errors.water_price && (
                         <span
                           id="water_price-error"
@@ -530,7 +602,43 @@ const MeterReadingForm: React.FC<MeterReadingFormProps> = ({
                       )}
                     </div>
                   </div>
-
+                  <div className="flex flex-col">
+                      <Label
+                        htmlFor="record_date"
+                        className="mb-2 text-gray-700 font-medium"
+                      >
+                        Ngày Ghi Chỉ Số
+                      </Label>
+                      <div className="relative">
+                        <Input
+                          type="date"
+                          id="record_date"
+                          name="record_date"
+                          value={
+                            meterReading.record_date.toISOString().split("T")[0]
+                          }
+                          onChange={handleChange}
+                          className={`border ${
+                            errors.record_date
+                              ? "border-red-500"
+                              : "border-gray-300"
+                          } rounded-md focus:border-blue-500 focus:ring-blue-500 pl-10`}
+                          aria-invalid={!!errors.record_date}
+                          aria-describedby={
+                            errors.record_date ? "record_date-error" : undefined
+                          }
+                        />
+                        <CalendarIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                      </div>
+                      {errors.record_date && (
+                        <span
+                          id="record_date-error"
+                          className="text-red-500 text-sm mt-1"
+                        >
+                          {errors.record_date}
+                        </span>
+                      )}
+                    </div>
                   <div className="rounded-lg border border-gray-200 p-4 bg-gray-50">
                     <h4 className="font-semibold text-gray-700 mb-2">
                       Tóm Tắt Mức Tiêu Thụ
@@ -561,76 +669,7 @@ const MeterReadingForm: React.FC<MeterReadingFormProps> = ({
             </ScrollArea>
 
             <div className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="flex flex-col">
-                  <Label
-                    htmlFor="record_date"
-                    className="mb-2 text-gray-700 font-medium"
-                  >
-                    Ngày Ghi Chỉ Số
-                  </Label>
-                  <div className="relative">
-                    <Input
-                      type="date"
-                      id="record_date"
-                      name="record_date"
-                      value={
-                        meterReading.record_date.toISOString().split("T")[0]
-                      }
-                      onChange={handleChange}
-                      className={`border ${
-                        errors.record_date
-                          ? "border-red-500"
-                          : "border-gray-300"
-                      } rounded-md focus:border-blue-500 focus:ring-blue-500 pl-10`}
-                      aria-invalid={!!errors.record_date}
-                      aria-describedby={
-                        errors.record_date ? "record_date-error" : undefined
-                      }
-                    />
-                    <CalendarIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                  </div>
-                  {errors.record_date && (
-                    <span
-                      id="record_date-error"
-                      className="text-red-500 text-sm mt-1"
-                    >
-                      {errors.record_date}
-                    </span>
-                  )}
-                </div>
-
-                <div className="flex flex-col">
-                  <Label
-                    htmlFor="status"
-                    className="mb-2 text-gray-700 font-medium"
-                  >
-                    Trạng Thái
-                  </Label>
-                  <Input
-                    id="status"
-                    name="status"
-                    type="number"
-                    value={meterReading.status}
-                    onChange={handleChange}
-                    className={`border ${
-                      errors.status ? "border-red-500" : "border-gray-300"
-                    } rounded-md focus:border-blue-500 focus:ring-blue-500`}
-                    aria-invalid={!!errors.status}
-                    aria-describedby={
-                      errors.status ? "status-error" : undefined
-                    }
-                  />
-                  {errors.status && (
-                    <span
-                      id="status-error"
-                      className="text-red-500 text-sm mt-1"
-                    >
-                      {errors.status}
-                    </span>
-                  )}
-                </div>
-              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
 
               <div className="flex justify-end space-x-4">
                 <Button
