@@ -27,7 +27,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal } from "lucide-react";
+import { MoreHorizontal, PlusCircle } from "lucide-react";
 import { FaEdit, FaTrash } from "react-icons/fa";
 
 const ITEMS_PER_PAGE = 8; // Số phần tử mỗi trang
@@ -38,7 +38,7 @@ const Tenant: React.FC = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedTenant, setSelectedTenant] = useState<Tenant | null>(null);
-
+  const [searchTerm, setSearchTerm] = useState("");
   // Thêm state để quản lý trang hiện tại
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -122,7 +122,14 @@ const Tenant: React.FC = () => {
               </div>
               <span className="text-base"></span>
             </div>
-            <div>
+            <div className="flex flex-row h-12 gap-4">
+            <input
+                type="text"
+                placeholder="Tìm kiếm khách hàng"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="p-2 border border-gray-300 rounded shadow w-[250px] focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
               <div
                 className="bg-themeColor flex flex-row justify-center items-center gap-2 text-base h-12 text-white py-2 w-44 rounded-[6px] shadow hover:bg-themeColor transition duration-300 cursor-pointer"
                 title="Thêm Mới"
@@ -131,7 +138,7 @@ const Tenant: React.FC = () => {
                   setIsAddModalOpen(true);
                 }}
               >
-                <BiPlus className="size-6" />
+                <PlusCircle className="w-6 h-6 text-white cursor-pointer" />
                 <span>Thêm</span>
               </div>
             </div>
@@ -142,7 +149,7 @@ const Tenant: React.FC = () => {
             <table className="w-full h-full">
               <thead>
                 <tr className="bg-themeColor text-white">
-                  <th className="w-16 p-4 border-2 border-gray-300 "></th>
+                  <th className="w-16 p-4 border-2 border-gray-300 ">Thao tác</th>
                   <th className="p-4 border-2 border-gray-300 text-left">
                     Tên khách thuê
                   </th>

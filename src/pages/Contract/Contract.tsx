@@ -23,7 +23,19 @@ import {
   getAllBuildings,
   getBuildingByUserId,
 } from "@/services/buildingApi/buildingApi";
-import { Bell } from "lucide-react";
+import { Bell, PlusCircle } from "lucide-react";
+
+// Thêm các import cho phân trang và dropdown-menu
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+
+const ITEMS_PER_PAGE = 8; // Số phần tử mỗi trang
 
 const DashBoardContract: React.FC = () => {
   const [selectedContract, setSelectedContract] = useState<Contract | null>(
@@ -35,12 +47,18 @@ const DashBoardContract: React.FC = () => {
   const [editContract, setEditContract] = useState<Contract | null>(null); // Store the contract to be edited
   const [selectedBuildingId, setSelectedBuildingId] = useState<string | null>(
     null
-  ); // State for selected building
+  ); 
+  const [searchTerm, setSearchTerm] = useState("");
+
   const contractData = useContractStore((state) => state.contracts);
   const userData = useAuthStore((state) => state.userData);
   const buildings = useBuildingStore((state) => state.buildings);
   const setBuilding = useBuildingStore((state) => state.setBuilding);
   const roomList = useBuildingStore((state) => state.roomList);
+
+  // Thêm state cho phân trang
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 8; // Số phần tử mỗi trang
 
   useEffect(() => {
     fetchInitialData();
@@ -130,18 +148,45 @@ const DashBoardContract: React.FC = () => {
     }
   };
 
+  // Xử lý tìm kiếm và phân trang
+  const filteredContracts = contractData.filter((contract: Contract) =>
+    (contract.customerName || "")
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase())
+  );
+
+  const totalPages = Math.ceil(filteredContracts.length / ITEMS_PER_PAGE);
+
+  const currentContracts = filteredContracts.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
+  const handlePageChange = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
+
+  // Đặt lại trang khi searchTerm hoặc selectedBuildingId thay đổi
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, selectedBuildingId]);
+
   return (
     <div className="flex flex-col flex-1 bg-gray-100 w-full overflow-y-hidden">
       <div className="flex h-[100%] p-4 overflow-hidden">
-        <div className="flex flex-1 rounded-[8px] flex-col py-4 px-4 w-full bg-white">
-          <div className="flex flex-row justify-between items-center pb-4 border-b">
+        <div className="flex flex-1 rounded-[8px] flex-col py-6 px-4 w-full bg-white">
+          <div className="flex flex-row justify-between items-center h-12 mb-4">
             <div className="flex flex-row items-center gap-6">
               <div className="py-1 px-2 rounded-[6px] flex justify-center items-center bg-themeColor">
                 <span className="text-base text-white font-bold">
-                  {contractData.length}
+                  {filteredContracts.length}
                 </span>
               </div>
-              <span className="text-sm">{contractData.length} Hợp đồng</span>
+              <span className="text-sm">
+                {filteredContracts.length} Hợp đồng
+              </span>
               {/* Building Selector */}
               <div className="flex items-center gap-4">
                 <select
@@ -158,65 +203,111 @@ const DashBoardContract: React.FC = () => {
                 </select>
               </div>
             </div>
-            <div>
+            <div className="flex flex-row gap-4">
+              <input
+                type="text"
+                placeholder="Tìm kiếm ..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="p-2 border border-gray-300 rounded shadow w-[300px] focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
               <div
                 onClick={() => setIsOpenCreateModal(true)}
-                className="bg-themeColor flex flex-row justify-center items-center gap-2 text-base h-12 text-white py-2 w-44 rounded-[6px] shadow hover:bg-themeColor transition duration-300 cursor-pointer"
+                className="bg-themeColor flex items-center justify-center gap-2 text-base h-11 text-white py-2 px-4 rounded-[6px] shadow hover:bg-opacity-90 transition duration-300 cursor-pointer"
                 title="Thêm Mới"
               >
-                <FaPlus size={20} />
+                <PlusCircle className="w-6 h-6 text-white cursor-pointer" />
                 <span>Thêm</span>
               </div>
             </div>
           </div>
 
           {/* Bảng hiển thị hợp đồng */}
-          <table className="w-full table-fixed border-collapse border border-gray-300">
-            <thead>
-              <tr className="bg-themeColor text-white h-12">
-                <th className="w-[5%] py-2 px-4 text-left border border-gray-300"></th>
-                <th className="w-[20%] py-2 px-4 text-left border border-gray-300">
-                  Tên người thuê
-                </th>
-                <th className="w-[15%] py-2 px-4 text-left border border-gray-300">
-                  Phòng
-                </th>
-                <th className="w-[15%] py-2 px-4 text-left border border-gray-300">
-                  Ngày bắt đầu
-                </th>
-                <th className="w-[15%] py-2 px-4 text-left border border-gray-300">
-                  Ngày kết thúc
-                </th>
-                <th className="w-[15%] py-2 px-4 text-left border border-gray-300">
-                  Giá thuê phòng
-                </th>
-                <th className="w-[15%] py-2 px-4 text-left border border-gray-300">
-                  Tiền cọc
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {contractData.length === 0 ? (
-                <tr>
-                  <td colSpan={7} className="text-center text-gray-500 py-4">
-                    Chưa có hợp đồng nào
-                  </td>
+          <div className="w-full rounded-[8px] h-[750px] overflow-hidden">
+            <table className="w-full table-fixed border-collapse border border-gray-300">
+              <thead>
+                <tr className="bg-themeColor text-white h-12">
+                  <th className="w-[7%] py-2  px-4 text-left border border-gray-300">Thao tác</th>
+                  <th className="w-[20%] py-2 px-4 text-left border border-gray-300">
+                    Tên người thuê
+                  </th>
+                  <th className="w-[15%] py-2 px-4 text-left border border-gray-300">
+                    Phòng
+                  </th>
+                  <th className="w-[15%] py-2 px-4 text-left border border-gray-300">
+                    Ngày bắt đầu
+                  </th>
+                  <th className="w-[15%] py-2 px-4 text-left border border-gray-300">
+                    Ngày kết thúc
+                  </th>
+                  <th className="w-[13%] py-2 px-4 text-left border border-gray-300">
+                    Giá thuê phòng
+                  </th>
+                  <th className="w-[15%] py-2 px-4 text-left border border-gray-300">
+                    Tiền cọc
+                  </th>
                 </tr>
-              ) : (
-                contractData.map((contract, index) => (
-                  <ContractRow
-                    key={contract.id}
-                    contract={contract}
-                    onClick={() => handleRowClick(contract)}
-                    onDelete={() => handleDelete(contract.id)}
-                    onEdit={() => handleEdit(contract)} // Pass the contract to edit
-                    onPrint={() => handlePrint(contract.id)}
-                    index={index + 1}
-                  />
-                ))
-              )}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {currentContracts.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="text-center text-gray-500 py-4">
+                      Chưa có hợp đồng nào
+                    </td>
+                  </tr>
+                ) : (
+                  currentContracts.map((contract, index) => (
+                    <ContractRow
+                      key={contract.id}
+                      contract={contract}
+                      onClick={() => handleRowClick(contract)}
+                      onDelete={() => handleDelete(contract.id)}
+                      onEdit={() => handleEdit(contract)}
+                      onPrint={() => handlePrint(contract.id)}
+                      index={(currentPage - 1) * ITEMS_PER_PAGE + index + 1}
+                    />
+                  ))
+                )}
+              </tbody>
+            </table>
+  
+          </div>
+          {/* Phần hiển thị phân trang */}
+          {totalPages && (
+            <div className="flex justify-center mt-4">
+              <Pagination>
+                <PaginationPrevious
+                  onClick={() => handlePageChange(currentPage - 1)}
+                >
+                  Trước
+                </PaginationPrevious>
+                <PaginationContent>
+                  {Array.from(
+                    { length: Math.max(totalPages, 1) },
+                    (_, index) => index + 1
+                  ).map((page) => (
+                    <PaginationItem key={page}>
+                      <PaginationLink
+                        onClick={() => handlePageChange(page)}
+                        className={`px-3 py-1 rounded ${
+                          currentPage === page
+                            ? "bg-themeColor text-white"
+                            : "bg-white text-themeColor border border-themeColor"
+                        }`}
+                      >
+                        {page}
+                      </PaginationLink>
+                    </PaginationItem>
+                  ))}
+                </PaginationContent>
+                <PaginationNext
+                  onClick={() => handlePageChange(currentPage + 1)}
+                >
+                  Tiếp
+                </PaginationNext>
+              </Pagination>
+            </div>
+          )}
         </div>
       </div>
 
@@ -229,7 +320,7 @@ const DashBoardContract: React.FC = () => {
       )}
 
       <CustomModal
-        header="Tạo hợp đồng"
+        header="Thêm mới"
         isOpen={isOpenCreateModal}
         onClose={() => setIsOpenCreateModal(false)}
       >

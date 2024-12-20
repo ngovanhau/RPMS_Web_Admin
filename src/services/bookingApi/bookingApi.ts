@@ -1,6 +1,7 @@
 import { Booking } from "@/types/types";
 import api from "../axios";
 import useBookingStore from "@/stores/bookingStore";
+import { useBuildingStore } from "@/stores/buildingStore";
 
 export const getAllBooking = async () => {
     try {
@@ -70,9 +71,10 @@ export const getRoomsByBuildingIdAndStatus = async (
     );
 
     const rooms = response.data?.data || []; 
-    console.log("Danh sách phòng:", rooms); 
+    useBuildingStore.getState().setRooms(response.data.data.rooms); 
     return rooms; 
   } catch (error) {
+    useBuildingStore.getState().setRooms([]); 
     console.error("Lỗi khi lấy danh sách phòng:", error);
     return [];
   }

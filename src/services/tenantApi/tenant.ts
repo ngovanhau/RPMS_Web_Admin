@@ -2,6 +2,7 @@ import api from "../axios";
 
 import { Tenant } from "@/types/types";
 import useTenantStore from "@/stores/tenantStore";
+import { useBuildingStore } from "@/stores/buildingStore";
 
 export const getallTenant = async () => {
   try {
@@ -55,8 +56,10 @@ export const updateTenant = async (Tenant: Tenant) => {
 export const getroombystatus = async(ID: number) => {
   try {
     const response = await api.get(`/room/getroombystatus?status=${ID}` );
+    useBuildingStore.getState().setRooms(response.data.data.rooms); 
     return response.data;
   } catch (error) {
+    useBuildingStore.getState().setRooms([]); 
     console.error(`Error fetching Tenant with ID ${ID}:`, error);
       throw error;
   }

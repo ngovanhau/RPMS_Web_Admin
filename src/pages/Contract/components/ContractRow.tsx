@@ -3,13 +3,14 @@ import { Contract } from "@/types/types";
 import { getbyidTenant } from "@/services/tenantApi/tenant";
 import { FiTrash, FiEdit2, FiMoreHorizontal, FiPrinter } from "react-icons/fi";
 import { formatDateTime } from "@/config/config";
+import { IoEye } from "react-icons/io5";
 
 type ContractRowProps = {
   contract: Contract;
   onClick?: () => void; // Hàm xử lý khi click vào hàng
   onDelete: (id: string) => void; // Hàm xóa hợp đồng nhận id hợp đồng
-  onEdit: ( contract : Contract) => void;  // Hàm sửa hợp đồng
-  onPrint: (id: string) => void;  // Hàm in hợp đồng
+  onEdit: (contract: Contract) => void; // Hàm sửa hợp đồng
+  onPrint: (id: string) => void; // Hàm in hợp đồng
   index: number; // Thứ tự
 };
 
@@ -33,9 +34,9 @@ const ContractRow: React.FC<ContractRowProps> = ({
     // Close dropdown if user clicks outside
     const handleClickOutside = (e: MouseEvent) => {
       if (
-        dropdownRef.current && 
+        dropdownRef.current &&
         !dropdownRef.current.contains(e.target as Node) &&
-        dropdownButtonRef.current && 
+        dropdownButtonRef.current &&
         !dropdownButtonRef.current.contains(e.target as Node)
       ) {
         setIsDropdownOpen(false); // Close the dropdown if clicked outside
@@ -69,42 +70,47 @@ const ContractRow: React.FC<ContractRowProps> = ({
   };
 
   return (
-    <tr
-      className="border-b cursor-pointer hover:bg-gray-100"
-      onClick={onClick} // Vẫn giữ onClick cho toàn bộ hàng trừ cột ba chấm
-    >
-      <td className="py-2 px-4 border border-gray-300 h-12 relative">
+    <tr className="cursor-pointer border-none shadow-none hover:bg-gray-100">
+      <td className="items-center px-4 border-2 border-gray-300 h-12 relative flex flex-row">
         {/* Dropdown Button with three dots */}
-        <button 
-          onClick={toggleDropdown} 
+        <button
+          onClick={toggleDropdown}
           className="p-2 text-gray-600 hover:text-gray-900 focus:outline-none"
           ref={dropdownButtonRef}
         >
           <FiMoreHorizontal />
         </button>
+        <IoEye
+          onClick={onClick} 
+          className="w-5 h-5 text-gray-600"
+        />
 
         {/* Dropdown menu */}
         {isDropdownOpen && (
-          <div 
+          <div
             className="absolute left-0 mt-2 w-48 bg-white shadow-lg rounded-lg z-10"
             ref={dropdownRef}
           >
             <ul className="list-none p-2">
-              <li 
-                className="flex items-center p-2 cursor-pointer hover:bg-gray-100 text-gray-600" 
+              <li
+                className="flex items-center p-2 cursor-pointer hover:bg-gray-100 text-gray-600"
                 onClick={(e) => handleMenuItemClick(e, () => onEdit(contract))}
               >
                 <FiEdit2 className="mr-2" /> Sửa
               </li>
-              <li 
-                className="flex items-center p-2 cursor-pointer hover:bg-gray-100 text-gray-600" 
-                onClick={(e) => handleMenuItemClick(e, () => onDelete(contract.id))}
+              <li
+                className="flex items-center p-2 cursor-pointer hover:bg-gray-100 text-gray-600"
+                onClick={(e) =>
+                  handleMenuItemClick(e, () => onDelete(contract.id))
+                }
               >
                 <FiTrash className="mr-2" /> Xóa
               </li>
-              <li 
-                className="flex items-center p-2 cursor-pointer hover:bg-gray-100 text-gray-600" 
-                onClick={(e) => handleMenuItemClick(e, () => onPrint(contract.id))}
+              <li
+                className="flex items-center p-2 cursor-pointer hover:bg-gray-100 text-gray-600"
+                onClick={(e) =>
+                  handleMenuItemClick(e, () => onPrint(contract.id))
+                }
               >
                 <FiPrinter className="mr-2" /> In
               </li>
@@ -112,12 +118,22 @@ const ContractRow: React.FC<ContractRowProps> = ({
           </div>
         )}
       </td>
-      <td className="py-2 px-4 border border-gray-300 h-12">{contract.customerName}</td>
-      <td className="py-2 px-4 border border-gray-300 h-12">{contract.room}</td>
-      <td className="py-2 px-4 border border-gray-300 h-12">{formatDateTime(contract.start_day)}</td>
-      <td className="py-2 px-4 border border-gray-300 h-12">{formatDateTime(contract.end_day)}</td>
-      <td className="py-2 px-4 border border-gray-300 h-12">{contract.room_fee.toLocaleString()} VND</td>
-      <td className="py-2 px-4 border border-gray-300 h-12">{contract.deposit.toLocaleString()} VND</td>
+      <td className="py-2 px-4 border-2 border-gray-300 h-12">
+        {contract.customerName}
+      </td>
+      <td className="py-2 px-4 border-2 border-gray-300 h-12">{contract.room}</td>
+      <td className="py-2 px-4 border-2 border-gray-300 h-12">
+        {formatDateTime(contract.start_day)}
+      </td>
+      <td className="py-2 px-4 border-2 border-gray-300 h-12">
+        {formatDateTime(contract.end_day)}
+      </td>
+      <td className="py-2 px-4 border-2 border-gray-300 h-12">
+        {contract.room_fee.toLocaleString()} VND
+      </td>
+      <td className="py-2 px-4 border-2 border-gray-300 h-12">
+        {contract.deposit.toLocaleString()} VND
+      </td>
     </tr>
   );
 };

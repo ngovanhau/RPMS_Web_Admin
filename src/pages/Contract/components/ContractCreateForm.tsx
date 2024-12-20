@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Contract } from "@/types/types";
+import { Building, Contract } from "@/types/types";
 import { getallService } from "@/services/servicesApi/servicesApi";
 import useServiceStore from "@/stores/servicesStore";
 import { Label } from "@/components/ui/label";
@@ -16,7 +16,14 @@ import Viewer from "react-viewer";
 import { Upload, message } from "antd";
 import type { GetProp, UploadFile, UploadProps } from "antd";
 import ImgCrop from "antd-img-crop";
-import { getRoomById } from "@/services/buildingApi/buildingApi";
+import {
+  getAllBuildings,
+  getBuildingByUserId,
+  getRoomById,
+} from "@/services/buildingApi/buildingApi";
+import { useBuildingStore } from "@/stores/buildingStore";
+import useAuthStore from "@/stores/userStore";
+import { getRoomsByBuildingIdAndStatus } from "@/services/bookingApi/bookingApi";
 type FileType = Parameters<GetProp<UploadProps, "beforeUpload">>[0];
 
 interface CreateContractFormProps {
@@ -49,47 +56,50 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({
   const [visible, setVisible] = useState(false); // Trạng thái xem ảnh
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [fileList, setFileList] = useState<UploadFile[]>([]);
+  const [selectedBuilding, setSelectedBuilding] = useState<Building | null>(
+    null
+  );
   // Access services from the store
   const services = useServiceStore.getState().services;
   const listCustomer = useTenantStore.getState().tenantsWithoutRoom;
+  const buildingList = useBuildingStore.getState().buildings;
+  const userInfo = useAuthStore.getState().userData;
 
   // const onChange: UploadProps["onChange"] = ({ fileList: newFileList }) => {
   //   setFileList(newFileList);
   // };
 
-  const onChange: UploadProps['onChange'] = async ({ file }) => {
-    if (file.originFileObj && file.status === 'uploading') {
+  const onChange: UploadProps["onChange"] = async ({ file }) => {
+    if (file.originFileObj && file.status === "uploading") {
       try {
         const imageUrl = await uploadImage(file.originFileObj); // Gọi API upload ảnh
         if (imageUrl) {
           const updatedFile: UploadFile = {
             ...file,
             url: imageUrl,
-            status: 'done', // Đánh dấu trạng thái là hoàn tất
+            status: "done", // Đánh dấu trạng thái là hoàn tất
           };
-  
+
           // Cập nhật vào danh sách file để hiển thị
           setFileList([updatedFile]);
-  
+
           // Lưu URL ảnh vào trạng thái contract
           setContract((prevState) => ({
             ...prevState,
             image: imageUrl,
           }));
-  
-          message.success('Ảnh đã tải lên thành công!');
+
+          message.success("Ảnh đã tải lên thành công!");
         } else {
-          throw new Error('Không nhận được URL ảnh từ API.');
+          throw new Error("Không nhận được URL ảnh từ API.");
         }
       } catch (error) {
-        console.error('Lỗi tải ảnh:', error);
-        message.error('Tải ảnh thất bại. Vui lòng thử lại.');
+        console.error("Lỗi tải ảnh:", error);
+        message.error("Tải ảnh thất bại. Vui lòng thử lại.");
         setFileList([]); // Reset fileList nếu lỗi
       }
     }
   };
-  ;
-
   const onPreview = async (file: UploadFile) => {
     let src = file.url as string;
     if (!src) {
@@ -144,10 +154,11 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({
   useEffect(() => {
     const fetchData = async () => {
       try {
-        await getallService();
-        await getCustomerNoRoom();
-        const responseRoom = await getroombystatus(0);
-        setListRoom(responseRoom.data);
+        if (userInfo) {
+          userInfo.role === "ADMIN"
+            ? (await getAllBuildings(), await getCustomerNoRoom())
+            : (await getBuildingByUserId(userInfo.userId || ""), await getCustomerNoRoom());
+        }
       } catch (error) {
         console.error("Error fetching room data:", error);
       }
@@ -156,13 +167,14 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({
     fetchData();
   }, []);
 
-  // Format services for react-select options
-  const serviceOptions = services.map((service) => ({
-    value: service.id,
-    label: service.service_name,
-    serviceId: service.id,
-    serviceName: service.service_name,
-  }));
+  useEffect(() => {
+    const getData = async () => {
+      const response = await getRoomsByBuildingIdAndStatus(selectedBuilding?.id || "", 3)
+      setListRoom(response)
+    }
+    getData()
+  }, [selectedBuilding]);
+
   // Tạo danh sách tùy chọn cho phòng
   const roomOptions = listRoom.map((room) => ({
     value: room.id,
@@ -173,6 +185,11 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({
   const customerOptions = listCustomer.map((customer) => ({
     value: customer.id || "",
     label: customer.customer_name,
+  }));
+
+  const buildingOptions = buildingList.map((building) => ({
+    value: building.id,
+    label: building.building_name,
   }));
 
   const handleUploadImage = async (files: FileList) => {
@@ -217,13 +234,9 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({
   };
   return (
     <form onSubmit={handleSubmit} className="space-y-6 bg-white p-8 mx-auto">
-      <h2 className="text-2xl font-bold text-gray-700 mb-6 text-center">
-        Tạo Hợp Đồng Mới
-      </h2>
-
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <label className="block text-sm font-semibold text-gray-600 mb-1">
+          <label className="block text-sm font-semibold text-black mb-1">
             Tên Hợp Đồng
           </label>
           <input
@@ -231,35 +244,88 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({
             name="contract_name"
             value={contract.contract_name || ""}
             onChange={handleChange}
-            className="border rounded-lg p-3 w-full focus:ring-2 focus:ring-blue-400 focus:outline-none"
+            className="border rounded-[6px] p-3 h-10 w-full focus:ring-2 focus:ring-blue-400 focus:outline-none"
             placeholder="Nhập tên hợp đồng"
             required
           />
         </div>
         <div>
           <label className="block text-sm font-semibold text-gray-600 mb-1">
-            Quản Lý Cho Thuê
+            Chọn tòa nhà
           </label>
-          <input
-            type="text"
-            name="rentalManagement"
-            value={contract.rentalManagement || ""}
-            onChange={handleChange}
-            className="border rounded-lg p-3 w-full focus:ring-2 focus:ring-blue-400 focus:outline-none"
-            placeholder="Tên quản lý"
+          <Select
+            options={buildingOptions}
+            onChange={(selected) => {
+              const fullBuilding = buildingList.find(
+                (building) => building.id === selected?.value
+              );
+              if (fullBuilding) {
+                setSelectedBuilding(fullBuilding);
+              }
+            }}
+            className="rounded-[6px] w-full focus:ring-2 focus:ring-blue-400 focus:outline-none"
+            placeholder="Chọn tòa nhà"
           />
         </div>
+
         <div>
           <label className="block text-sm font-semibold text-gray-600 mb-1">
             Phòng
           </label>
+          {
+            listRoom.length > 0 ? 
+            (
+              <Select
+              options={roomOptions}
+              onChange={(selected) =>
+                handleRoomChange(selected as { value: string; label: string })
+              }
+              className="h-10 rounded-[6px] w-full focus:ring-2 focus:ring-blue-400 focus:outline-none"
+              placeholder="Chọn phòng"
+            />
+            )
+            :
+            (
+              <div className="border border-gray-300 px-2 flex items-center h-10 rounded-[6px]">
+                <span>Không có phòng</span>
+              </div>
+            )
+          }
+
+        </div>
+        <div>
+          <label className="block text-sm font-semibold text-gray-600 mb-1">
+            Khách Hàng
+          </label>
           <Select
-            options={roomOptions}
+            options={customerOptions}
             onChange={(selected) =>
-              handleRoomChange(selected as { value: string; label: string })
+              handleCustomerChange(selected as { value: string; label: string })
             }
-            className="border rounded-lg w-full focus:ring-2 focus:ring-blue-400 focus:outline-none"
-            placeholder="Chọn phòng"
+            className="rounded-[6px] w-full  focus:ring-2 focus:ring-blue-400 focus:outline-none"
+            placeholder="Chọn khách hàng"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-semibold text-gray-600 mb-1">
+            Phí Phòng (VND)
+          </label>
+          <div className="w-full border  border-gray-200 h-12 justify-start p-2 items-center flex">
+            <span>{contract.room_fee?.toLocaleString()} VNĐ</span>
+          </div>
+        </div>
+        <div>
+          <label className="block text-sm font-semibold text-gray-600 mb-1">
+            Tiền Đặt Cọc (VND)
+          </label>
+          <input
+            type="number"
+            name="deposit"
+            value={contract.deposit || ""}
+            onChange={handleChange}
+            className="border rounded-[6px] p-3 w-full focus:ring-2 focus:ring-blue-400 focus:outline-none"
+            placeholder="Nhập tiền đặt cọc"
+            required
           />
         </div>
         <div>
@@ -273,7 +339,7 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({
             onChange={(e) =>
               setContract({ ...contract, start_day: new Date(e.target.value) })
             }
-            className="border rounded-lg p-3 w-full focus:ring-2 focus:ring-blue-400 focus:outline-none"
+            className="border rounded-[6px] p-3 w-full focus:ring-2 focus:ring-blue-400 focus:outline-none"
             required
           />
         </div>
@@ -288,7 +354,7 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({
             onChange={(e) =>
               setContract({ ...contract, end_day: new Date(e.target.value) })
             }
-            className="border rounded-lg p-3 w-full focus:ring-2 focus:ring-blue-400 focus:outline-none"
+            className="border rounded-[6px] p-3 w-full focus:ring-2 focus:ring-blue-400 focus:outline-none"
             required
           />
         </div>
@@ -308,7 +374,7 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({
                 billing_start_date: new Date(e.target.value),
               })
             }
-            className="border rounded-lg p-3 w-full focus:ring-2 focus:ring-blue-400 focus:outline-none"
+            className="border rounded-[6px] p-3 w-full focus:ring-2 focus:ring-blue-400 focus:outline-none"
             required
           />
         </div>
@@ -321,54 +387,13 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({
             name="payment_term"
             value={contract.payment_term || ""}
             onChange={handleChange}
-            className="border rounded-lg p-3 w-full focus:ring-2 focus:ring-blue-400 focus:outline-none"
+            className="border rounded-[6px] p-3 w-full focus:ring-2 focus:ring-blue-400 focus:outline-none"
             placeholder="Nhập kỳ hạn"
             required
           />
         </div>
-        <div>
-          <label className="block text-sm font-semibold text-gray-600 mb-1">
-            Phí Phòng (VND)
-          </label>
-          <input
-            type="text"
-            name="room_fee"
-            disabled
-            value={contract.room_fee || ""}
-            onChange={handleChange}
-            className="border rounded-lg p-3 w-full focus:ring-2 focus:ring-blue-400 focus:outline-none"
-            placeholder="Nhập phí phòng"
-            required
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-semibold text-gray-600 mb-1">
-            Tiền Đặt Cọc (VND)
-          </label>
-          <input
-            type="number"
-            name="deposit"
-            value={contract.deposit || ""}
-            onChange={handleChange}
-            className="border rounded-lg p-3 w-full focus:ring-2 focus:ring-blue-400 focus:outline-none"
-            placeholder="Nhập tiền đặt cọc"
-            required
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-semibold text-gray-600 mb-1">
-            Khách Hàng
-          </label>
-          <Select
-            options={customerOptions}
-            onChange={(selected) =>
-              handleCustomerChange(selected as { value: string; label: string })
-            }
-            className="border rounded-lg w-full focus:ring-2 focus:ring-blue-400 focus:outline-none"
-            placeholder="Chọn khách hàng"
-          />
-        </div>
-        <div>
+
+        {/* <div>
           <label className="block text-sm font-semibold text-gray-600 mb-1">
             Điều Khoản
           </label>
@@ -377,10 +402,10 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({
             name="clause"
             value={contract.clause || ""}
             onChange={handleChange}
-            className="border rounded-lg p-3 w-full focus:ring-2 focus:ring-blue-400 focus:outline-none"
+            className="border rounded-[6px] p-3 w-full focus:ring-2 focus:ring-blue-400 focus:outline-none"
             placeholder="Nhập điều khoản"
           />
-        </div>
+        </div> */}
         <div>
           <label className="block text-sm font-semibold text-gray-600 mb-1">
             Ảnh Hợp Đồng
@@ -394,9 +419,8 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({
                 handleUploadImage(files);
               }
             }}
-            className="border rounded-lg p-3 w-full focus:ring-2 focus:ring-blue-400 focus:outline-none"
+            className="border rounded-[6px] p-3 w-full focus:ring-2 focus:ring-blue-400 focus:outline-none"
           /> */}
-          <ImgCrop rotationSlider>
             <Upload
               listType="picture-card"
               fileList={fileList}
@@ -406,7 +430,6 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({
             >
               {fileList.length === 0 && "+ Upload"}{" "}
             </Upload>
-          </ImgCrop>
         </div>
       </div>
 
