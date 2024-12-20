@@ -2,13 +2,18 @@ import { updateTenant } from "@/services/tenantApi/tenant";
 import { Tenant } from "@/types/types";
 import React, { useState, useEffect } from "react";
 import { getroombystatus } from "@/services/tenantApi/tenant";
-import { uploadImage } from "@/services/uploadApi/upload";
+import { uploadImage, deleteImage } from "@/services/imageApi/imageApi";
+import { Image, message } from "antd";
+import { CloseOutlined, PlusOutlined } from "@ant-design/icons";
+import type { GetProp, UploadFile, UploadProps } from "antd";
+import { Upload } from "antd";
 
 interface EditTenantFormProps {
   tenant: Tenant;
   onSuccess: () => void;
   onClose: () => void;
 }
+type FileType = Parameters<GetProp<UploadProps, "beforeUpload">>[0];
 
 interface Room {
   id: string;
@@ -22,13 +27,29 @@ const EditTenantForm: React.FC<EditTenantFormProps> = ({
 }) => {
   const [editableTenant, setEditableTenant] = useState<Tenant>({
     ...tenant,
-    date_of_birth: tenant.date_of_birth ? new Date(tenant.date_of_birth) : new Date(),
-    date_of_issue: tenant.date_of_issue ? new Date(tenant.date_of_issue) : new Date(),
+    date_of_birth: tenant.date_of_birth
+      ? new Date(tenant.date_of_birth)
+      : new Date(),
+    date_of_issue: tenant.date_of_issue
+      ? new Date(tenant.date_of_issue)
+      : new Date(),
   });
   const [rooms, setRooms] = useState<Room[]>([]);
+  const [fileList, setFileList] = useState<UploadFile[]>([]);
+  const [previewImage, setPreviewImage] = useState<string>("");
+  const [previewOpen, setPreviewOpen] = useState<boolean>(false);
 
   useEffect(() => {
     fetchAvailableRooms();
+    const initialFiles: UploadFile[] | undefined = tenant.imageCCCDs?.map(
+      (url, index) => ({
+        uid: `-${index}`,
+        name: `Image ${index + 1}`,
+        status: "done",
+        url,
+      })
+    );
+    setFileList(initialFiles || []);
   }, []);
 
   const fetchAvailableRooms = async () => {
@@ -39,7 +60,6 @@ const EditTenantForm: React.FC<EditTenantFormProps> = ({
       console.error("Failed to fetch rooms:", error);
     }
   };
-
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -53,37 +73,12 @@ const EditTenantForm: React.FC<EditTenantFormProps> = ({
     }));
   };
 
-  const handleDateChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
     setEditableTenant((prevTenant) => ({
       ...prevTenant,
       [id]: new Date(value), // Chuyển đổi chuỗi thành `Date`
     }));
-  };
-
-  const handleImageUpload = async (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    if (event.target.files) {
-      const files = Array.from(event.target.files);
-      const uploadedImageUrls: string[] = [];
-
-      for (const file of files) {
-        try {
-          const response = await uploadImage(file);
-          uploadedImageUrls.push(response.data.url);
-        } catch (error) {
-          console.error("Failed to upload image:", error);
-        }
-      }
-
-      setEditableTenant((prevTenant) => ({
-        ...prevTenant,
-        imageCCCDs: [...prevTenant.imageCCCDs, ...uploadedImageUrls],
-      }));
-    }
   };
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -96,6 +91,80 @@ const EditTenantForm: React.FC<EditTenantFormProps> = ({
     } catch (error) {
       console.error("Failed to update tenant:", error);
     }
+  };
+
+  const handleDeleteImage = (url: string) => {
+    setEditableTenant((prevTenant) => ({
+      ...prevTenant,
+      imageCCCDs: prevTenant.imageCCCDs.filter((imageUrl) => imageUrl !== url),
+    }));
+  };
+
+  const uploadButton = (
+    <div>
+      <PlusOutlined />
+      <div style={{ marginTop: 8 }}>Upload</div>
+    </div>
+  );
+
+  // Xử lý upload ảnh
+  const handleUpload = async (options: any) => {
+    const { file, onSuccess, onError } = options;
+
+    try {
+      const imageUrl = await uploadImage(file);
+      onSuccess("OK");
+      setEditableTenant((prev) => ({
+        ...prev,
+        imageCCCDs: [...prev.imageCCCDs, imageUrl],
+      }));
+      setFileList((prevList) => [
+        ...prevList,
+        {
+          uid: file.uid,
+          name: file.name,
+          status: "done",
+          url: imageUrl,
+        },
+      ]);
+      message.success("Upload thành công!");
+    } catch (error) {
+      onError({ error });
+      message.error("Upload thất bại!");
+    }
+  };
+
+  // Xử lý xóa ảnh
+  const handleRemove = async (file: UploadFile) => {
+    try {
+      if (file.url) {
+        await deleteImage(file.url);
+        message.success("Xóa ảnh thành công!");
+      }
+
+      setFileList((prevList) =>
+        prevList.filter((item) => item.uid !== file.uid)
+      );
+      // Xóa khỏi imageCCCDs
+      setEditableTenant((prev) => ({
+        ...prev,
+        imageCCCDs: prev.imageCCCDs.filter((url) => url !== file.url),
+      }));
+    } catch (error) {
+      message.error("Xóa ảnh thất bại!");
+    }
+  };
+  // Xử lý xem ảnh
+  const handlePreview = async (file: UploadFile) => {
+    setPreviewImage(file.url || (file.preview as string));
+    setPreviewOpen(true);
+  };
+  const uploadProps: UploadProps = {
+    customRequest: handleUpload,
+    onRemove: handleRemove,
+    listType: "picture-card",
+    fileList,
+    onPreview: handlePreview,
   };
 
   return (
@@ -159,13 +228,16 @@ const EditTenantForm: React.FC<EditTenantFormProps> = ({
 
         {/* Date of Birth */}
         <div>
-          <label htmlFor="date_of_birth" className="block text-gray-700 font-semibold mb-1">
+          <label
+            htmlFor="date_of_birth"
+            className="block text-gray-700 font-semibold mb-1"
+          >
             Ngày sinh
           </label>
           <input
             type="date"
             id="date_of_birth"
-            value={editableTenant.date_of_birth.toISOString().split('T')[0]}
+            value={editableTenant.date_of_birth.toISOString().split("T")[0]}
             onChange={handleDateChange}
             className="w-full p-2 border rounded-md"
           />
@@ -177,17 +249,17 @@ const EditTenantForm: React.FC<EditTenantFormProps> = ({
             htmlFor="choose_room"
             className="block text-gray-700 font-semibold mb-1"
           >
-            {tenant.choose_room !== "00000000-0000-0000-0000-000000000000" ? ('Phòng thuê') : ("Chọn phòng thuê")}
+            {tenant.choose_room !== "00000000-0000-0000-0000-000000000000"
+              ? "Phòng thuê"
+              : "Chọn phòng thuê"}
           </label>
-          {
-            tenant.choose_room !== "00000000-0000-0000-0000-000000000000" ?
-            (
-              <div className="p-2"><span className="font-semibold" >{tenant.roomName}</span></div>
-            )
-            :
-            (
-              <>
-                <select
+          {tenant.choose_room !== "00000000-0000-0000-0000-000000000000" ? (
+            <div className="p-2">
+              <span className="font-semibold">{tenant.roomName}</span>
+            </div>
+          ) : (
+            <>
+              <select
                 id="choose_room"
                 value={editableTenant.choose_room}
                 onChange={handleChange}
@@ -200,10 +272,8 @@ const EditTenantForm: React.FC<EditTenantFormProps> = ({
                   </option>
                 ))}
               </select>
-              </>
-            )
-          }
-
+            </>
+          )}
         </div>
 
         {/* CCCD */}
@@ -253,7 +323,7 @@ const EditTenantForm: React.FC<EditTenantFormProps> = ({
           <input
             type="date"
             id="date_of_issue"
-            value={editableTenant.date_of_issue.toISOString().split('T')[0]}
+            value={editableTenant.date_of_issue.toISOString().split("T")[0]}
             onChange={handleDateChange}
             className="w-full p-2 border rounded-md"
           />
@@ -284,23 +354,17 @@ const EditTenantForm: React.FC<EditTenantFormProps> = ({
           >
             Ảnh CMND/CCCD
           </label>
-          <input
-            type="file"
-            id="imageCCCDs"
-            multiple
-            onChange={handleImageUpload}
-            className="w-full p-2 border border-dashed rounded-md cursor-pointer"
+          <Upload {...uploadProps}>
+            {fileList.length < 8 && uploadButton}
+          </Upload>
+          <Image
+            wrapperStyle={{ display: "none" }}
+            preview={{
+              visible: previewOpen,
+              src: previewImage,
+              onVisibleChange: (visible) => setPreviewOpen(visible),
+            }}
           />
-          <div className="flex flex-wrap mt-2">
-            {editableTenant.imageCCCDs.map((url, index) => (
-              <img
-                key={index}
-                src={url}
-                alt={`Ảnh CMND/CCCD ${index + 1}`}
-                className="w-20 h-20 object-cover m-1"
-              />
-            ))}
-          </div>
         </div>
       </div>
 

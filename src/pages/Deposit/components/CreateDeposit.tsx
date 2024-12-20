@@ -111,7 +111,7 @@ const CreateDeposit: React.FC<CreateDepositProps> = ({
       const initialFiles: UploadFile[] | undefined = initialData.image?.map((url, index) => ({
         uid: `-${index}`,
         name: `Image ${index + 1}`,
-        status: "done", // Dùng đúng kiểu cho status
+        status: "done", 
         url,
       }));
       setFileList(initialFiles || []);

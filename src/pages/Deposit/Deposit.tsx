@@ -229,7 +229,7 @@ const DashBoard: React.FC = () => {
               <table className="w-full border-collapse">
               <thead className="sticky top-0 bg-themeColor text-white z-10 h-25">
               <tr>
-                <th className="border border-gray-300 p-2 w-[100px]">Thao tác</th>
+                <th className="border border-gray-300 p-2 w-[100px]"></th>
                 <th className="border border-gray-300 p-2 w-[200px]">Tên Khách hàng</th>
                 <th className="border border-gray-300 p-2 w-[150px]">Tên phòng</th>
                 <th className="border border-gray-300 p-2 w-[150px]">Số tiền cọc</th>

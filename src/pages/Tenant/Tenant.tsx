@@ -279,7 +279,7 @@ const Tenant: React.FC = () => {
       <CustomModal
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
-        header="Chỉnh sửa Tenant"
+        header="Chỉnh sửa"
       >
         {selectedTenant && (
           <EditTenantForm
