@@ -39,12 +39,12 @@ const TableRow: React.FC<TableRowProps> = ({
               <Edit className="mr-2 h-4 w-4 " />
               Sửa
             </DropdownMenuItem>
-            <DropdownMenuItem
+            {/* <DropdownMenuItem
               onClick={() => onCreateBill(ServiceMeterReadings)}
             >
               <FileText className="mr-2 h-4 w-4 " />
               Tạo hóa đơn
-            </DropdownMenuItem>
+            </DropdownMenuItem> */}
             <DropdownMenuItem
               onClick={() => onDelete(ServiceMeterReadings?.id)}
             >
@@ -64,7 +64,7 @@ const TableRow: React.FC<TableRowProps> = ({
         {ServiceMeterReadings.room_name}
       </td>
       <td className="border-2 border-gray-300 px-4 py-2 whitespace-nowrap text-sm">
-        {ServiceMeterReadings.status}
+        {ServiceMeterReadings.status === 0 ? ('Chưa tạo hóa đơn') : ('Đã tạo hóa đơn')}
       </td>
       <td className="border-2 border-gray-300 px-4 py-2 whitespace-nowrap text-sm">
         {ServiceMeterReadings.recorded_by}
