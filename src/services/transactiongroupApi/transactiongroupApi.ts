@@ -32,3 +32,13 @@ export const deleteTransactionGroup = async ( id : string ) => {
         console.log(error)
     }
 }
+
+
+export const updateTransactionGroup = async (id: string, data : TransactionGroup ) => {
+    try {
+        const response = await api.put(`/transactiongroup/update?id=${id}`, data)
+        console.log(response)
+    } catch (error) {
+        console.log(error)
+    }
+}

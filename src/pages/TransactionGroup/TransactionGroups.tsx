@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { FaEdit, FaTrashAlt } from "react-icons/fa";
 import CustomModal from "@/components/Modal/Modal";
-import TransactionGroupForm from "../Cashflow/components/TransactionGroupForm";
+import TransactionGroupForm from "./components/TransactionGroupForm";
 import { TransactionGroup } from "@/types/types";
 import {
   createTransactionGroup,
   getAllTransactionGroup,
   deleteTransactionGroup,
+  updateTransactionGroup,
 } from "@/services/transactiongroupApi/transactiongroupApi";
 import useAuthStore from "@/stores/userStore";
 import useTransactionGroupStore from "@/stores/transactiongroupStore";
@@ -33,9 +34,7 @@ const TransactionGroups = () => {
   );
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingGroup, setEditingGroup] = useState<TransactionGroup | null>(
-    null
-  );
+  const [editingGroup, setEditingGroup] = useState<TransactionGroup | null>(null);
   const [filterType, setFilterType] = useState("all");
 
   const fetchInitialData = async () => {
@@ -63,9 +62,17 @@ const TransactionGroups = () => {
   };
 
   const handleSaveGroup = async (group: TransactionGroup) => {
-    await createTransactionGroup(group);
-    await getAllTransactionGroup();
+    if (editingGroup) {
+      // If editing, update the group
+      await updateTransactionGroup(group.id, group);
+    } else {
+      // If adding a new group
+      await createTransactionGroup(group);
+    }
+
+    // After creating or updating, close the modal and refresh the list
     setIsModalOpen(false);
+    await getAllTransactionGroup();
   };
 
   const handleDeleteGroup = async (group: TransactionGroup) => {
@@ -96,26 +103,24 @@ const TransactionGroups = () => {
                 <SelectValue placeholder="Chọn loại giao dịch" />
               </SelectTrigger>
               <SelectContent className="bg-white ">
-                <SelectContent className="bg-white">
-                  <SelectItem
-                    className="data-[state=checked]:bg-themeColor data-[state=checked]:text-white"
-                    value="all"
-                  >
-                    Tất cả
-                  </SelectItem>
-                  <SelectItem
-                    className="data-[state=checked]:bg-themeColor data-[state=checked]:text-white"
-                    value="income"
-                  >
-                    Thu
-                  </SelectItem>
-                  <SelectItem
-                    className="data-[state=checked]:bg-themeColor data-[state=checked]:text-white"
-                    value="expense"
-                  >
-                    Chi
-                  </SelectItem>
-                </SelectContent>
+                <SelectItem
+                  className="data-[state=checked]:bg-themeColor data-[state=checked]:text-white"
+                  value="all"
+                >
+                  Tất cả
+                </SelectItem>
+                <SelectItem
+                  className="data-[state=checked]:bg-themeColor data-[state=checked]:text-white"
+                  value="income"
+                >
+                  Thu
+                </SelectItem>
+                <SelectItem
+                  className="data-[state=checked]:bg-themeColor data-[state=checked]:text-white"
+                  value="expense"
+                >
+                  Chi
+                </SelectItem>
               </SelectContent>
             </Select>
           </CardHeader>
@@ -159,14 +164,14 @@ const TransactionGroups = () => {
                               className="px-4 bg-white"
                             >
                               <DropdownMenuItem
-                                className="flex items-center space-x-2 text-blue-600"
+                                className="flex items-center space-x-2"
                                 onClick={() => handleEditGroup(group)}
                               >
                                 <FaEdit size={16} />
                                 <span>Chỉnh sửa</span>
                               </DropdownMenuItem>
                               <DropdownMenuItem
-                                className="flex items-center space-x-2 text-red-600"
+                                className="flex items-center space-x-2"
                                 onClick={() => handleDeleteGroup(group)}
                               >
                                 <FaTrashAlt className="text-gray-500" size={16} />
@@ -185,7 +190,7 @@ const TransactionGroups = () => {
                             {group.type === 0 ? "Thu" : "Chi"}
                           </span>
                         </td>
-                        <td className="px-4 py-3 border-2 border-gray-300 text-md text-gray-500 max-w-sm break-words">
+                        <td className="px-4 py-3 border-2 border-gray-300 text-md text-gray-900">
                           {group.note}
                         </td>
                       </tr>
@@ -213,6 +218,7 @@ const TransactionGroups = () => {
           initialData={editingGroup || undefined}
           onSubmit={handleSaveGroup}
           onCancel={() => setIsModalOpen(false)}
+          onUpdate={fetchInitialData} // Pass the fetch function to refresh the list
         />
       </CustomModal>
     </div>
@@ -220,3 +226,4 @@ const TransactionGroups = () => {
 };
 
 export default TransactionGroups;
+

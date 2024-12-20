@@ -107,3 +107,19 @@ export const updatepassword = async (email: string, otp: string, newPassword: st
         return null;
     }
 };
+
+export const updateStatus = async (id: string): Promise<any> => {
+    try {
+        // Xây dựng URL động với các tham số email, otp, và newPassword
+        const response = await api.put(`/identityusers/updatestatus?id=${id}`);
+
+        if (response.status === 200) {
+            return response.data; // Trả về dữ liệu từ phản hồi
+        } else {
+            return null;
+        }
+    } catch (error) {
+        console.error("Lỗi khi gọi API:", error);
+        return null;
+    }
+};

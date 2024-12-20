@@ -1,83 +1,100 @@
-import React from "react";
-import { FaEllipsisV, FaTrash, FaEdit } from "react-icons/fa";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { MoreHorizontal } from "lucide-react";
-
+// src/components/AccountRow.tsx
+import React, { useState, useEffect } from "react";
+import { Switch, Spin } from "antd"; // Import Switch và Spin từ Ant Design
+import { updateStatus } from "@/services/userApi/userApi"; // Đảm bảo bạn có hàm updateStatus
+import 'antd/dist/reset.css'; // Import styles của Ant Design
 
 type AccountRowProps = {
+  id: string;
   username: string;
   firstName: string;
   lastName: string;
   role: string;
   email: string;
   phone: string;
-  onEdit?: () => void; // Edit handler
-  onClick?: () => void; // Edit handler
-  onDelete?: () => void; // Delete handler
+  status: string; // Trạng thái người dùng
+  onStatusChange?: () => void; // Handler khi trạng thái thay đổi
 };
 
-export const AccountRow: React.FC<AccountRowProps> = ({
+const AccountRow: React.FC<AccountRowProps> = ({
+  id,
   username,
   firstName,
   lastName,
   role,
   email,
   phone,
-  onEdit,
-  onDelete,
-  onClick
+  status,
+  onStatusChange,
 }) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [checked, setChecked] = useState(status === "Active");
+
+  useEffect(() => {
+    setChecked(status === "Active");
+  }, [status]);
+
+  const handleToggleStatus = async (checked: boolean) => {
+    setIsLoading(true);
+    try {
+      await updateStatus(id); // Gọi API để cập nhật trạng thái
+      setChecked(checked);
+      onStatusChange && onStatusChange(); // Gọi handler để cập nhật danh sách
+    } catch (error) {
+      console.error("Failed to update status:", error);
+      alert("Cập nhật trạng thái thất bại. Vui lòng thử lại.");
+      // Đảo ngược trạng thái nếu cập nhật thất bại
+      setChecked(!checked);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
-    <div onClick={onClick} className="flex flex-row w-full h-16 cursor-pointer items-center border-b border-gray-200 hover:bg-blue-50 transition duration-200 ease-in-out">
-      {/* Three-dots menu */}
-      <div className="w-[4%] flex items-center justify-start">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button className="text-themeColor hover:text-themeColor focus:outline-none">
-            <MoreHorizontal/>
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="bg-white shadow-lg rounded-lg p-2 border border-gray-200">
-            <DropdownMenuItem
-              onClick={onDelete}
-              className="p-2 text-red-500 hover:bg-red-50 flex items-center gap-2 rounded-md transition-colors duration-150"
-            >
-              <FaTrash className="w-4 h-4 text-gray-600" />
-              <span className="text-gray-600">Xóa</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={onEdit}
-              className="p-2 text-themeColor hover:bg-blue-50 flex items-center gap-2 rounded-md transition-colors duration-150"
-            >
-              <FaEdit className="w-4 h-4 text-gray-600" />
-              <span className="text-gray-600">Chỉnh sửa</span>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+    <div className="flex flex-row w-full h-16 items-center border-b border-gray-200 hover:bg-blue-50 transition duration-200 ease-in-out">
+      {/* Tên đăng nhập */}
+      <div className="w-[20%] flex items-center justify-start border-r border-gray-600 px-4">
+        <span className="text-gray-800 text-sm font-medium">{username}</span>
       </div>
 
-      <div className="w-[25%] flex items-center justify-start">
-        <span className="text-gray-800 text-sm">{username}</span>
+      {/* Họ */}
+      <div className="w-[12%] flex items-center justify-start border-r border-gray-600 px-4">
+        <span className="text-gray-800 text-sm font-medium">{firstName}</span>
       </div>
-      <div className="w-[12%] flex items-center justify-start">
-        <span className="text-gray-800 text-sm">{firstName}</span>
+
+      {/* Tên */}
+      <div className="w-[12%] flex items-center justify-start border-r border-gray-600 px-4">
+        <span className="text-gray-800 text-sm font-medium">{lastName}</span>
       </div>
-      <div className="w-[12%] flex items-center justify-start">
-        <span className="text-gray-800 text-sm">{lastName}</span>
+
+      {/* Vai trò */}
+      <div className="w-[10%] flex items-center justify-start border-r border-gray-600 px-4">
+        <span className="text-gray-800 text-sm font-medium">{role}</span>
       </div>
-      <div className="w-[10%] flex items-center justify-start">
-        <span className="text-gray-800 text-sm">{role}</span>
+
+      {/* Email */}
+      <div className="w-[23%] flex items-center justify-start border-r border-gray-600 px-4">
+        <span className="text-gray-800 text-sm truncate font-medium">{email}</span>
       </div>
-      <div className="w-[23%] flex items-center justify-start">
-        <span className="text-gray-800 text-sm truncate">{email}</span>
+
+      {/* Số điện thoại */}
+      <div className="w-[14%] flex items-center justify-start border-r border-gray-600 px-4">
+        <span className="text-gray-800 text-sm font-medium">{phone}</span>
       </div>
-      <div className="w-[14%] flex items-center justify-start">
-        <span className="text-gray-800 text-sm">{phone}</span>
+
+      {/* Thao tác */}
+      <div className="w-[14%] flex items-center justify-center px-4">
+        {isLoading ? (
+          <Spin size="small" />
+        ) : (
+          <Switch
+            checked={checked}
+            onChange={handleToggleStatus}
+            checkedChildren="Active"
+            unCheckedChildren="Deleted"
+            className="mt-1"
+          />
+        )}
       </div>
     </div>
   );
