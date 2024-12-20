@@ -71,3 +71,13 @@ export const deleteServicemeter = async ( servicemeterId : string ) => {
         throw error
     }
 }
+
+export const updateStatusServicemeter = async ( servicemeterId : string, status : number) => {
+    try {
+        const response = await api.put(`/servicemeterreadings/updatestatus?id=${servicemeterId}&status=${status}`)
+        console.log(response.data.data)
+        return response
+    } catch (error) {
+        throw error
+    }
+}

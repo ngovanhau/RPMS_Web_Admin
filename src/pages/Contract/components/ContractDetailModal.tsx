@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import { Contract } from "@/types/types";
-import CustomModal from '@/components/Modal/Modal';
-import { formatDateTime } from '@/config/config';
-import Viewer from 'react-viewer';
+import CustomModal from "@/components/Modal/Modal";
+import { formatDateTime } from "@/config/config";
+import Viewer from "react-viewer";
 
 interface ContractDetailsModalProps {
   contract: Contract;
@@ -35,85 +35,127 @@ const ContractDetailsModal: React.FC<ContractDetailsModalProps> = ({
     >
       <div>
         {/* Tên hợp đồng */}
-        <h2 className="text-2xl font-bold text-center text-gray-800 mb-8">{contract.contract_name}</h2>
+        <h2 className="text-2xl font-bold text-center text-gray-800 mb-8">
+          {contract.contract_name}
+        </h2>
 
         {/* Bảng chi tiết hợp đồng */}
         <div className="overflow-x-auto">
           <table className="min-w-full table-auto">
             <thead>
               <tr>
-                <th className="text-left py-3 px-6 bg-gray-100 text-gray-700 font-medium">Tiêu đề</th>
-                <th className="text-left py-3 px-6 bg-gray-100 text-gray-700 font-medium">Dữ liệu</th>
+                <th className="text-left py-3 px-6 bg-gray-100 text-gray-700 font-medium">
+                  Tiêu đề
+                </th>
+                <th className="text-left py-3 px-6 bg-gray-100 text-gray-700 font-medium">
+                  Dữ liệu
+                </th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td className="py-4 px-6 border-b text-gray-700 font-medium">Phòng</td>
-                <td className="py-4 px-6 border-b text-gray-700">{contract.room}</td>
+                <td className="py-4 px-6 border-b text-gray-700 font-medium">
+                  Phòng
+                </td>
+                <td className="py-4 px-6 border-b text-gray-700">
+                  {contract.room}
+                </td>
               </tr>
               <tr>
-                <td className="py-4 px-6 border-b text-gray-700 font-medium">Ngày bắt đầu</td>
-                <td className="py-4 px-6 border-b text-gray-700">{formatDateTime(contract.start_day)}</td>
+                <td className="py-4 px-6 border-b text-gray-700 font-medium">
+                  Ngày bắt đầu
+                </td>
+                <td className="py-4 px-6 border-b text-gray-700">
+                  {formatDateTime(contract.start_day)}
+                </td>
               </tr>
               <tr>
-                <td className="py-4 px-6 border-b text-gray-700 font-medium">Ngày kết thúc</td>
-                <td className="py-4 px-6 border-b text-gray-700">{formatDateTime(contract.end_day)}</td>
+                <td className="py-4 px-6 border-b text-gray-700 font-medium">
+                  Ngày kết thúc
+                </td>
+                <td className="py-4 px-6 border-b text-gray-700">
+                  {formatDateTime(contract.end_day)}
+                </td>
               </tr>
               <tr>
-                <td className="py-4 px-6 border-b text-gray-700 font-medium">Ngày bắt đầu thanh toán</td>
-                <td className="py-4 px-6 border-b text-gray-700">{formatDateTime(contract.billing_start_date)}</td>
+                <td className="py-4 px-6 border-b text-gray-700 font-medium">
+                  Ngày bắt đầu thanh toán
+                </td>
+                <td className="py-4 px-6 border-b text-gray-700">
+                  {formatDateTime(contract.billing_start_date)}
+                </td>
               </tr>
               <tr>
-                <td className="py-4 px-6 border-b text-gray-700 font-medium">Điều khoản thanh toán</td>
-                <td className="py-4 px-6 border-b text-gray-700">{contract.payment_term} tháng</td>
+                <td className="py-4 px-6 border-b text-gray-700 font-medium">
+                  Điều khoản thanh toán
+                </td>
+                <td className="py-4 px-6 border-b text-gray-700">
+                  {contract.payment_term} tháng
+                </td>
               </tr>
               <tr>
-                <td className="py-4 px-6 border-b text-gray-700 font-medium">Phí phòng</td>
-                <td className="py-4 px-6 border-b text-gray-700">{contract.room_fee.toLocaleString()} VNĐ</td>
+                <td className="py-4 px-6 border-b text-gray-700 font-medium">
+                  Phí phòng
+                </td>
+                <td className="py-4 px-6 border-b text-gray-700">
+                  {contract.room_fee.toLocaleString()} VNĐ
+                </td>
               </tr>
               <tr>
-                <td className="py-4 px-6 border-b text-gray-700 font-medium">Tiền đặt cọc</td>
-                <td className="py-4 px-6 border-b text-gray-700">{contract.deposit.toLocaleString()} VNĐ</td>
+                <td className="py-4 px-6 border-b text-gray-700 font-medium">
+                  Tiền đặt cọc
+                </td>
+                <td className="py-4 px-6 border-b text-gray-700">
+                  {contract.deposit.toLocaleString()} VNĐ
+                </td>
               </tr>
               {contract.customerName && (
                 <tr>
-                  <td className="py-4 px-6 border-b text-gray-700 font-medium">Khách hàng</td>
-                  <td className="py-4 px-6 border-b text-gray-700">{contract.customerName}</td>
+                  <td className="py-4 px-6 border-b text-gray-700 font-medium">
+                    Khách hàng
+                  </td>
+                  <td className="py-4 px-6 border-b text-gray-700">
+                    {contract.customerName}
+                  </td>
                 </tr>
               )}
               {contract.clause && (
                 <tr>
-                  <td className="py-4 px-6 border-b text-gray-700 font-medium">Điều khoản đặc biệt</td>
-                  <td className="py-4 px-6 border-b text-gray-700">{contract.clause}</td>
+                  <td className="py-4 px-6 border-b text-gray-700 font-medium">
+                    Điều khoản đặc biệt
+                  </td>
+                  <td className="py-4 px-6 border-b text-gray-700">
+                    {contract.clause}
+                  </td>
                 </tr>
               )}
             </tbody>
           </table>
         </div>
-              
-        {/* Hình ảnh hợp đồng */}
-        {contract.image && contract.image.length > 0 && (
-          <div className="flex max-h-64 justify-center mt-8">
-            {contract.image.map((imageUrl, index) => (
-              <div key={index} className="cursor-pointer mx-2">
+        <div className="my-10 px-6">
+          <span>Ảnh hợp đồng</span>
+          {/* Hình ảnh hợp đồng */}
+          {contract.image && (
+            <div className="flex max-h-64 justify-start mt-4">
+              <div className="cursor-pointer">
                 <img
-                  src={imageUrl}
-                  alt={`Hình ảnh hợp đồng ${index + 1}`}
-                  className="max-w-md rounded-lg shadow-lg object-contain"
-                  onClick={() => handleImageClick(index)}
+                  src={contract.image}
+                  alt="Hình ảnh hợp đồng"
+                  className="w-48 rounded-lg shadow-lg object-contain"
+                  onClick={() => handleImageClick(0)} // Chỉ có một ảnh, index là 0
                 />
               </div>
-            ))}
-          </div>
-        )}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* React Viewer Modal */}
-      {contract.image && contract.image.length > 0 && (
+      {contract.image && (
         <Viewer
           visible={visible}
           onClose={() => setVisible(false)}
-          images={contract.image.map((image) => ({ src: image }))}
+          images={[{ src: contract.image }]} // Tạo mảng với một phần tử từ chuỗi
           activeIndex={activeIndex}
         />
       )}

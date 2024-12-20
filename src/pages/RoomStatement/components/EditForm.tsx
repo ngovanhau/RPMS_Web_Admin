@@ -77,6 +77,7 @@ const EditMeterReadingForm: React.FC<EditMeterReadingFormProps> = ({
                       id="electricity_old"
                       name="electricity_old"
                       type="number"
+                      disabled
                       value={editedMeterReading.electricity_old}
                       onChange={handleChange}
                       className="border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
@@ -143,6 +144,7 @@ const EditMeterReadingForm: React.FC<EditMeterReadingFormProps> = ({
                       id="water_old"
                       name="water_old"
                       type="number"
+                      disabled
                       value={editedMeterReading.water_old}
                       onChange={handleChange}
                       className="border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"

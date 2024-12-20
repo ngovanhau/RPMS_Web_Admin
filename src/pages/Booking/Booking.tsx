@@ -137,8 +137,9 @@ const DashBoardBooking: React.FC = () => {
       // Làm mới danh sách bookings ngay sau khi thêm mới
       if (selectedBuildingId) {
         await getBookingByBuildingId(selectedBuildingId);
-      } else {
-        await getAllBooking();
+      }
+       else {
+        await fetchInitialData()
       }
   
       // Đặt lại trạng thái modal và selectedBooking

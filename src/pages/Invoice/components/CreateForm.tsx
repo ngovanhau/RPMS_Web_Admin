@@ -27,7 +27,7 @@ import { getRoomsByBuildingIdAndStatus } from "@/services/bookingApi/bookingApi"
 interface CreateBillFormProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (bill: Bill) => void;
+  onSubmit: (bill: Bill, serviceMeterid : string) => void;
   serviceMeterReading?: ServiceMeterReadings;
 }
 
@@ -71,7 +71,7 @@ const CreateBillForm: React.FC<CreateBillFormProps> = ({
   const [customerError, setCustomerError] = useState<string>("");
   const [serviceMeterReadingData, setServiceMeterReadingData] =
     useState<ServiceMeterReadings | null>(null);
-
+  const [serviceMeterid, setServiceMeterId] = useState<string>("")
   const [serviceCost, setServiceCost] = useState<number | null>(0);
   const [electricityMoney, setElectricityMoney] = useState<number | null>(0);
   const [waterMoney, setWaterMoney] = useState<number | null>(0);
@@ -233,7 +233,7 @@ const CreateBillForm: React.FC<CreateBillFormProps> = ({
           selectedRoom.id
         );
         setServiceMeterReadingData(serviceMeterReading?.data.data);
-
+        setServiceMeterId(serviceMeterReading?.data.data.id)
         // Initialize total service cost
         let totalServiceCost = 0;
 
@@ -338,7 +338,7 @@ const CreateBillForm: React.FC<CreateBillFormProps> = ({
       // updatedAt: new Date().toISOString(),
     } as Bill;
 
-    onSubmit(finalBill);
+    onSubmit(finalBill, serviceMeterid);
     onClose();
   };
 

@@ -414,7 +414,7 @@ const DashBoardRoomStatement: React.FC = () => {
               <table className="w-full border-collapse">
                 <thead className="bg-themeColor text-white">
                   <tr>
-                    <th className="border-2 border-gray-300 px-4 h-14 text-left rounded-tl-lg"></th>
+                    <th className="border-2 border-gray-300 px-4 h-14 text-left rounded-tl-lg">Thao tác</th>
                     <th className="border-2 border-gray-300 px-4 h-14 text-sm text-left rounded-tl-lg">
                       Tên tòa nhà
                     </th>

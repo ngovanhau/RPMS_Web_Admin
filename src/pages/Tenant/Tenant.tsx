@@ -29,6 +29,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal, PlusCircle } from "lucide-react";
 import { FaEdit, FaTrash } from "react-icons/fa";
+import ViewTenant from "./components/TenantDetail";
+import { IoEye } from "react-icons/io5";
 
 const ITEMS_PER_PAGE = 10; // Số phần tử mỗi trang
 
@@ -39,6 +41,7 @@ const Tenant: React.FC = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedTenant, setSelectedTenant] = useState<Tenant | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   // Thêm state để quản lý trang hiện tại
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -108,6 +111,10 @@ const Tenant: React.FC = () => {
       setCurrentPage(page);
     }
   };
+  const handleView = (tenant: Tenant) => {
+    setSelectedTenant(tenant);
+    setIsViewModalOpen(true);
+  };
 
   return (
     <div className="flex flex-col flex-1 bg-gray-100 w-full overflow-y-hidden relative">
@@ -123,7 +130,7 @@ const Tenant: React.FC = () => {
               <span className="text-base"></span>
             </div>
             <div className="flex flex-row gap-4">
-            <input
+              <input
                 type="text"
                 placeholder="Tìm kiếm khách hàng"
                 value={searchTerm}
@@ -132,7 +139,7 @@ const Tenant: React.FC = () => {
               />
               <div
                 className="bg-themeColor flex items-center justify-center gap-2 text-base h-11 text-white py-2 px-4 rounded-[6px] shadow hover:bg-opacity-90 transition duration-300 cursor-pointer"
-                style={{ backgroundColor: "#004392" }}                
+                style={{ backgroundColor: "#004392" }}
                 onClick={() => {
                   setSelectedTenant(null);
                   setIsAddModalOpen(true);
@@ -147,9 +154,11 @@ const Tenant: React.FC = () => {
           {/* Tenant Table */}
           <div className="w-full rounded-[8px] overflow-hidden">
             <table className="w-full h-full">
-              <thead >
+              <thead>
                 <tr className="bg-themeColor text-white">
-                  <th className="w-26 p-1 border-2 border-gray-300 ">Thao tác</th>
+                  <th className="w-26 p-1 border-2 border-gray-300 ">
+                    Thao tác
+                  </th>
                   <th className="p-4 border-2 border-gray-300 text-left">
                     Tên khách thuê
                   </th>
@@ -170,7 +179,7 @@ const Tenant: React.FC = () => {
               <tbody className="divide-y divide-gray-200 font-semibold">
                 {currentTenants.map((tenant) => (
                   <tr key={tenant.id} className="hover:bg-gray-50 ">
-                    <td className="p-4 border border-gray-300">
+                    <td className="p-4 border gap-2 border-gray-300 flex flex-row justify-center items-center">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <button>
@@ -192,12 +201,15 @@ const Tenant: React.FC = () => {
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
+                      <div onClick={() => handleView(tenant)}>
+                        <IoEye className="w-5 h-5 text-gray-600" />
+                      </div>
                     </td>
                     <td className="p-4 border border-gray-300">
                       {tenant.customer_name}
                     </td>
                     <td className="p-4 border border-gray-300">
-                      {tenant.roomName ? (tenant.roomName) : ('Chưa có')}
+                      {tenant.roomName ? tenant.roomName : "Chưa có"}
                     </td>
                     <td className="p-4 border border-gray-300">
                       {tenant.phone_number}
@@ -292,6 +304,19 @@ const Tenant: React.FC = () => {
           <EditTenantForm
             onSuccess={handleSuccess}
             onClose={() => setIsEditModalOpen(false)}
+            tenant={selectedTenant}
+          />
+        )}
+      </CustomModal>
+
+      <CustomModal
+        isOpen={isViewModalOpen}
+        onClose={() => setIsViewModalOpen(false)}
+        header="Thông tin"
+      >
+        {selectedTenant && (
+          <ViewTenant
+            onClose={() => setIsViewModalOpen(false)}
             tenant={selectedTenant}
           />
         )}

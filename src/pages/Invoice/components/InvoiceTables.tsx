@@ -119,7 +119,7 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
   return (
     <div className="h-[100%] w-full">
       <div className="h-[80%] w-full">
-        <div className="w-full max-w-[82vw] overflow-x-auto">
+        <div className="w-full max-w-[80vw] overflow-x-auto">
           <table className="w-full table-auto text-sm text-left">
             {" "}
             {/* Thay từ text-base xuống text-sm */}

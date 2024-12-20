@@ -179,7 +179,7 @@ const EditBillForm: React.FC<EditBillFormProps> = ({
             value={formData.note}
             onChange={handleChange}
             className="w-full min-h-[100px]"
-            placeholder="Nhập ghi chú cho hóa đơn..."
+            placeholder="Ghi chú hóa đơn..."
           />
         </Card>
 

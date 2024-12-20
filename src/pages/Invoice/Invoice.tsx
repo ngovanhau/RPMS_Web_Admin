@@ -37,6 +37,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import { updateStatusServicemeter } from "@/services/roomStatementApi/roomStatementApi";
 
 const DashBoardInvoice: React.FC = () => {
   const { toast } = useToast();
@@ -123,11 +124,12 @@ const DashBoardInvoice: React.FC = () => {
   };
 
   // Hàm lưu hóa đơn mới
-  const handleSaveCreate = async (newBill: Bill) => {
+  const handleSaveCreate = async (newBill: Bill , serviceMeterid : string) => {
     try {
       const response = await createBill(newBill);
 
       if (response?.status === 201) {
+        await updateStatusServicemeter(serviceMeterid,1)
         toast({
           title: "Thành công",
           description: "Tạo hóa đơn thành công.",
