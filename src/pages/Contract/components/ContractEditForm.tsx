@@ -7,7 +7,10 @@ import { getroombystatus } from "@/services/tenantApi/tenant";
 import { Room } from "@/types/types";
 import { getCustomerNoRoom } from "@/services/contractApi/contractApi";
 import useTenantStore from "@/stores/tenantStore";
-import { uploadImage } from "@/services/imageApi/imageApi";
+import { deleteImage, uploadImage } from "@/services/imageApi/imageApi";
+import { Upload, message } from "antd";
+import type { GetProp, UploadFile, UploadProps } from "antd";
+type FileType = Parameters<GetProp<UploadProps, "beforeUpload">>[0];
 
 interface EditContractFormProps {
   contract: Contract; // Contract to edit
@@ -22,19 +25,79 @@ const EditContractForm: React.FC<EditContractFormProps> = ({
   const [modifiedData, setModifiedData] = useState<Partial<Contract>>({});
   const [listRoom, setListRoom] = useState<Room[]>([]);
   const [uploading, setUploading] = useState(false);
-  const [imagePreviews, setImagePreviews] = useState<string[]>([]); // To store image preview URLs
-
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  const [visible, setVisible] = useState(false);
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [fileList, setFileList] = useState<UploadFile[]>([]);
   // Fetch data from stores
   const services = useServiceStore.getState().services;
   const listCustomer = useTenantStore.getState().tenantsWithoutRoom;
 
   // Handle field changes
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
     setContract((prevState) => ({ ...prevState, [name]: value }));
 
     // Track changes in modifiedData
     setModifiedData((prevState) => ({ ...prevState, [name]: value }));
+  };
+
+  const onChange: UploadProps["onChange"] = async ({ file }) => {
+    if (file.originFileObj && file.status === "uploading") {
+      try {
+        const imageUrl = await uploadImage(file.originFileObj); 
+        if (imageUrl) {
+          const updatedFile: UploadFile = {
+            ...file,
+            url: imageUrl,
+            status: "done",
+          };
+
+          setFileList([updatedFile]);
+
+          setContract((prevState) => ({
+            ...prevState,
+            image: imageUrl,
+          }));
+
+          message.success("Ảnh đã tải lên thành công!");
+        } else {
+          throw new Error("Không nhận được URL ảnh từ API.");
+        }
+      } catch (error) {
+        console.error("Lỗi tải ảnh:", error);
+        message.error("Tải ảnh thất bại. Vui lòng thử lại.");
+        setFileList([]); // Reset fileList nếu lỗi
+      }
+    }
+  };
+    // Xóa ảnh
+    const handleRemoveImage = async () => {
+      if (contract.image) {
+        await deleteImage(contract?.image);
+        setContract((prevState) => ({
+          ...prevState,
+          image: "",
+        }));
+        setFileList([]); // Xóa file khỏi giao diện
+      }
+    };
+
+  const onPreview = async (file: UploadFile) => {
+    let src = file.url as string;
+    if (!src) {
+      src = await new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file.originFileObj as FileType);
+        reader.onload = () => resolve(reader.result as string);
+      });
+    }
+    const image = new Image();
+    image.src = src;
+    const imgWindow = window.open(src);
+    imgWindow?.document.write(image.outerHTML);
   };
 
   // Submit form with updated data
@@ -63,20 +126,28 @@ const EditContractForm: React.FC<EditContractFormProps> = ({
   };
 
   // Fetch initial data (rooms and customers)
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        await getallService();
-        await getCustomerNoRoom();
-        const responseRoom = await getroombystatus(0);
-        setListRoom(responseRoom.data);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     try {
+  //       await getallService();
+  //       await getCustomerNoRoom();
+  //       const responseRoom = await getroombystatus(0);
+  //       setListRoom(responseRoom.data);
+  //         if (contract?.image) {
+  //         const updatedFile: UploadFile = {
+  //           ...file,
+  //           url: contract.im,
+  //           status: "done",
+  //         };
 
-    fetchData();
-  }, []);
+  //         setFileList([updatedFile]);
+  //     } catch (error) {
+  //       console.error("Error fetching data:", error);
+  //     }
+  //   };
+
+  //   fetchData();
+  // }, []);
 
   // Format service options for react-select
   const serviceOptions = services.map((service) => ({
@@ -96,31 +167,6 @@ const EditContractForm: React.FC<EditContractFormProps> = ({
     label: customer.customer_name,
   }));
 
-  // Handle multiple image uploads
-  const handleUploadImage = async (files: FileList | null) => {
-    if (!files || files.length === 0) return;
-
-    setUploading(true);
-    try {
-      const newImageUrls = await Promise.all(
-        Array.from(files).map((file) => uploadImage(file))
-      );
-      // Update contract with new images and preview URLs
-      setContract((prevState) => ({
-        ...prevState,
-        image: [...(prevState.image || []), ...newImageUrls],
-      }));
-      setImagePreviews((prevState) => [
-        ...prevState,
-        ...newImageUrls.map((url) => url),
-      ]);
-    } catch (error) {
-      console.error("Error uploading image:", error);
-      alert("Tải ảnh lên thất bại. Vui lòng thử lại.");
-    } finally {
-      setUploading(false);
-    }
-  };
 
   // Helper function to safely convert to ISO string
   const formatDateToISO = (date: Date | string | undefined) => {
@@ -281,33 +327,20 @@ const EditContractForm: React.FC<EditContractFormProps> = ({
       {/* Upload Image */}
       <div>
         <label className="block text-sm font-semibold text-gray-600 mb-1">
-          Hình Ảnh
+          Ảnh hợp đồng
         </label>
-        <input
-          type="file"
-          accept="image/*"
-          multiple
-          onChange={(e) => handleUploadImage(e.target.files)}
-          className="border rounded-lg p-3 w-full focus:ring-2 focus:ring-blue-400 focus:outline-none"
-        />
-
-        {/* Display uploaded images as thumbnails */}
-        {imagePreviews.length > 0 && (
-          <div className="mt-3">
-            <h3 className="text-sm font-semibold text-gray-600 mb-2">Ảnh đã tải lên</h3>
-            <div className="flex space-x-4">
-              {imagePreviews.map((preview, index) => (
-                <img
-                  key={index}
-                  src={preview}
-                  alt={`preview-${index}`}
-                  className="w-20 h-20 object-cover rounded-md"
-                />
-              ))}
-            </div>
-          </div>
-        )}
+           <Upload
+              listType="picture-card"
+              fileList={fileList}
+              onChange={onChange}
+              onPreview={onPreview}
+              onRemove={handleRemoveImage}
+            >
+              {fileList.length === 0 && "+ Upload"}{" "}
+            </Upload>
       </div>
+
+      
 
       {/* Submit Button */}
       <div className="flex justify-center">

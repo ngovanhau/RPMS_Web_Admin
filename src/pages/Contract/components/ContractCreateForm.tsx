@@ -15,7 +15,7 @@ import { deleteImage, uploadImage } from "@/services/imageApi/imageApi";
 import Viewer from "react-viewer";
 import { Upload, message } from "antd";
 import type { GetProp, UploadFile, UploadProps } from "antd";
-import ImgCrop from "antd-img-crop";
+
 import {
   getAllBuildings,
   getBuildingByUserId,
@@ -192,25 +192,6 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({
     label: building.building_name,
   }));
 
-  const handleUploadImage = async (files: FileList) => {
-    if (files.length === 0) return;
-
-    const file = files[0];
-    setUploading(true); // Start uploading
-
-    try {
-      const imageUrl = await uploadImage(file); // Upload ảnh
-      setContract((prevState) => ({
-        ...prevState,
-        image: imageUrl, // Set single image URL
-      }));
-    } catch (error) {
-      console.error("Error uploading image:", error);
-      alert("Tải ảnh lên thất bại. Vui lòng thử lại.");
-    } finally {
-      setUploading(false); // Finish uploading
-    }
-  };
 
   // Xóa ảnh
   const handleRemoveImage = async () => {
@@ -221,11 +202,6 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({
         image: "",
       }));
       setFileList([]); // Xóa file khỏi giao diện
-    }
-  };
-  const handleImageClick = () => {
-    if (contract.image) {
-      setVisible(true); // Show viewer
     }
   };
 
@@ -392,35 +368,10 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({
             required
           />
         </div>
-
-        {/* <div>
-          <label className="block text-sm font-semibold text-gray-600 mb-1">
-            Điều Khoản
-          </label>
-          <input
-            type="text"
-            name="clause"
-            value={contract.clause || ""}
-            onChange={handleChange}
-            className="border rounded-[6px] p-3 w-full focus:ring-2 focus:ring-blue-400 focus:outline-none"
-            placeholder="Nhập điều khoản"
-          />
-        </div> */}
         <div>
           <label className="block text-sm font-semibold text-gray-600 mb-1">
             Ảnh Hợp Đồng
           </label>
-          {/* <input
-            type="file"
-            accept="image/*"
-            onChange={(e) => {
-              const files = e.target.files;
-              if (files) {
-                handleUploadImage(files);
-              }
-            }}
-            className="border rounded-[6px] p-3 w-full focus:ring-2 focus:ring-blue-400 focus:outline-none"
-          /> */}
             <Upload
               listType="picture-card"
               fileList={fileList}

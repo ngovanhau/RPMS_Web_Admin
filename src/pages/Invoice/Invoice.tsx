@@ -368,7 +368,7 @@ const DashBoardInvoice: React.FC = () => {
                   ))}
               </select>
 
-              {roomList.length > 0 ? (
+              {roomList && roomList.length > 0 ? (
                 <select
                   className="border border-gray-300 px-4 rounded-[8px] py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   onChange={(e) => handleRoomSelect(e.target.value)}
