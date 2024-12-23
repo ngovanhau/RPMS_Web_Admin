@@ -3,55 +3,63 @@ import { Bell } from "lucide-react";
 import { getAllNotification, updateisread, deletenotification } from "@/services/notificationApi/notificationApi";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { MdOutlineDownloadDone } from "react-icons/md";
-import { MdDelete } from "react-icons/md";
+import { MdOutlineDownloadDone, MdDelete } from "react-icons/md";
 import useAuthStore from "@/stores/userStore";
+import { messaging } from "@/services/notificationApi/notificationApi";
+import { onMessage } from "firebase/messaging";
 
 const Header: React.FC = () => {
-  const [notifications, setNotifications] = useState<any[]>([]); // Danh sách thông báo
-  const [unreadCount, setUnreadCount] = useState<number>(0); // Số thông báo chưa đọc
-  const [newNotification, setNewNotification] = useState<any | null>(null); // Thông báo mới
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [unreadCount, setUnreadCount] = useState<number>(0);
+  const [isDropdownVisible, setIsDropdownVisible] = useState<boolean>(false);
+  const [activeTab, setActiveTab] = useState<"unread" | "read">("unread");
   const userData = useAuthStore((state) => state.userData?.id ?? "");
   const [userId] = useState(userData);
-  const [isDropdownVisible, setIsDropdownVisible] = useState<boolean>(false);
-  const [activeTab, setActiveTab] = useState<"unread" | "read">("unread"); // Tab hiển thị
 
   // Hàm lấy thông báo từ API
   const fetchNotifications = async () => {
     try {
       const response = await getAllNotification(userId);
-      const data = Array.isArray(response.data) ? response.data : []; // Đảm bảo dữ liệu trả về là mảng
+      const data = Array.isArray(response.data) ? response.data : [];
       setNotifications(data);
 
-      // Cập nhật số lượng thông báo chưa đọc
       const unreadNotifications = data.filter((notif: any) => !notif.isRead);
       setUnreadCount(unreadNotifications.length);
-
-      // Kiểm tra thông báo mới
-      const newNotifs = data.filter((notif: any) => !notif.isRead && !notifications.some((existingNotif) => existingNotif.id === notif.id));
-
-      if (newNotifs.length > 0) {
-        // Hiển thị thông báo mới qua toast
-        setNewNotification(newNotifs[0]); // Lấy thông báo mới
-        toast.success(`Có thông báo mới: ${newNotifs[0].title}`);
-
-        // Ẩn thông báo mới sau 5 giây
-        setTimeout(() => {
-          setNewNotification(null);
-        }, 5000);
-      }
     } catch (error) {
       console.error("Lỗi khi lấy thông báo:", error);
-      setNotifications([]); // Gán danh sách thông báo là mảng rỗng nếu xảy ra lỗi
+      setNotifications([]);
     }
   };
 
-  // Gọi API mỗi 5 giây để kiểm tra thông báo mới
-  // useEffect(() => {
-  //   fetchNotifications();
-  //   const intervalId = setInterval(fetchNotifications, 5000);
-  //   return () => clearInterval(intervalId); // Cleanup khi component unmount
-  // }, [notifications]);
+  // Gọi API khi component mount
+  useEffect(() => {
+    fetchNotifications();
+  }, [userId]);
+
+  // Lắng nghe thông báo từ Firebase khi ứng dụng foreground
+  useEffect(() => {
+    const unsubscribe = onMessage(messaging, (payload) => {
+      console.log("Message received. ", payload);
+
+      // Cập nhật danh sách thông báo
+      const newNotification = {
+        id: payload.messageId,
+        title: payload.notification?.title || "Thông báo mới",
+        message: payload.notification?.body || "Bạn có thông báo mới.",
+        isRead: false,
+      };
+
+      setNotifications((prevNotifications) => [newNotification, ...prevNotifications]);
+      setUnreadCount((prevCount) => prevCount + 1);
+
+      // Hiển thị toast thông báo
+      toast.info(`📬 ${newNotification.title}`);
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, []);
 
   // Xử lý toggle hiển thị danh sách thông báo
   const toggleDropdown = () => {
@@ -61,13 +69,13 @@ const Header: React.FC = () => {
   // Hàm đánh dấu thông báo là đã đọc
   const markAsRead = async (notifId: string) => {
     try {
-      await updateisread(notifId, true); // Gọi API để đánh dấu đã đọc
+      await updateisread(notifId, true);
       setNotifications((prevNotifications) =>
         prevNotifications.map((notif) =>
           notif.id === notifId ? { ...notif, isRead: true } : notif
         )
       );
-      setUnreadCount((prevCount) => prevCount - 1); // Giảm số thông báo chưa đọc
+      setUnreadCount((prevCount) => prevCount - 1);
       toast.success("Đã đánh dấu thông báo là đã đọc");
     } catch (error) {
       toast.error("Lỗi khi đánh dấu thông báo đã đọc");
@@ -77,7 +85,7 @@ const Header: React.FC = () => {
   // Hàm xóa thông báo
   const deleteNotification = async (notifId: string) => {
     try {
-      await deletenotification(notifId); // Gọi API để xóa thông báo
+      await deletenotification(notifId);
       setNotifications((prevNotifications) =>
         prevNotifications.filter((notif) => notif.id !== notifId)
       );
@@ -88,11 +96,9 @@ const Header: React.FC = () => {
   };
 
   // Lọc thông báo theo tab
-  const filteredNotifications = Array.isArray(notifications)
-    ? activeTab === "unread"
-      ? notifications.filter((notif) => !notif.isRead)
-      : notifications.filter((notif) => notif.isRead)
-    : [];
+  const filteredNotifications = activeTab === "unread"
+    ? notifications.filter((notif) => !notif.isRead)
+    : notifications.filter((notif) => notif.isRead);
 
   return (
     <div className="h-[5%] flex flex-row px-10 gap-4 items-center justify-end border-b-b bg-white w-full relative">

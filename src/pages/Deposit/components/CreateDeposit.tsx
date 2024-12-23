@@ -5,12 +5,20 @@ import {
   getBuildingByRoomId,
 } from "@/services/bookingApi/bookingApi";
 import { getRoomById } from "@/services/buildingApi/buildingApi";
-import { getCustomerNoRoom } from "@/services/contractApi/contractApi";
+import { getCustomerByStatus, getCustomerNoRoom } from "@/services/contractApi/contractApi";
 
 import { PlusOutlined } from "@ant-design/icons";
 import { Image, Upload, message } from "antd";
 import type { UploadFile, UploadProps } from "antd";
 import { uploadImage, deleteImage } from "@/services/imageApi/imageApi";
+import * as Select from "@radix-ui/react-select";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { CalendarDays } from "lucide-react";
 
 type FileType = UploadFile;
 
@@ -29,6 +37,7 @@ const CreateDeposit: React.FC<CreateDepositProps> = ({
 }) => {
   const [formData, setFormData] = useState<Partial<Deposit>>(
     initialData || {
+      buildingId: "",
       deposit_amount: 0,
       roomid: "",
       payment_method: "",
@@ -39,8 +48,8 @@ const CreateDeposit: React.FC<CreateDepositProps> = ({
       status: 0,
     }
   );
-
   const [selectedBuildingId, setSelectedBuildingId] = useState<string>("");
+  const [selectedRoomId, setSelectedRoomId] = useState<string>("");
   const [rooms, setRooms] = useState<Room[]>([]);
   const [customers, setCustomers] = useState<Tenant[]>([]); // Danh sách khách hàng
   const [roomName, setRoomName] = useState<string>(""); // Tên phòng
@@ -49,28 +58,82 @@ const CreateDeposit: React.FC<CreateDepositProps> = ({
   const [previewImage, setPreviewImage] = useState<string>("");
   const [previewOpen, setPreviewOpen] = useState<boolean>(false);
 
+  const [formState, setFormState] = useState<{
+    depositDate: Date;
+    moveInDate: Date;
+    numberOfPeople: number;
+    room_amount: number;
+  }>({
+    depositDate: new Date(), // Ngày hiện tại
+    moveInDate: new Date(), // Ngày hiện tại
+    numberOfPeople: 0,
+    room_amount: 0,
+  });
+
+  const handleBuildingChange = (value: string) => {
+    setSelectedBuildingId(value); // Cập nhật selectedBuildingId
+    setFormData((prev) => ({
+      ...prev,
+      buildingId: value, // Đồng bộ buildingId với formData
+    }));
+  };
+
+  const handleInputChange1 = (field: keyof typeof formState, value: string) => {
+    setFormState((prev) => ({
+      ...prev,
+      [field]: field.includes("Date") ? new Date(value) : value, // Chuyển đổi sang Date nếu là trường ngày
+    }));
+  };
+
   // Fetch danh sách phòng khi chọn tòa nhà
   useEffect(() => {
-    if (selectedBuildingId) {
-      (async () => {
+    const fetchRooms = async () => {
+      if (selectedBuildingId) {
+        setFormData((prev) => ({
+          ...prev,
+          buildingId: selectedBuildingId,
+        }));
         const fetchedRooms = await getRoomsByBuildingIdAndStatus(
           selectedBuildingId,
-          0
+          99
         );
         setRooms(fetchedRooms);
-      })();
-    } else {
-      setRooms([]);
-    }
+      } else {
+        setRooms([]);
+      }
+    };
+
+    fetchRooms(); // Gọi hàm async bên trong useEffect
   }, [selectedBuildingId]);
+
+  useEffect(() => {
+    if (selectedRoomId) {
+      (async () => {
+        const fetchedDataRoom = await getRoomById(selectedRoomId);
+        
+        if (fetchedDataRoom?.data) {
+          setFormData((prev) => ({
+            ...prev,
+            deposit_amount: fetchedDataRoom.data.data.deposit,
+          }));
+          setFormState((prev) => ({
+            ...prev,
+            room_amount: fetchedDataRoom.data.data.room_price,
+          }));
+        } else {
+          console.error("fetchedDataRoom or fetchedDataRoom.data is null");
+        }
+      })();
+    }
+  }, [selectedRoomId]);
 
   // Fetch danh sách khách hàng
   useEffect(() => {
     (async () => {
       try {
-        const response = await getCustomerNoRoom();
+        const response = await getCustomerByStatus(10);
         if (response) {
-          setCustomers(response);
+          setCustomers(response.data);
         }
       } catch (error) {
         console.error("Error fetching customers:", error);
@@ -90,7 +153,9 @@ const CreateDeposit: React.FC<CreateDepositProps> = ({
             handleInputChange("roomid", initialData.roomid);
           }
 
-          const buildingResponse = await getBuildingByRoomId(initialData.roomid);
+          const buildingResponse = await getBuildingByRoomId(
+            initialData.roomid
+          );
           if (buildingResponse?.data) {
             setBuildingName(buildingResponse.data.building_name || "");
           }
@@ -107,13 +172,17 @@ const CreateDeposit: React.FC<CreateDepositProps> = ({
           ? formatToDatetimeLocal(initialData.move_in_date)
           : "",
       }));
+      setSelectedBuildingId(initialData?.buildingId || "");
+      setSelectedRoomId(initialData.roomid);
 
-      const initialFiles: UploadFile[] | undefined = initialData.image?.map((url, index) => ({
-        uid: `-${index}`,
-        name: `Image ${index + 1}`,
-        status: "done", 
-        url,
-      }));
+      const initialFiles: UploadFile[] | undefined = initialData.image?.map(
+        (url, index) => ({
+          uid: `-${index}`,
+          name: `Image ${index + 1}`,
+          status: "done",
+          url,
+        })
+      );
       setFileList(initialFiles || []);
 
       fetchRoomAndBuilding();
@@ -130,6 +199,7 @@ const CreateDeposit: React.FC<CreateDepositProps> = ({
 
     if (field === "deposit_amount") {
       formattedValue = value.toString().replace(/\D/g, "");
+      formattedValue = formattedValue.replace(/^0+/, "");
       formattedValue = formatNumber(formattedValue);
     }
 
@@ -140,8 +210,11 @@ const CreateDeposit: React.FC<CreateDepositProps> = ({
   };
 
   const handleSubmit = (e: React.FormEvent) => {
+    console.log("Form Data: ", formData); // Kiểm tra formData trước khi submit
     e.preventDefault();
-    const cleanedAmount = formData.deposit_amount?.toString().replace(/\./g, "");
+    const cleanedAmount = formData.deposit_amount
+      ?.toString()
+      .replace(/\./g, "");
 
     if (
       !cleanedAmount ||
@@ -170,8 +243,12 @@ const CreateDeposit: React.FC<CreateDepositProps> = ({
   const formatToDatetimeLocal = (date: string | Date | undefined): string => {
     if (!date) return "";
     if (typeof date === "string") {
-      const isDatetimeLocalFormat = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(date);
-      return isDatetimeLocalFormat ? date : new Date(date).toISOString().slice(0, 16);
+      const isDatetimeLocalFormat = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(
+        date
+      );
+      return isDatetimeLocalFormat
+        ? date
+        : new Date(date).toISOString().slice(0, 16);
     }
     return date.toISOString().slice(0, 16);
   };
@@ -214,7 +291,9 @@ const CreateDeposit: React.FC<CreateDepositProps> = ({
         message.success("Xóa ảnh thành công!");
       }
 
-      setFileList((prevList) => prevList.filter((item) => item.uid !== file.uid));
+      setFileList((prevList) =>
+        prevList.filter((item) => item.uid !== file.uid)
+      );
     } catch (error) {
       message.error("Xóa ảnh thất bại!");
     }
@@ -237,91 +316,143 @@ const CreateDeposit: React.FC<CreateDepositProps> = ({
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       {/* Tòa nhà */}
-      <div>
-        <label className="block text-sm font-medium mb-1">Tòa nhà</label>
-        <select
-          value={selectedBuildingId}
-          onChange={(e) => setSelectedBuildingId(e.target.value)}
-          className="w-full p-2 border rounded bg-white focus:outline-none"
-        >
-          <option value="">{buildingName || "Chọn tòa nhà"}</option>
-          {buildings.map((building) => (
-            <option key={building.id} value={building.id}>
-              {building.building_name}
-            </option>
-          ))}
-        </select>
-      </div>
+      {/* <div className="w-full">
+        <span className="text-themeColor font-semibold">Thông tin khách</span>
+      </div> */}
+      <div className="w-full flex flex-row justify-between  space-x-4">
+        <div className="w-[48%]">
+          <label className="block text-sm font-medium mb-1">Tòa nhà</label>
+          <select
+            value={selectedBuildingId}
+            onChange={(e) => handleBuildingChange(e.target.value)}
+            className="w-full p-2 border rounded bg-white focus:outline-none"
+          >
+            <option value="">{buildingName || "Chọn tòa nhà"}</option>
+            {buildings.map((building) => (
+              <option key={building.id} value={building.id}>
+                {building.building_name}
+              </option>
+            ))}
+          </select>
+        </div>
 
-      {/* Phòng */}
-      <div>
-        <label className="block text-sm font-medium mb-1">Phòng</label>
-        <select
-          value={formData.roomid}
-          onChange={(e) => handleInputChange("roomid", e.target.value)}
-          className="w-full p-2 border rounded bg-white focus:outline-none"
-        >
-          <option value="">{roomName || "Chọn phòng"}</option>
-          {rooms.map((room) => (
-            <option key={room.id} value={room.id}>
-              {room.room_name}
-            </option>
-          ))}
-        </select>
+        {/* Phòng */}
+        <div className="w-[48%]">
+          <label className="block text-sm font-medium mb-1">Phòng</label>
+          <select
+            value={formData.roomid}
+            onChange={(e) => {
+              handleInputChange("roomid", e.target.value),
+                setSelectedRoomId(e.target.value);
+            }}
+            className="w-full p-2 border rounded bg-white focus:outline-none"
+          >
+            <option value="">{roomName || "Chọn phòng"}</option>
+            {rooms.map((room) => (
+              <option key={room.id} value={room.id}>
+                {room.room_name}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       {/* Chọn khách hàng */}
-      <div>
-        <label className="block text-sm font-medium mb-1">Khách hàng</label>
-        <select
-          value={formData.customerid}
-          onChange={(e) => handleInputChange("customerid", e.target.value)}
-          className="w-full p-2 border rounded bg-white focus:outline-none"
-        >
-          <option value="">Chọn khách hàng</option>
-          {customers.map((customer) => (
-            <option key={customer.id} value={customer.id}>
-              {customer.customer_name}
-            </option>
-          ))}
-        </select>
+      <div className="flex flex-row w-full justify-between">
+        <div className="w-[48%]">
+          <label className="block text-sm font-medium mb-1">Khách hàng</label>
+          <select
+            value={formData.customerid}
+            onChange={(e) => handleInputChange("customerid", e.target.value)}
+            className="w-full p-2 border rounded bg-white focus:outline-none"
+          >
+            <option value="">Chọn khách hàng</option>
+            {customers.map((customer) => (
+              <option key={customer.id} value={customer.id}>
+                {customer.customer_name}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="flex flex-col w-[48%]">
+          <label className="block text-sm font-medium mb-1">
+            Ngày dự kiến nhận phòng
+          </label>
+          {/* <input
+            type="datetime-local"
+            value={formatToDatetimeLocal(formData.move_in_date)}
+            onChange={(e) => handleInputChange("move_in_date", e.target.value)}
+            className="w-full p-2 border rounded"
+          /> */}
+          <Popover>
+            <PopoverTrigger asChild>
+              <button className="w-full px-4 py-2 border border-gray-300 rounded-[8px] text-left flex flex-row justify-between">
+                {formData.move_in_date
+                  ? new Date(formData.move_in_date).toLocaleDateString("vi-VN")
+                  : "Chọn ngày"}
+                <CalendarDays className="text-gray-400" />
+              </button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-2 bg-white rounded-md shadow-md">
+              <Calendar
+                mode="single"
+                selected={formData.move_in_date ? new Date(formData.move_in_date) : undefined}
+                onSelect={(date) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    move_in_date: date ? date.toISOString() : "",
+                  }))
+                }
+                className="rounded-md border"
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
+      </div>
+      <div className="w-full flex flex-row justify-between">
+        <div className="w-[30%]">
+          <label className="block text-sm font-medium mb-1">Tiền phòng</label>
+          <div
+            className={`w-full p-2 border rounded bg-white ${
+              formState.room_amount ? "text-black" : "text-gray-400"
+            }`}
+          >
+            {formState.room_amount.toLocaleString() || "Tiền phòng"}{" "}
+            {/* Hiển thị thông tin hoặc thông báo nếu giá trị rỗng */}
+          </div>
+        </div>
+        <div className="w-[30%]">
+          <label className="block text-sm font-medium mb-1">Số tiền cọc</label>
+          <div
+            className={`w-full p-2 border rounded bg-white ${
+              formData.deposit_amount ? "text-black" : "text-gray-400"
+            }`}
+          >
+            {formData.deposit_amount?.toLocaleString() || "Tiền cọc"}{" "}
+            {/* Hiển thị thông tin hoặc thông báo nếu giá trị rỗng */}
+          </div>
+        </div>
+
+        <div className="w-[30%]">
+          <label className="block text-sm font-medium mb-1">
+            Phương thức thanh toán
+          </label>
+          <select
+            value={formData.payment_method}
+            onChange={(e) =>
+              handleInputChange("payment_method", e.target.value)
+            }
+            className="w-full p-2 border rounded bg-white focus:outline-none"
+          >
+            <option value="">Chọn phương thức</option>
+            <option value="Tiền mặt">Tiền mặt</option>
+            <option value="Chuyển khoản">Chuyển khoản</option>
+          </select>
+        </div>
       </div>
 
-      {/* Số tiền cọc */}
-      <div>
-        <label className="block text-sm font-medium mb-1">Số tiền</label>
-        <input
-          type="text"
-          value={formData.deposit_amount}
-          onChange={(e) => handleInputChange("deposit_amount", e.target.value)}
-          className="w-full p-2 border rounded"
-          placeholder="Nhập số tiền"
-        />
-      </div>
+      
 
-      {/* Phương thức thanh toán */}
-      <div>
-        <label className="block text-sm font-medium mb-1">Phương thức thanh toán</label>
-        <select
-          value={formData.payment_method}
-          onChange={(e) => handleInputChange("payment_method", e.target.value)}
-          className="w-full p-2 border rounded bg-white focus:outline-none"
-        >
-          <option value="">Chọn phương thức</option>
-          <option value="Tiền mặt">Tiền mặt</option>
-          <option value="Chuyển khoản">Chuyển khoản</option>
-        </select>
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium mb-1">Ngày dự kiến nhận phòng</label>
-        <input
-          type="datetime-local"
-          value={formatToDatetimeLocal(formData.move_in_date)}
-          onChange={(e) => handleInputChange("move_in_date", e.target.value)}
-          className="w-full p-2 border rounded"
-        />
-      </div>
 
       {/* Ghi chú */}
       <div>
@@ -334,16 +465,16 @@ const CreateDeposit: React.FC<CreateDepositProps> = ({
         />
       </div>
       <div>
-      <Upload {...uploadProps}>{fileList.length < 8 && uploadButton}</Upload>
-      <Image
-        wrapperStyle={{ display: "none" }}
-        preview={{
-          visible: previewOpen,
-          src: previewImage,
-          onVisibleChange: (visible) => setPreviewOpen(visible),
-        }}
-      />
-    </div>
+        <Upload {...uploadProps}>{fileList.length < 8 && uploadButton}</Upload>
+        <Image
+          wrapperStyle={{ display: "none" }}
+          preview={{
+            visible: previewOpen,
+            src: previewImage,
+            onVisibleChange: (visible) => setPreviewOpen(visible),
+          }}
+        />
+      </div>
 
       {/* Nút lưu */}
       <div className="flex justify-end space-x-4">

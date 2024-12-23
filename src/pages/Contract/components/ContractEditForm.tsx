@@ -129,6 +129,11 @@ const EditContractForm: React.FC<EditContractFormProps> = ({
     onSubmit(updatedContract, modifiedData);
   };
 
+  useEffect(() => {
+    // Đồng bộ modifiedData với dữ liệu contract khi vào trang
+    setModifiedData(initialContract);
+  }, [initialContract]);
+  
   // Handle room change
   const handleRoomChange = (selectedRoom: { value: string; label: string }) => {
     setContract((prevState) => ({
@@ -220,20 +225,7 @@ const EditContractForm: React.FC<EditContractFormProps> = ({
           />
         </div>
 
-        {/* Rental Management */}
-        <div>
-          <label className="block text-sm font-semibold text-gray-600 mb-1">
-            Quản Lý Cho Thuê
-          </label>
-          <input
-            type="text"
-            name="rentalManagement"
-            value={contract.rentalManagement || ""}
-            onChange={handleChange}
-            className="border rounded-lg p-3 w-full focus:ring-2 focus:ring-blue-400 focus:outline-none"
-            placeholder="Tên quản lý"
-          />
-        </div>
+
 
         {/* Room */}
         <div>
@@ -262,11 +254,11 @@ const EditContractForm: React.FC<EditContractFormProps> = ({
           <input
             type="date"
             name="start_day"
-            value={formatDateToISO(contract.start_day)}
+            value={formatDateToISO(modifiedData.start_day)}
             onChange={(e) => {
               const newDate = new Date(e.target.value);
-              setContract({
-                ...contract,
+              setModifiedData({
+                ...modifiedData,
                 start_day: newDate,
               });
             }}
@@ -283,11 +275,11 @@ const EditContractForm: React.FC<EditContractFormProps> = ({
           <input
             type="date"
             name="end_day"
-            value={formatDateToISO(contract.end_day)}
+            value={formatDateToISO(modifiedData.end_day)}
             onChange={(e) => {
               const newDate = new Date(e.target.value);
-              setContract({
-                ...contract,
+              setModifiedData({
+                ...modifiedData,
                 end_day: newDate,
               });
             }}

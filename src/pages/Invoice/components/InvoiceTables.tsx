@@ -131,7 +131,6 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
                   "Khách hàng",
                   "Phòng",
                   "Ngày tạo",
-                  "Hạn thanh toán",
                   "Tiền phòng",
                   "Tiền dịch vụ",
                   "Tổng tiền",
@@ -223,9 +222,6 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
                     </td>
                     <td className="border-2 border-gray-300 px-4 h-14 text-sm text-left">
                       {formatDate(bill.date)}
-                    </td>
-                    <td className="border-2 border-gray-300 px-4 h-14 text-sm text-left">
-                      {formatDate(bill.due_date)}
                     </td>
                     <td className="border-2 border-gray-300 px-4 h-14 text-sm text-left">
                       {formatCurrency(bill.cost_room)}

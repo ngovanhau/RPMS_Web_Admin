@@ -15,6 +15,7 @@ export const getallTenant = async () => {
     throw error;
   }
 };
+
 export const getbyidTenant = async(TenanID: string) => {
   try {
     const response = await api.get(`/customer/getcustomerbyid?id=${TenanID}` );

@@ -176,24 +176,6 @@ const EditMeterReadingForm: React.FC<EditMeterReadingFormProps> = ({
                       className="border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                     />
                   </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="record_date" className="text-gray-700">
-                      Ngày Ghi
-                    </Label>
-                    <Input
-                      type="date"
-                      id="record_date"
-                      name="record_date"
-                      value={
-                        new Date(editedMeterReading.record_date)
-                          .toISOString()
-                          .split("T")[0]
-                      }
-                      onChange={handleChange}
-                      className="border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                    />
-
-                  </div>
                 </div>
                 <div className="rounded-lg border p-3 bg-gray-100">
                   <h4 className="font-medium text-gray-800">Tóm Tắt</h4>

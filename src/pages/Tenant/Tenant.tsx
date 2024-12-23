@@ -287,6 +287,7 @@ const Tenant: React.FC = () => {
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
         header="Thêm mới"
+        className="max-w-[50vw]"
       >
         <TenantForm
           onSuccess={handleSuccess}

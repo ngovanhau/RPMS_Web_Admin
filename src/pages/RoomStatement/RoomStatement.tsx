@@ -83,14 +83,11 @@ const DashBoardRoomStatement: React.FC = () => {
       if (userData?.role === "ADMIN") {
         const buildingsData = (await getAllBuildings())?.data.data;
         useBuildingStore.getState().setBuildings(buildingsData);
-        hasFetchedBuildingsRef.current = true; // Cập nhật useRef
         getALlServicemeterreadings();
-      } else if (userData?.role === "MANAGEMENT") {
-        const buildingsData = (await getBuildingByUserId(userData?.id || ""))
-          ?.data.data;
-        useBuildingStore.getState().setBuildings(buildingsData);
-        if (buildingsData.length > 0) {
-          await handleBuildingSelect(buildingsData[0].id);
+      } else {
+        await getBuildingByUserId(userData?.id || "")
+        if (buildings.length > 0) {
+          await handleBuildingSelect(buildings[0].id);
         }
       }
     } catch (error) {
@@ -102,6 +99,7 @@ const DashBoardRoomStatement: React.FC = () => {
       });
     }
   }, [userData, toast]);
+
 
   const handleCancel = () => {
     setCreateFormOpen(false);
@@ -233,66 +231,6 @@ const DashBoardRoomStatement: React.FC = () => {
     },
     [selectedRoom, toast]
   );
-
-  const handleCreateBill = async (
-    serviceMeterReading: ServiceMeterReadings
-  ) => {
-    try {
-      // Lấy thông tin phòng từ API
-      const response = await getRoomById(serviceMeterReading.room_id);
-
-      // Kiểm tra response và dữ liệu trả về
-      if (!response || !response.data || !response.data.data) {
-        throw new Error("Không thể lấy thông tin phòng");
-      }
-
-      const roomData: Room = response.data.data;
-
-      // Ngày hiện tại
-      const currentDate = new Date().toISOString();
-
-      // Tạo đối tượng hóa đơn từ dữ liệu ServiceMeterReadings và Room
-      const newBill: Bill = {
-        id: serviceMeterReading.id, // Sử dụng ID từ ServiceMeterReadings
-        bill_name: `Hóa đơn ${serviceMeterReading.room_name || "không rõ"}`, // Đặt tên hóa đơn
-        status: 1, // Ví dụ: trạng thái mới tạo
-        status_payment: 0, // Ví dụ: chưa thanh toán
-        building_id: serviceMeterReading.building_id || "", // ID tòa nhà
-        customer_name: roomData.nameCustomer || "Không rõ", // Lấy từ Room
-        customer_id: roomData.customerId || "", // Lấy từ Room
-        date: currentDate, // Ngày tạo hóa đơn
-        roomid: serviceMeterReading.room_id || "", // ID phòng
-        roomname: serviceMeterReading.room_name || "", // Tên phòng
-        payment_date: currentDate, // Ngày thanh toán
-        due_date: currentDate, // Ngày đến hạn
-        cost_room: roomData.room_price || 0, // Giá phòng từ Room
-        cost_service:
-          serviceMeterReading.electricity_cost + serviceMeterReading.water_cost, // Tổng chi phí dịch vụ
-        total_amount: serviceMeterReading.total_amount, // Tổng số tiền
-        penalty_amount: 0, // Phạt (nếu có)
-        discount: 0, // Giảm giá (nếu có)
-        final_amount: serviceMeterReading.total_amount, // Tổng cuối cùng
-        note: `Hóa đơn tạo từ ${serviceMeterReading.recorded_by || "hệ thống"}`, // Ghi chú
-        createdAt: currentDate, // Ngày tạo
-        updatedAt: currentDate, // Ngày cập nhật
-      };
-      await createBill(newBill);
-
-      // Thông báo thành công
-      toast({
-        title: "Thành công",
-        description: "Hóa đơn đã được tạo thành công!",
-        type: "foreground",
-      });
-    } catch (error) {
-      console.error("Lỗi khi tạo hóa đơn:", error);
-      toast({
-        title: "Lỗi",
-        description: "Không thể tạo hóa đơn. Vui lòng thử lại!",
-        type: "foreground",
-      });
-    }
-  };
 
   const handleEditSubmit = async (
     updatedMeterReading: ServiceMeterReadings
@@ -461,7 +399,6 @@ const DashBoardRoomStatement: React.FC = () => {
                         ServiceMeterReadings={serviceMeterReading}
                         onDelete={() => handleDelete(serviceMeterReading.id)}
                         onEdit={() => handleEdit(serviceMeterReading)}
-                        onCreateBill={(data) => handleCreateBill(data)}
                         onViewDetails={handleViewDetails}
                       />
                     </tbody>
@@ -485,7 +422,6 @@ const DashBoardRoomStatement: React.FC = () => {
                           ServiceMeterReadings={serviceMeterReading}
                           onDelete={() => handleDelete(serviceMeterReading.id)}
                           onEdit={() => handleEdit(serviceMeterReading)}
-                          onCreateBill={(data) => handleCreateBill(data)}
                           onViewDetails={handleViewDetails}
                         />
                       )

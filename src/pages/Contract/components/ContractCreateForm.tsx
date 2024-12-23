@@ -24,6 +24,7 @@ import {
 import { useBuildingStore } from "@/stores/buildingStore";
 import useAuthStore from "@/stores/userStore";
 import { getRoomsByBuildingIdAndStatus } from "@/services/bookingApi/bookingApi";
+import { getDepositByRoomId } from "@/services/depositApi/depositApi";
 type FileType = Parameters<GetProp<UploadProps, "beforeUpload">>[0];
 
 interface CreateContractFormProps {
@@ -132,24 +133,30 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({
     label: string;
   }) => {
     const response = await getRoomById(selectedRoom.value);
+    const responseDeposit = await getDepositByRoomId(selectedRoom.value);
+
+    console.log(responseDeposit);
     setContract((prevState) => ({
       ...prevState,
       room: selectedRoom.label,
       roomId: selectedRoom.value,
       room_fee: response?.data.data.room_price,
+      deposit: response?.data.data.deposit,
+      customerId: responseDeposit.data.customerid,
+      customerName: responseDeposit.data.customername,
     }));
   };
 
-  const handleCustomerChange = (selectedCustomer: {
-    value: string;
-    label: string;
-  }) => {
-    setContract((prevState) => ({
-      ...prevState,
-      customerId: selectedCustomer.value,
-      customerName: selectedCustomer.label,
-    }));
-  };
+  // const handleCustomerChange = (selectedCustomer: {
+  //   value: string;
+  //   label: string;
+  // }) => {
+  //   setContract((prevState) => ({
+  //     ...prevState,
+  //     customerId: selectedCustomer.value,
+  //     customerName: selectedCustomer.label,
+  //   }));
+  // };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -157,7 +164,8 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({
         if (userInfo) {
           userInfo.role === "ADMIN"
             ? (await getAllBuildings(), await getCustomerNoRoom())
-            : (await getBuildingByUserId(userInfo.userId || ""), await getCustomerNoRoom());
+            : (await getBuildingByUserId(userInfo.userId || ""),
+              await getCustomerNoRoom());
         }
       } catch (error) {
         console.error("Error fetching room data:", error);
@@ -169,10 +177,13 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({
 
   useEffect(() => {
     const getData = async () => {
-      const response = await getRoomsByBuildingIdAndStatus(selectedBuilding?.id || "", 3)
-      setListRoom(response)
-    }
-    getData()
+      const response = await getRoomsByBuildingIdAndStatus(
+        selectedBuilding?.id || "",
+        3
+      );
+      setListRoom(response);
+    };
+    getData();
   }, [selectedBuilding]);
 
   // Tạo danh sách tùy chọn cho phòng
@@ -191,7 +202,6 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({
     value: building.id,
     label: building.building_name,
   }));
-
 
   // Xóa ảnh
   const handleRemoveImage = async () => {
@@ -248,10 +258,8 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({
           <label className="block text-sm font-semibold text-gray-600 mb-1">
             Phòng
           </label>
-          {
-            listRoom.length > 0 ? 
-            (
-              <Select
+          {listRoom.length > 0 ? (
+            <Select
               options={roomOptions}
               onChange={(selected) =>
                 handleRoomChange(selected as { value: string; label: string })
@@ -259,50 +267,35 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({
               className="h-10 rounded-[6px] w-full focus:ring-2 focus:ring-blue-400 focus:outline-none"
               placeholder="Chọn phòng"
             />
-            )
-            :
-            (
-              <div className="border border-gray-300 px-2 flex items-center h-10 rounded-[6px]">
-                <span>Không có phòng</span>
-              </div>
-            )
-          }
-
+          ) : (
+            <div className="border border-gray-300 px-2 flex items-center h-10 rounded-[6px]">
+              <span>Không có phòng</span>
+            </div>
+          )}
         </div>
         <div>
           <label className="block text-sm font-semibold text-gray-600 mb-1">
             Khách Hàng
           </label>
-          <Select
-            options={customerOptions}
-            onChange={(selected) =>
-              handleCustomerChange(selected as { value: string; label: string })
-            }
-            className="rounded-[6px] w-full  focus:ring-2 focus:ring-blue-400 focus:outline-none"
-            placeholder="Chọn khách hàng"
-          />
+          <div className="rounded-[8px] w-full border border-gray-300 p-2 bg-white">
+            {contract?.customerName || "Chưa chọn khách hàng"}
+          </div>
         </div>
         <div>
-          <label className="block text-sm font-semibold text-gray-600 mb-1">
+          <label className="block text-sm font-semibold text-gray-600 mb-1 ">
             Phí Phòng (VND)
           </label>
-          <div className="w-full border  border-gray-200 h-12 justify-start p-2 items-center flex">
+          <div className="w-full border rounded-[8px]  border-gray-200 h-12 justify-start p-2 items-center flex">
             <span>{contract.room_fee?.toLocaleString()} VNĐ</span>
           </div>
         </div>
         <div>
           <label className="block text-sm font-semibold text-gray-600 mb-1">
-            Tiền Đặt Cọc (VND)
+            Tiền đặt cọc
           </label>
-          <input
-            type="number"
-            name="deposit"
-            value={contract.deposit || ""}
-            onChange={handleChange}
-            className="border rounded-[6px] p-3 w-full focus:ring-2 focus:ring-blue-400 focus:outline-none"
-            placeholder="Nhập tiền đặt cọc"
-            required
-          />
+          <div className="w-full border rounded-[8px]  border-gray-200 h-12 justify-start p-2 items-center flex">
+            <span>{contract.deposit?.toLocaleString()} VNĐ</span>
+          </div>
         </div>
         <div>
           <label className="block text-sm font-semibold text-gray-600 mb-1">
@@ -372,15 +365,15 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({
           <label className="block text-sm font-semibold text-gray-600 mb-1">
             Ảnh Hợp Đồng
           </label>
-            <Upload
-              listType="picture-card"
-              fileList={fileList}
-              onChange={onChange}
-              onPreview={onPreview}
-              onRemove={handleRemoveImage}
-            >
-              {fileList.length === 0 && "+ Upload"}{" "}
-            </Upload>
+          <Upload
+            listType="picture-card"
+            fileList={fileList}
+            onChange={onChange}
+            onPreview={onPreview}
+            onRemove={handleRemoveImage}
+          >
+            {fileList.length === 0 && "+ Upload"}{" "}
+          </Upload>
         </div>
       </div>
 

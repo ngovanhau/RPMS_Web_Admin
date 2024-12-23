@@ -322,6 +322,7 @@ const DashBoardContract: React.FC = () => {
         header="Thêm mới"
         isOpen={isOpenCreateModal}
         onClose={() => setIsOpenCreateModal(false)}
+        className="max-w-[50vw]"
       >
         <CreateContractForm onSubmit={handleCreateContract} />
       </CustomModal>

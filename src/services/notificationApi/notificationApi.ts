@@ -1,6 +1,6 @@
 import api from "../axios";
 import { UserTokens } from "@/types/types";
-import { getMessaging, getToken } from "firebase/messaging";
+import { getMessaging, getToken, onMessage } from "firebase/messaging";
 import { initializeApp } from "firebase/app";
 
 const firebaseConfig = {
@@ -15,7 +15,9 @@ const firebaseConfig = {
 
 // Initialize Firebase app
 const app = initializeApp(firebaseConfig);
-const messaging = getMessaging(app);
+
+export const messaging = getMessaging(app);
+
 
 export const getDeviceToken = async (): Promise<string | null> => {
   try {
@@ -52,6 +54,16 @@ export const getDeviceToken = async (): Promise<string | null> => {
   }
 };
 
+export const listenToNotifications = (handleNewNotification: (payload: any) => void) => {
+  const messaging = getMessaging();
+  onMessage(messaging, (payload) => {
+    console.log("Thông báo mới vừa đến:", payload);
+    // Xử lý thông báo (ví dụ: hiển thị toast hoặc cập nhật UI)
+    const notificationTitle = payload.notification?.title || "Thông báo";
+    const notificationBody = payload.notification?.body || "Không có nội dung.";
+    alert(`📢 ${notificationTitle}: ${notificationBody}`);
+  });
+};
 
 // api lưu UserTokens
 export const useUserTokens = async (data: UserTokens) => {

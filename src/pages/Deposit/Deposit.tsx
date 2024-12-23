@@ -26,7 +26,7 @@ import {
   DropdownMenuTrigger,
 } from "@radix-ui/react-dropdown-menu";
 import { IoEye } from "react-icons/io5";
-import { FaEdit, FaTrash } from "react-icons/fa";
+import { FaEdit, FaTimesCircle, FaTrash } from "react-icons/fa";
 import DepositDetail from "./components/DepositDetail";
 
 const DashBoard: React.FC = () => {
@@ -38,8 +38,9 @@ const DashBoard: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+    const [failureModal, setFailureModal] = useState(false);
+    const [reasonCancel, setReasonCancel] = useState<string>("");
   // State để lưu booking được chọn
-
   const [selectedDeposit, setSelectedDeposit] = useState<Deposit | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const userData = useAuthStore((state) => state.userData);
@@ -79,6 +80,22 @@ const DashBoard: React.FC = () => {
       console.error("Error fetching buildings:", error);
     }
   };
+
+    // const handleUpdateBookingFailure = async () => {
+    //   try {
+    //     if(selectedDeposit) {
+    //       const response = await handleUpdateDepositFailure(selectedBooking.id , reasonCancel)
+    //       console.log(response)
+    //       if(response.isSuccess){
+    //         setFailureModal(false)
+    //         setReasonCancel("")
+    //         await fetchInitialData()
+    //       }
+    //     }
+    //   } catch (error) {
+    //     console.log(error)
+    //   }
+    // };
 
   useEffect(() => {
     if (
@@ -134,6 +151,13 @@ const DashBoard: React.FC = () => {
   const refreshDeposits = async () => {
     await fetchInitialData();
   };
+
+    const handleFailureDeposit = async (deposit: Deposit) => {
+      setFailureModal(true);
+      setSelectedDeposit(deposit);
+    };
+
+
   const handleAddDeposit = async (deposit: Deposit) => {
     try {
       if (isEditing && selectedDeposit) {
@@ -289,6 +313,13 @@ const DashBoard: React.FC = () => {
                                   <span className="text-sm">Chỉnh sửa</span>
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
+                                  onClick={() => handleFailureDeposit(deposit)}
+                                  className="flex items-center space-x-2 p-2 hover:bg-gray-100 rounded-md cursor-pointer"
+                                >
+                                  <FaTimesCircle />
+                                  <span className="text-sm">Hủy cọc</span>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
                                   onClick={() => handleDelete(deposit.id)} // Gọi hàm xóa booking
                                   className="flex items-center space-x-2 p-2 hover:bg-gray-100 rounded-md cursor-pointer"
                                 >
@@ -346,22 +377,20 @@ const DashBoard: React.FC = () => {
                           )}
                         </td>
                         <td className="font-semibold text-gray-800 border border-gray-300 p-2 text-center">
-                          <select
-                            value={deposit.status}
-                            onClick={(e) => e.stopPropagation()}
-                            onChange={(e) =>
-                              handleStatusChange(
-                                deposit,
-                                Number(e.target.value)
-                              )
+                          {(() => {
+                            switch (deposit.status) {
+                              case 0:
+                                return <span>Đang chờ phòng</span>;
+                              case 1:
+                                return <span>Quá hạn</span>;
+                              case 2:
+                                return <span>Khách hủy cọc</span>;
+                              case 3:
+                                return <span>Đã tạo hợp đồng</span>;
+                              default:
+                                return <span>Trạng thái không xác định</span>;
                             }
-                            className="p-1 border rounded bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-themeColor"
-                          >
-                            <option value={0}>Đang chờ phòng</option>
-                            <option value={1}>Quá hạn</option>
-                            <option value={2}>Khách hủy cọc</option>
-                            <option value={3}>Đã tạo hợp đòng</option>
-                          </select>
+                          })()}
                         </td>
                       </tr>
                     ))
@@ -383,6 +412,7 @@ const DashBoard: React.FC = () => {
       </div>
       {/* Modal thêm đặt chỗ */}
       <CustomModal
+        className="max-w-[40vw]"
         header={isEditing ? "Chỉnh sửa" : "Thêm mới"}
         isOpen={isModalOpen}
         onClose={() => {
@@ -402,6 +432,50 @@ const DashBoard: React.FC = () => {
         isOpen={isDetailModalOpen}
         onClose={() => setIsDetailModalOpen(false)}
         deposit={selectedDeposit}
+      />
+
+<CustomModal
+        header="Đánh dấu thất bại"
+        className="max-w-xl"
+        isOpen={failureModal}
+        onClose={() => setFailureModal(false)}
+        children={
+          <div className="px-4 gap-6 flex flex-col">
+            <div className="flex flex-col w-full gap-1">
+              <span className="text-sm">Ghi chú</span>
+              <textarea
+                className="border border-gray-300 rounded-[8px] resize-none overflow-hidden p-2 w-full"
+                value={reasonCancel}
+                onChange={(event) => setReasonCancel(event.target.value)}
+                onInput={(event) => {
+                  const target = event.target as HTMLTextAreaElement; // Ép kiểu
+                  target.style.height = "auto"; // Reset chiều cao để tính lại
+                  target.style.height = `${target.scrollHeight}px`; // Gán chiều cao mới dựa trên nội dung
+                }}
+                rows={4} 
+                placeholder="Nhập lý do hủy..."
+              ></textarea>
+            </div>
+            <div className="flex justify-end space-x-4">
+              <button
+                onClick={() => {
+                  setFailureModal(false), setReasonCancel("");
+                }}
+                type="button"
+                className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+              >
+                Hủy
+              </button>
+              {/* <button
+                onClick={handleUpdateBookingFailure}
+                type="submit"
+                className="px-4 py-2 text-white rounded hover:bg-blue-700 bg-themeColor"
+              >
+                Lưu
+              </button> */}
+            </div>
+          </div>
+        }
       />
     </div>
   );

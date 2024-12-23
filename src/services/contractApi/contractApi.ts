@@ -81,3 +81,15 @@ export const updateContract = async ( contract : Contract ) => {
     console.log(error)
   }
 }
+
+
+export const getCustomerByStatus = async ( status : number ) => {
+  try {
+    const response = await api.get(`/customer/getbystatus?status=${status}`)
+    const dataTenants = response.data.data
+    useTenantStore.getState().setAllTenants(dataTenants)
+    return response.data
+  } catch (error) {
+    console.log(error)
+  }
+}

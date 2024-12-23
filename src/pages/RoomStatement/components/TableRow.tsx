@@ -14,7 +14,6 @@ interface TableRowProps {
   ServiceMeterReadings: ServiceMeterReadings;
   onEdit: (serviceMeterReadings: ServiceMeterReadings) => void;
   onDelete: (id: string) => void;
-  onCreateBill: (serviceMeterReadings: ServiceMeterReadings) => void;
   onViewDetails: (serviceMeterReadings: ServiceMeterReadings) => void; // New prop for "View Details"
 }
 
@@ -22,7 +21,6 @@ const TableRow: React.FC<TableRowProps> = ({
   ServiceMeterReadings,
   onEdit,
   onDelete,
-  onCreateBill,
   onViewDetails, // Destructure the new prop
 }) => {
   return (
@@ -39,12 +37,7 @@ const TableRow: React.FC<TableRowProps> = ({
               <Edit className="mr-2 h-4 w-4 " />
               Sửa
             </DropdownMenuItem>
-            {/* <DropdownMenuItem
-              onClick={() => onCreateBill(ServiceMeterReadings)}
-            >
-              <FileText className="mr-2 h-4 w-4 " />
-              Tạo hóa đơn
-            </DropdownMenuItem> */}
+
             <DropdownMenuItem
               onClick={() => onDelete(ServiceMeterReadings?.id)}
             >

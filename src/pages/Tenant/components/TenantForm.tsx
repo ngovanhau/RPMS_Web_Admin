@@ -7,6 +7,13 @@ import { Upload } from "antd";
 import type { GetProp, UploadFile, UploadProps } from "antd";
 import ImgCrop from "antd-img-crop";
 import { uploadImage } from "@/services/imageApi/imageApi";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { CalendarDays } from "lucide-react";
 
 type FileType = Parameters<GetProp<UploadProps, "beforeUpload">>[0];
 
@@ -171,7 +178,7 @@ const TenantForm: React.FC<TenantFormProps> = ({ onSuccess, onClose }) => {
     <form onSubmit={handleSubmit} className="w-full p-6 bg-white">
       <div className="grid grid-cols-2 gap-4">
         {/* Full Name */}
-        <div>
+        <div >
           <label
             htmlFor="customer_name"
             className="block text-gray-700 font-semibold mb-1"
@@ -184,7 +191,7 @@ const TenantForm: React.FC<TenantFormProps> = ({ onSuccess, onClose }) => {
             value={tenant.customer_name}
             onChange={handleChange}
             placeholder="Nhập họ và tên"
-            className="w-full p-2 border rounded-md"
+            className="w-full p-2 border border-gray-300 rounded-[8px]"
             required
           />
         </div>
@@ -203,7 +210,7 @@ const TenantForm: React.FC<TenantFormProps> = ({ onSuccess, onClose }) => {
             value={tenant.phone_number}
             onChange={handleChange}
             placeholder="Nhập số điện thoại"
-            className="w-full p-2 border rounded-md"
+            className="w-full p-2 border border-gray-300 rounded-[8px]"
             required
           />
         </div>
@@ -222,7 +229,7 @@ const TenantForm: React.FC<TenantFormProps> = ({ onSuccess, onClose }) => {
             value={tenant.email}
             onChange={handleChange}
             placeholder="Nhập email"
-            className="w-full p-2 border rounded-md"
+            className="w-full p-2 border border-gray-300 rounded-[8px]"
           />
         </div>
 
@@ -246,10 +253,33 @@ const TenantForm: React.FC<TenantFormProps> = ({ onSuccess, onClose }) => {
             }
             className="w-full p-2 border rounded-md"
           />
+          {/* <Popover>
+            <PopoverTrigger asChild>
+              <button className="w-full px-4 py-2 border border-gray-300 rounded-[8px] text-left flex flex-row justify-between items-center">
+                {tenant.date_of_birth
+                  ? new Date(tenant.date_of_birth).toLocaleDateString("vi-VN") 
+                  : "Chọn ngày"}{" "}
+                <CalendarDays className="text-gray-400" />
+              </button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-2 bg-white rounded-md shadow-md">
+              <Calendar
+                mode="single"
+                selected={tenant.date_of_birth} 
+                onSelect={(date) =>
+                  setTenant((prev) => ({
+                    ...prev,
+                    date_of_birth: date || prev.date_of_birth, 
+                  }))
+                }
+                className="rounded-md border"
+              />
+            </PopoverContent>
+          </Popover> */}
         </div>
 
         {/* Choose Room */}
-        <div>
+        {/* <div>
           <label
             htmlFor="choose_room"
             className="block text-gray-700 font-semibold mb-1"
@@ -269,7 +299,7 @@ const TenantForm: React.FC<TenantFormProps> = ({ onSuccess, onClose }) => {
               </option>
             ))}
           </select>
-        </div>
+        </div> */}
 
         {/* CCCD */}
         <div>
@@ -285,7 +315,7 @@ const TenantForm: React.FC<TenantFormProps> = ({ onSuccess, onClose }) => {
             value={tenant.cccd}
             onChange={handleChange}
             placeholder="Nhập số CMND/CCCD"
-            className="w-full p-2 border rounded-md"
+            className="w-full p-2 border border-gray-300 rounded-[8px]"
           />
         </div>
 
@@ -303,7 +333,7 @@ const TenantForm: React.FC<TenantFormProps> = ({ onSuccess, onClose }) => {
             value={tenant.place_of_issue}
             onChange={handleChange}
             placeholder="Nhập nơi cấp CMND/CCCD"
-            className="w-full p-2 border rounded-md"
+            className="w-full p-2 border border-gray-300 rounded-[8px]"
           />
         </div>
 
@@ -329,8 +359,31 @@ const TenantForm: React.FC<TenantFormProps> = ({ onSuccess, onClose }) => {
                 date_of_issue: new Date(e.target.value),
               }))
             }
-            className="w-full p-2 border rounded-md"
+            className="w-full p-2 border border-gray-300 rounded-[8px]"
           />
+                    {/* <Popover>
+            <PopoverTrigger asChild>
+              <button className="w-full px-4 py-2 border border-gray-300 rounded-[8px] text-left flex flex-row justify-between items-center">
+                {tenant.date_of_issue
+                  ? new Date(tenant.date_of_issue).toLocaleDateString("vi-VN") 
+                  : "Chọn ngày"}{" "}
+                <CalendarDays className="text-gray-400" />
+              </button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-2 bg-white rounded-md shadow-md">
+              <Calendar
+                mode="single"
+                selected={tenant.date_of_issue} 
+                onSelect={(date) =>
+                  setTenant((prev) => ({
+                    ...prev,
+                    date_of_issue: date || prev.date_of_issue, 
+                  }))
+                }
+                className="rounded-md border"
+              />
+            </PopoverContent>
+          </Popover> */}
         </div>
 
         {/* Address */}
@@ -346,7 +399,7 @@ const TenantForm: React.FC<TenantFormProps> = ({ onSuccess, onClose }) => {
             value={tenant.address}
             onChange={handleChange}
             placeholder="Nhập địa chỉ của người thuê"
-            className="w-full p-2 border rounded-md"
+            className="w-full p-2 border border-gray-300 rounded-[8px]"
           ></textarea>
         </div>
 

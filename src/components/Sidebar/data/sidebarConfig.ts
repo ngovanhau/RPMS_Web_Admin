@@ -43,11 +43,6 @@ export const sidebarItems = [
         icon: FaCalendarAlt, 
       },
       {
-        type: "Tenant",
-        label: "Khách hàng",
-        icon: FaUserFriends,
-      },
-      {
         type: "deposit",
         label: "Đặt cọc",
         icon: FaMoneyBill,
@@ -57,6 +52,12 @@ export const sidebarItems = [
         label: "Hợp đồng thuê",
         icon: FaFileContract,
       },
+      {
+        type: "Tenant",
+        label: "Khách hàng",
+        icon: FaUserFriends,
+      },
+
       
     ],
   },

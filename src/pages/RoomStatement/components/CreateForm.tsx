@@ -48,7 +48,7 @@ const MeterReadingForm: React.FC<MeterReadingFormProps> = ({
     null
   );
   const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
-
+  const currentDateISO = new Date().toISOString();
   const [meterReading, setMeterReading] = useState<ServiceMeterReadings>({
     id: "9c09af3b-111e-4362-ba48-0b9a0ec255a1",
     building_name: "",
@@ -414,43 +414,6 @@ const MeterReadingForm: React.FC<MeterReadingFormProps> = ({
                         </span>
                       )}
                     </div>
-                    <div className="flex flex-col">
-                      <Label
-                        htmlFor="record_date"
-                        className="mb-2 text-gray-700 font-medium"
-                      >
-                        Ngày Ghi Chỉ Số
-                      </Label>
-                      <div className="relative">
-                        <Input
-                          type="date"
-                          id="record_date"
-                          name="record_date"
-                          value={
-                            meterReading.record_date.toISOString().split("T")[0]
-                          }
-                          onChange={handleChange}
-                          className={`border ${
-                            errors.record_date
-                              ? "border-red-500"
-                              : "border-gray-300"
-                          } rounded-md focus:border-blue-500 focus:ring-blue-500 pl-10`}
-                          aria-invalid={!!errors.record_date}
-                          aria-describedby={
-                            errors.record_date ? "record_date-error" : undefined
-                          }
-                        />
-                        <CalendarIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                      </div>
-                      {errors.record_date && (
-                        <span
-                          id="record_date-error"
-                          className="text-red-500 text-sm mt-1"
-                        >
-                          {errors.record_date}
-                        </span>
-                      )}
-                    </div>
                   </div>
 
                   <div className="rounded-lg border border-gray-200 p-4 bg-gray-50">
@@ -561,6 +524,52 @@ const MeterReadingForm: React.FC<MeterReadingFormProps> = ({
                       )}
                     </div>
 
+                    {/* <div className="flex flex-col w-full gap-2">
+                      <Label
+                        htmlFor="record_date"
+                        className="mb-2 text-gray-700 font-medium"
+                      >
+                        Chọn Ngày Ghi Chỉ Số
+                      </Label>
+                      <Input
+                        id="record_date"
+                        name="record_date"
+                        type="date"
+                        placeholder="Chọn ngày"
+                        value={
+                          meterReading.record_date
+                            ? meterReading.record_date
+                                .toISOString()
+                                .substring(0, 10)
+                            : ""
+                        }
+                        onChange={(e) => {
+                          const selectedDate = e.target.value;
+                          setMeterReading((prevState) => ({
+                            ...prevState,
+                            record_date: new Date(selectedDate), // Chuyển đổi chuỗi thành Date
+                          }));
+                        }}
+                        className={`border ${
+                          errors.record_date
+                            ? "border-red-500"
+                            : "border-gray-300"
+                        } rounded-md focus:border-blue-500 focus:ring-blue-500`}
+                        aria-invalid={!!errors.record_date}
+                        aria-describedby={
+                          errors.record_date ? "record_date-error" : undefined
+                        }
+                      />
+                      {errors.record_date && (
+                        <span
+                          id="record_date-error"
+                          className="text-red-500 text-sm mt-1"
+                        >
+                          {errors.record_date}
+                        </span>
+                      )}
+                    </div> */}
+
                     <div className="flex flex-col">
                       <Label
                         htmlFor="water_price"
@@ -602,43 +611,7 @@ const MeterReadingForm: React.FC<MeterReadingFormProps> = ({
                       )}
                     </div>
                   </div>
-                  <div className="flex flex-col">
-                      <Label
-                        htmlFor="record_date"
-                        className="mb-2 text-gray-700 font-medium"
-                      >
-                        Ngày Ghi Chỉ Số
-                      </Label>
-                      <div className="relative">
-                        <Input
-                          type="date"
-                          id="record_date"
-                          name="record_date"
-                          value={
-                            meterReading.record_date.toISOString().split("T")[0]
-                          }
-                          onChange={handleChange}
-                          className={`border ${
-                            errors.record_date
-                              ? "border-red-500"
-                              : "border-gray-300"
-                          } rounded-md focus:border-blue-500 focus:ring-blue-500 pl-10`}
-                          aria-invalid={!!errors.record_date}
-                          aria-describedby={
-                            errors.record_date ? "record_date-error" : undefined
-                          }
-                        />
-                        <CalendarIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                      </div>
-                      {errors.record_date && (
-                        <span
-                          id="record_date-error"
-                          className="text-red-500 text-sm mt-1"
-                        >
-                          {errors.record_date}
-                        </span>
-                      )}
-                    </div>
+
                   <div className="rounded-lg border border-gray-200 p-4 bg-gray-50">
                     <h4 className="font-semibold text-gray-700 mb-2">
                       Tóm Tắt Mức Tiêu Thụ

@@ -1,20 +1,7 @@
 import { create } from 'zustand';
 
 // Định nghĩa interface cho Tenant
-export interface Tenant {
-  id?: string;
-  customer_name: string;
-  phone_number: string;
-  choose_room: string;
-  email: string;
-  date_of_birth: Date;
-  cccd: string;
-  date_of_issue: Date;
-  place_of_issue: string;
-  address: string;
-  imageCCCDs: string[];
-  roomName: string;
-}
+import { Tenant } from '@/types/types';
 
 // Định nghĩa interface cho TenantStore
 interface TenantStore {

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Booking } from "@/types/types";
+import { Booking, cuBooking } from "@/types/types";
 import CustomModal from "@/components/Modal/Modal";
 import CreateBooking from "./components/CreateBooking";
 import useAuthStore from "@/stores/userStore";
@@ -15,14 +15,21 @@ import {
   deleteBookingById,
   getAllBooking,
   getBookingByBuildingId,
+  handleUpdateFailure,
   updateBookingById,
 } from "@/services/bookingApi/bookingApi";
 import useBookingStore from "@/stores/bookingStore";
 import OptionSelector from "../Deposit/components/OptionSelector";
 import { MoreHorizontal, PlusCircle } from "lucide-react";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@radix-ui/react-dropdown-menu";
 import { IoEye } from "react-icons/io5";
-import { FaEdit, FaTrash } from "react-icons/fa";
+import { FaEdit, FaTrash, FaTimesCircle } from "react-icons/fa";
+import { Input } from "@/components/ui/input";
 
 const DashBoardBooking: React.FC = () => {
   const [selectedBuildingId, setSelectedBuildingId] = useState<string | null>(
@@ -33,6 +40,8 @@ const DashBoardBooking: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [failureModal, setFailureModal] = useState(false);
+  const [reasonCancel, setReasonCancel] = useState<string>("");
   // State để lưu booking được chọn
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
@@ -51,11 +60,10 @@ const DashBoardBooking: React.FC = () => {
   };
 
   const filteredBookings = bookings
-  .filter((item) => statusMap[item.status] === selectedOption)
-  .filter((item) =>
-    item.customername.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
+    .filter((item) => statusMap[item.status] === selectedOption)
+    .filter((item) =>
+      item.customername.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
   const fetchInitialData = async () => {
     try {
@@ -107,7 +115,7 @@ const DashBoardBooking: React.FC = () => {
   const handleDelete = async (id: string) => {
     const isConfirmed = window.confirm("Bạn có chắc chắn muốn xóa không?");
     if (!isConfirmed) return;
-  
+
     try {
       await deleteBookingById(id);
       if (selectedBuildingId) {
@@ -124,7 +132,7 @@ const DashBoardBooking: React.FC = () => {
   const refreshBookings = async () => {
     await fetchInitialData();
   };
-  const handleAddBooking = async (booking: Booking) => {
+  const handleAddBooking = async (booking: cuBooking) => {
     try {
       if (isEditing && selectedBooking) {
         // Nếu đang chỉnh sửa
@@ -133,20 +141,19 @@ const DashBoardBooking: React.FC = () => {
         // Nếu thêm mới
         await createBooking(booking);
       }
-  
+
       // Làm mới danh sách bookings ngay sau khi thêm mới
       if (selectedBuildingId) {
         await getBookingByBuildingId(selectedBuildingId);
+      } else {
+        await fetchInitialData();
       }
-       else {
-        await fetchInitialData()
-      }
-  
+
       // Đặt lại trạng thái modal và selectedBooking
       setIsModalOpen(false);
       setSelectedBooking(null);
       setIsEditing(false);
-  
+
       // Làm mới toàn bộ dữ liệu
       refreshBookings(); // Gọi lại hàm fetchInitialData
     } catch (error) {
@@ -154,6 +161,21 @@ const DashBoardBooking: React.FC = () => {
     }
   };
 
+  const handleUpdateBookingFailure = async () => {
+    try {
+      if(selectedBooking) {
+        const response = await handleUpdateFailure(selectedBooking.id , reasonCancel)
+        console.log(response)
+        if(response.isSuccess){
+          setFailureModal(false)
+          setReasonCancel("")
+          await fetchInitialData()
+        }
+      }
+    } catch (error) {
+      console.log(error)
+    }
+  };
 
   const handleStatusChange = async (booking: Booking, newStatus: number) => {
     try {
@@ -170,6 +192,11 @@ const DashBoardBooking: React.FC = () => {
     }
   };
 
+  const handleFailureBooking = async (booking: Booking) => {
+    setFailureModal(true);
+    setSelectedBooking(booking);
+  };
+
   const handleEditClick = (booking: Booking) => {
     setSelectedBooking(booking); // Gán dữ liệu của row vào selectedBooking
     setIsEditing(true); // Chuyển sang chế độ chỉnh sửa
@@ -184,7 +211,6 @@ const DashBoardBooking: React.FC = () => {
     <div className="flex flex-col flex-1 bg-gray-100 w-full overflow-y-hidden relative">
       {/* Nội dung chính */}
       <div className="flex h-[100%] p-4 overflow-hidden">
-        
         <div className="flex flex-1 rounded-[8px] flex-col py-4 px-4 w-full bg-white">
           <OptionSelector
             options={options}
@@ -193,11 +219,10 @@ const DashBoardBooking: React.FC = () => {
             onOptionChange={setSelectedOption}
             onBuildingChange={handleBuildingSelect}
           />
-          
+
           {/* Add Button */}
           <div className="relative">
-            
-          <div className="flex justify-end items-center mb-4 gap-4">
+            <div className="flex justify-end items-center mb-4 gap-4">
               <h2 className="text-xl font-semibold text-gray-800 ml-0 pl-0 text-left w-full">
                 Danh sách khách hẹn xem
               </h2>
@@ -224,15 +249,19 @@ const DashBoardBooking: React.FC = () => {
                 Thêm
               </div>
             </div>
-            
+
             {/* Bảng */}
             <div className="overflow-y-auto max-h-[70vh] border border-gray-200 rounded-md mt-4">
               <table className="w-full border-collapse">
                 <thead className="sticky top-0 bg-themeColor text-white z-10 h-25">
                   <tr>
                     <th className="border border-gray-300 p-2">Thao tác</th>
-                    <th className="border border-gray-300 p-2">Tên khách hàng</th>
-                    <th className="border border-gray-300 p-2">Số điện thoại</th>
+                    <th className="border border-gray-300 p-2">
+                      Tên khách hàng
+                    </th>
+                    <th className="border border-gray-300 p-2">
+                      Số điện thoại
+                    </th>
                     <th className="border border-gray-300 p-2">Email</th>
                     <th className="border border-gray-300 p-2">Phòng</th>
                     <th className="border border-gray-300 p-2">Ngày</th>
@@ -242,7 +271,10 @@ const DashBoardBooking: React.FC = () => {
                 <tbody>
                   {bookings.length > 0 ? (
                     filteredBookings.map((booking, index) => (
-                      <tr key={booking.id} className="hover:bg-gray-100 transition">
+                      <tr
+                        key={booking.id}
+                        className="hover:bg-gray-100 transition"
+                      >
                         {/* Cột thao tác */}
                         <td className="border border-gray-300 p-2 text-center">
                           <div className="flex items-center justify-center space-x-2">
@@ -258,19 +290,25 @@ const DashBoardBooking: React.FC = () => {
                                 align="center"
                                 sideOffset={5}
                               >
-                                
                                 <DropdownMenuItem
                                   onClick={() => handleEditClick(booking)}
                                   className="flex items-center space-x-2 p-2 hover:bg-gray-100 rounded-md cursor-pointer"
                                 >
-                                  <FaEdit/>
+                                  <FaEdit />
                                   <span className="text-sm">Chỉnh sửa</span>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onClick={() => handleFailureBooking(booking)}
+                                  className="flex items-center space-x-2 p-2 hover:bg-gray-100 rounded-md cursor-pointer"
+                                >
+                                  <FaTimesCircle />
+                                  <span className="text-sm">Thất bại</span>
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
                                   onClick={() => handleDelete(booking.id)} // Gọi hàm xóa booking
                                   className="flex items-center space-x-2 p-2 hover:bg-gray-100 rounded-md cursor-pointer"
                                 >
-                                  <FaTrash/>
+                                  <FaTrash />
                                   <span className="text-sm">Xóa</span>
                                 </DropdownMenuItem>
                               </DropdownMenuContent>
@@ -291,10 +329,18 @@ const DashBoardBooking: React.FC = () => {
                         </td>
 
                         {/* Các cột khác */}
-                        <td className="font-semibold text-gray-800 border border-gray-300 p-2">{booking.customername}</td>
-                        <td className="font-semibold text-gray-800 border border-gray-300 p-2">{booking.phone}</td>
-                        <td className="font-semibold text-gray-800 border border-gray-300 p-2">{booking.email}</td>
-                        <td className="font-semibold text-gray-800 border border-gray-300 p-2">{booking.roomname}</td>
+                        <td className="font-semibold text-gray-800 border border-gray-300 p-2">
+                          {booking.customername}
+                        </td>
+                        <td className="font-semibold text-gray-800 border border-gray-300 p-2">
+                          {booking.phone}
+                        </td>
+                        <td className="font-semibold text-gray-800 border border-gray-300 p-2">
+                          {booking.email}
+                        </td>
+                        <td className="font-semibold text-gray-800 border border-gray-300 p-2">
+                          {booking.roomname}
+                        </td>
                         <td className="font-semibold text-gray-800 border border-gray-300 p-2 text-center whitespace-nowrap">
                           {new Date(booking.date).toLocaleDateString("vi-VN", {
                             day: "2-digit",
@@ -308,17 +354,20 @@ const DashBoardBooking: React.FC = () => {
                           })}
                         </td>
                         <td className="font-semibold text-gray-800 border border-gray-300 p-2 text-center">
-                          <select
-                            value={booking.status}
-                            onClick={(e) => e.stopPropagation()}
-                            onChange={(e) => handleStatusChange(booking, Number(e.target.value))}
-                            className="p-1 border rounded bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-themeColor"
-                          >
-                            <option value={0}>Hẹn khách</option>
-                            <option value={1}>Đặt cọc</option>
-                            <option value={2}>Hoàn thành</option>
-                            <option value={3}>Thất bại</option>
-                          </select>
+                          {(() => {
+                            switch (booking.status) {
+                              case 0:
+                                return "Hẹn khách";
+                              case 1:
+                                return "Đặt cọc";
+                              case 2:
+                                return "Hoàn thành";
+                              case 3:
+                                return "Thất bại";
+                              default:
+                                return "Không xác định";
+                            }
+                          })()}
                         </td>
                       </tr>
                     ))
@@ -340,13 +389,14 @@ const DashBoardBooking: React.FC = () => {
       </div>
       {/* Modal thêm đặt chỗ */}
       <CustomModal
-        header={isEditing ? "Chỉnh sửa" : "Thêm mới"} 
+        header={isEditing ? "Chỉnh sửa" : "Thêm mới"}
         isOpen={isModalOpen}
         onClose={() => {
           setIsModalOpen(false);
           setSelectedBooking(null); // Reset selectedBooking
           setIsEditing(false); // Quay lại chế độ thêm mới
         }}
+        className="max-w-xl"
       >
         <CreateBooking
           onSubmit={handleAddBooking}
@@ -359,6 +409,49 @@ const DashBoardBooking: React.FC = () => {
         isOpen={isDetailModalOpen}
         onClose={() => setIsDetailModalOpen(false)}
         booking={selectedBooking}
+      />
+      <CustomModal
+        header="Đánh dấu thất bại"
+        className="max-w-xl"
+        isOpen={failureModal}
+        onClose={() => setFailureModal(false)}
+        children={
+          <div className="px-4 gap-6 flex flex-col">
+            <div className="flex flex-col w-full gap-1">
+              <span className="text-sm">Ghi chú</span>
+              <textarea
+                className="border border-gray-300 rounded-[8px] resize-none overflow-hidden p-2 w-full"
+                value={reasonCancel}
+                onChange={(event) => setReasonCancel(event.target.value)}
+                onInput={(event) => {
+                  const target = event.target as HTMLTextAreaElement; // Ép kiểu
+                  target.style.height = "auto"; // Reset chiều cao để tính lại
+                  target.style.height = `${target.scrollHeight}px`; // Gán chiều cao mới dựa trên nội dung
+                }}
+                rows={4} 
+                placeholder="Nhập lý do hủy..."
+              ></textarea>
+            </div>
+            <div className="flex justify-end space-x-4">
+              <button
+                onClick={() => {
+                  setFailureModal(false), setReasonCancel("");
+                }}
+                type="button"
+                className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+              >
+                Hủy
+              </button>
+              <button
+                onClick={handleUpdateBookingFailure}
+                type="submit"
+                className="px-4 py-2 text-white rounded hover:bg-blue-700 bg-themeColor"
+              >
+                Lưu
+              </button>
+            </div>
+          </div>
+        }
       />
     </div>
   );

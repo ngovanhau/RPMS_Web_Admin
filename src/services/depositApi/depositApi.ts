@@ -52,7 +52,6 @@ export const changeStatusDepositById = async (id: string, status: number) => {
       // Gửi yêu cầu PUT để cập nhật trạng thái deposit
       const response = await api.put(`/deposit/updatestatus?id=${id}&status=${status}`);
         return response.data.data
-  
     //   return response.data;
     } catch (error) {
       console.error("Lỗi khi thay đổi trạng thái deposit:", error);
@@ -73,3 +72,22 @@ export const changeStatusDepositById = async (id: string, status: number) => {
       throw error;
     }
   };
+
+
+  export const updateFailure = async ( depositId : string, note: string, amount : number ) => {
+    try {
+      const response = await api.put(`/deposit/updatefailure?`)
+    } catch (error) {
+      console.log(error)
+    }
+  }
+  export const getDepositByRoomId = async ( roomId : string ) => {
+    try {
+      const response = await api.get(`/deposit/getbyroomid?id=${roomId}`)
+      return response.data
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+

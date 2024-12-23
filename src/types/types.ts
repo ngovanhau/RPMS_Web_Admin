@@ -103,6 +103,7 @@ export interface User {
       address?: string;
       imageCCCDs: string[];
       roomName: string;
+      userId?: string
     }
     
 
@@ -127,6 +128,7 @@ export interface User {
     image?: string;
     // image?: string[];
     customerName?: string | undefined;
+    userId?: string
   }
   
   
@@ -145,6 +147,7 @@ export interface User {
 
   export interface Deposit {
     id: string;
+    buildingId?: string;
     deposit_amount: number;
     roomid: string;
     roomname: string;
@@ -256,6 +259,7 @@ export interface Transaction {
 export interface Booking {
   id: string;
   roomid: string;
+  userId: string;
   customername: string;
   phone: string;
   email: string;
@@ -264,6 +268,16 @@ export interface Booking {
   note: string;
   roomname: string
 };
+
+
+export interface cuBooking {
+  id: string;
+  roomid: string;
+  userId: string;
+  date: string; 
+  status: number; 
+  note: string;
+}
 
 export interface UserTokens{
   userId: string

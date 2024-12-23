@@ -1,4 +1,4 @@
-import { Booking } from "@/types/types";
+import { Booking, cuBooking } from "@/types/types";
 import api from "../axios";
 import useBookingStore from "@/stores/bookingStore";
 import { useBuildingStore } from "@/stores/buildingStore";
@@ -13,8 +13,9 @@ export const getAllBooking = async () => {
         console.log(error)
     }
 }
-export const createBooking = async (booking : Booking) => {
+export const createBooking = async (booking : cuBooking) => {
     try {
+      console.log(booking)
         const response = await api.post(`/booking/create`, booking)
         return response.data
     } catch (error) {
@@ -70,7 +71,6 @@ export const getRoomsByBuildingIdAndStatus = async (
       `/room/getroombybuildingidandstatus?BuildingId=${buildingId}&status=${status}`
     );
     const rooms = response.data?.data || []; 
-    console.log('Đây là mảng rooms ', rooms)
     useBuildingStore.getState().setRooms(response.data.data); 
     return rooms; 
   } catch (error) {
@@ -97,3 +97,12 @@ export const getBuildingByRoomId = async (
 
 
 
+
+  export const handleUpdateFailure = async ( id : string , note : string) => {
+    try {
+      const response = await api.put(`/booking/updatefailure?id=${id}&note=${note}`)
+      return response.data
+    } catch (error) {
+      console.log(error)
+    }
+  }
