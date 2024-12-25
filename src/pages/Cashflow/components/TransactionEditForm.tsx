@@ -15,6 +15,10 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { CalendarDays } from "lucide-react";
+import { Upload } from 'antd';
+import type { GetProp, UploadFile, UploadProps } from 'antd';
+type FileType = Parameters<GetProp<UploadProps, 'beforeUpload'>>[0];
+
 
 interface EditTransactionFormProps {
   transaction: Transaction;
@@ -28,6 +32,8 @@ const EditTransactionForm: React.FC<EditTransactionFormProps> = ({
   onCancel,
 }) => {
   const [formData, setFormData] = useState<Transaction>(transaction);
+
+  
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -57,6 +63,8 @@ const EditTransactionForm: React.FC<EditTransactionFormProps> = ({
     e.preventDefault();
     onSubmit(formData); 
   };
+
+  
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6 overflow-hidden">
@@ -147,7 +155,7 @@ const EditTransactionForm: React.FC<EditTransactionFormProps> = ({
               <SelectValue placeholder="Phương thức thanh toán" />
             </SelectTrigger>
             <SelectContent className="bg-white">
-              <SelectItem value="Chuyển khoản">Chuyển khoản</SelectItem>
+              <SelectItem value="Chuyển khoảng">Chuyển khoản</SelectItem>
               <SelectItem value="Tiền mặt">Tiền mặt</SelectItem>
             </SelectContent>
           </Select>

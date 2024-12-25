@@ -1,30 +1,31 @@
-import { updateTenant } from "@/services/tenantApi/tenant";
-import { Tenant } from "@/types/types";
 import React, { useState, useEffect } from "react";
-import { getroombystatus } from "@/services/tenantApi/tenant";
+import { updateTenant, getroombystatus } from "@/services/tenantApi/tenant";
 import { uploadImage, deleteImage } from "@/services/imageApi/imageApi";
-import { Image, message } from "antd";
+import { Image, message, Upload } from "antd";
 import { CloseOutlined, PlusOutlined } from "@ant-design/icons";
 import type { GetProp, UploadFile, UploadProps } from "antd";
-import { Upload } from "antd";
-
-interface EditTenantFormProps {
-  tenant: Tenant;
-  onSuccess: () => void;
-  onClose: () => void;
-}
-type FileType = Parameters<GetProp<UploadProps, "beforeUpload">>[0];
+import { Tenant } from "@/types/types";
 
 interface Room {
   id: string;
   room_name: string;
 }
 
+interface EditTenantFormProps {
+  tenant: Tenant; // Dữ liệu Tenant gốc để hiển thị
+  onSuccess: () => void; // Callback khi update thành công
+  onClose: () => void; // Callback khi đóng form
+}
+
+// FileType chỉ là tham chiếu kiểu cho hàm beforeUpload
+type FileType = Parameters<GetProp<UploadProps, "beforeUpload">>[0];
+
 const EditTenantForm: React.FC<EditTenantFormProps> = ({
   tenant,
   onSuccess,
   onClose,
 }) => {
+  // 1) Tạo state cho Tenant đang edit, trong đó ép kiểu `date_of_birth` và `date_of_issue` thành Date
   const [editableTenant, setEditableTenant] = useState<Tenant>({
     ...tenant,
     date_of_birth: tenant.date_of_birth
@@ -34,13 +35,21 @@ const EditTenantForm: React.FC<EditTenantFormProps> = ({
       ? new Date(tenant.date_of_issue)
       : new Date(),
   });
+  // 2) Danh sách rooms (phòng trống) để cho user chọn
   const [rooms, setRooms] = useState<Room[]>([]);
+
+  // 3) Quản lý fileList cho Upload
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const [previewImage, setPreviewImage] = useState<string>("");
   const [previewOpen, setPreviewOpen] = useState<boolean>(false);
 
+  // ----------------------------------------------------------------
+  // useEffect: load danh sách phòng, đồng thời map tenant.imageCCCDs -> fileList
+  // ----------------------------------------------------------------
   useEffect(() => {
     fetchAvailableRooms();
+
+    // Map ảnh cũ (nếu có) thành dạng UploadFile => để hiển thị trong antd Upload
     const initialFiles: UploadFile[] | undefined = tenant.imageCCCDs?.map(
       (url, index) => ({
         uid: `-${index}`,
@@ -50,8 +59,10 @@ const EditTenantForm: React.FC<EditTenantFormProps> = ({
       })
     );
     setFileList(initialFiles || []);
-  }, []);
+  }, [tenant]);
+  // Thêm [tenant] để khi prop tenant thay đổi, form cập nhật lại.
 
+  // Hàm load danh sách phòng trống (status=0) => bạn có thể chỉnh lại logic nếu cần
   const fetchAvailableRooms = async () => {
     try {
       const response = await getroombystatus(0);
@@ -61,6 +72,10 @@ const EditTenantForm: React.FC<EditTenantFormProps> = ({
     }
   };
 
+  // ----------------------------------------------------------------
+  // Các hàm handleChange
+  // ----------------------------------------------------------------
+  // handleChange cho các input text, select...
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
@@ -73,17 +88,22 @@ const EditTenantForm: React.FC<EditTenantFormProps> = ({
     }));
   };
 
+  // handleDateChange cho trường date (ngày sinh, ngày cấp)
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
     setEditableTenant((prevTenant) => ({
       ...prevTenant,
-      [id]: new Date(value), // Chuyển đổi chuỗi thành `Date`
+      [id]: new Date(value),
     }));
   };
 
+  // ----------------------------------------------------------------
+  // Submit form => gọi API updateTenant
+  // ----------------------------------------------------------------
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     try {
+      // Gọi API update
       await updateTenant(editableTenant);
 
       onSuccess();
@@ -93,31 +113,21 @@ const EditTenantForm: React.FC<EditTenantFormProps> = ({
     }
   };
 
-  const handleDeleteImage = (url: string) => {
-    setEditableTenant((prevTenant) => ({
-      ...prevTenant,
-      imageCCCDs: prevTenant.imageCCCDs.filter((imageUrl) => imageUrl !== url),
-    }));
-  };
-
-  const uploadButton = (
-    <div>
-      <PlusOutlined />
-      <div style={{ marginTop: 8 }}>Upload</div>
-    </div>
-  );
-
-  // Xử lý upload ảnh
+  // ----------------------------------------------------------------
+  // Upload / Remove / Preview ảnh
+  // ----------------------------------------------------------------
+  // Hàm upload ảnh => customRequest của antd
   const handleUpload = async (options: any) => {
     const { file, onSuccess, onError } = options;
-
     try {
       const imageUrl = await uploadImage(file);
       onSuccess("OK");
+      // Cập nhật vào editableTenant.imageCCCDs
       setEditableTenant((prev) => ({
         ...prev,
         imageCCCDs: [...prev.imageCCCDs, imageUrl],
       }));
+      // Cập nhật vào fileList để antd hiển thị
       setFileList((prevList) => [
         ...prevList,
         {
@@ -134,18 +144,18 @@ const EditTenantForm: React.FC<EditTenantFormProps> = ({
     }
   };
 
-  // Xử lý xóa ảnh
+  // Xóa ảnh
   const handleRemove = async (file: UploadFile) => {
     try {
       if (file.url) {
         await deleteImage(file.url);
         message.success("Xóa ảnh thành công!");
       }
-
+      // Xóa file khỏi fileList
       setFileList((prevList) =>
         prevList.filter((item) => item.uid !== file.uid)
       );
-      // Xóa khỏi imageCCCDs
+      // Xóa link khỏi editableTenant.imageCCCDs
       setEditableTenant((prev) => ({
         ...prev,
         imageCCCDs: prev.imageCCCDs.filter((url) => url !== file.url),
@@ -154,19 +164,33 @@ const EditTenantForm: React.FC<EditTenantFormProps> = ({
       message.error("Xóa ảnh thất bại!");
     }
   };
-  // Xử lý xem ảnh
+
+  // Xem ảnh preview
   const handlePreview = async (file: UploadFile) => {
     setPreviewImage(file.url || (file.preview as string));
     setPreviewOpen(true);
   };
+
+  // Cấu hình cho antd Upload
   const uploadProps: UploadProps = {
-    customRequest: handleUpload,
+    customRequest: handleUpload, // Thay thế quy trình upload mặc định
     onRemove: handleRemove,
     listType: "picture-card",
     fileList,
     onPreview: handlePreview,
   };
 
+  // Nút upload
+  const uploadButton = (
+    <div>
+      <PlusOutlined />
+      <div style={{ marginTop: 8 }}>Upload</div>
+    </div>
+  );
+
+  // ----------------------------------------------------------------
+  // Render
+  // ----------------------------------------------------------------
   return (
     <form onSubmit={handleSubmit} className="w-full p-6 bg-white">
       <div className="grid grid-cols-2 gap-4">
@@ -184,7 +208,7 @@ const EditTenantForm: React.FC<EditTenantFormProps> = ({
             value={editableTenant.customer_name}
             onChange={handleChange}
             placeholder="Nhập họ và tên"
-            className="w-full p-2 border rounded-md"
+            className="w-full p-2 border  rounded-[8px]"
             required
           />
         </div>
@@ -203,7 +227,7 @@ const EditTenantForm: React.FC<EditTenantFormProps> = ({
             value={editableTenant.phone_number}
             onChange={handleChange}
             placeholder="Nhập số điện thoại"
-            className="w-full p-2 border rounded-md"
+            className="w-full p-2 border  rounded-[8px]"
             required
           />
         </div>
@@ -222,7 +246,7 @@ const EditTenantForm: React.FC<EditTenantFormProps> = ({
             value={editableTenant.email}
             onChange={handleChange}
             placeholder="Nhập email"
-            className="w-full p-2 border rounded-md"
+            className="w-full p-2 border  rounded-[8px]"
           />
         </div>
 
@@ -239,42 +263,29 @@ const EditTenantForm: React.FC<EditTenantFormProps> = ({
             id="date_of_birth"
             value={editableTenant.date_of_birth.toISOString().split("T")[0]}
             onChange={handleDateChange}
-            className="w-full p-2 border rounded-md"
+            className="w-full p-2 border  rounded-[8px]"
           />
         </div>
 
         {/* Choose Room */}
-        <div>
-          <label
-            htmlFor="choose_room"
-            className="block text-gray-700 font-semibold mb-1"
-          >
-            {tenant.choose_room !== "00000000-0000-0000-0000-000000000000"
-              ? "Phòng thuê"
-              : "Chọn phòng thuê"}
-          </label>
-          {tenant.choose_room !== "00000000-0000-0000-0000-000000000000" ? (
-            <div className="p-2">
-              <span className="font-semibold">{tenant.roomName}</span>
+       <div>
+          <label  className="block text-gray-700 font-semibold mb-1" htmlFor="choose_room">Phòng thuê</label>
+  
+          {editableTenant.choose_room !==
+          "00000000-0000-0000-0000-000000000000" ? (
+            // Nếu tenant có phòng (ID khác chuỗi zero)
+            <div className="p-2 w-full border border-gray-300 rounded-[8px]">
+              <span className="">
+                {editableTenant.roomName || "Đang thuê phòng này"}
+              </span>
             </div>
           ) : (
-            <>
-              <select
-                id="choose_room"
-                value={editableTenant.choose_room}
-                onChange={handleChange}
-                className="w-full p-2 border rounded-md"
-              >
-                <option value="">Chọn phòng thuê có sẵn</option>
-                {rooms.map((room) => (
-                  <option key={room.id} value={room.id}>
-                    {room.room_name}
-                  </option>
-                ))}
-              </select>
-            </>
+            // Ngược lại => hiển thị "Chưa thuê phòng"
+            <div className="p-2 w-full border border-gray-300 rounded-[8px]">
+              <span className="text-gray-500">Chưa thuê phòng</span>
+            </div>
           )}
-        </div>
+       </div>
 
         {/* CCCD */}
         <div>
@@ -290,7 +301,7 @@ const EditTenantForm: React.FC<EditTenantFormProps> = ({
             value={editableTenant.cccd}
             onChange={handleChange}
             placeholder="Nhập số CMND/CCCD"
-            className="w-full p-2 border rounded-md"
+            className="w-full p-2 border  rounded-[8px]"
           />
         </div>
 
@@ -308,7 +319,7 @@ const EditTenantForm: React.FC<EditTenantFormProps> = ({
             value={editableTenant.place_of_issue}
             onChange={handleChange}
             placeholder="Nhập nơi cấp CMND/CCCD"
-            className="w-full p-2 border rounded-md"
+            className="w-full p-2 border  rounded-[8px]"
           />
         </div>
 
@@ -325,7 +336,7 @@ const EditTenantForm: React.FC<EditTenantFormProps> = ({
             id="date_of_issue"
             value={editableTenant.date_of_issue.toISOString().split("T")[0]}
             onChange={handleDateChange}
-            className="w-full p-2 border rounded-md"
+            className="w-full p-2 border  rounded-[8px]"
           />
         </div>
 
@@ -339,11 +350,12 @@ const EditTenantForm: React.FC<EditTenantFormProps> = ({
           </label>
           <textarea
             id="address"
-            value={editableTenant.address}
+            value={editableTenant.address ?? ""}
             onChange={handleChange}
             placeholder="Nhập địa chỉ của người thuê"
-            className="w-full p-2 border rounded-md"
-          ></textarea>
+            className="w-full p-2 border  rounded-[8px]"
+            rows={2}
+          />
         </div>
 
         {/* Image CCCD */}
@@ -357,6 +369,8 @@ const EditTenantForm: React.FC<EditTenantFormProps> = ({
           <Upload {...uploadProps}>
             {fileList.length < 8 && uploadButton}
           </Upload>
+
+          {/* Preview ảnh (ẩn wrapper, chỉ hiển thị khi previewOpen=true) */}
           <Image
             wrapperStyle={{ display: "none" }}
             preview={{
@@ -368,13 +382,21 @@ const EditTenantForm: React.FC<EditTenantFormProps> = ({
         </div>
       </div>
 
-      <div className="flex justify-between mt-6">
+      <div className="flex justify-end mt-6 gap-4">
+      <button
+          type="button"
+          onClick={onClose}
+          className="py-2 px-6 rounded-md border border-gray-300"
+        >
+          Hủy
+        </button>
         <button
           type="submit"
           className="bg-blue-500 text-white py-2 px-6 rounded-md"
         >
-          Cập nhật
+          Lưu
         </button>
+
       </div>
     </form>
   );

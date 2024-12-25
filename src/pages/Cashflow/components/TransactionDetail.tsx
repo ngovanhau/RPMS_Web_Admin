@@ -43,8 +43,7 @@ const ViewTransaction: React.FC<ViewTransactionProps> = ({
         <div className="flex flex-col w-[30%] gap-2">
           <span className="font-semibold">Phòng</span>
           <div className="p-2 border border-gray-300 rounded-[8px] bg-gray-50">
-            {roomList.find((r) => r.id === transaction.roomid)?.room_name ||
-              "Không rõ"}
+            {transaction.roomname}
           </div>
         </div>
         <div className="flex flex-col w-[30%] gap-2">
@@ -65,7 +64,7 @@ const ViewTransaction: React.FC<ViewTransactionProps> = ({
         <div className="flex flex-col w-[30%] gap-2">
           <span className="font-semibold">Nhóm giao dịch</span>
           <div className="p-2 border border-gray-300 rounded-[8px] bg-gray-50">
-            {transaction.transactiongroupid || "Không rõ"}
+            {transaction.transactiongroupname || "Không rõ"}
           </div>
         </div>
         <div className="flex flex-col w-[30%] gap-2">

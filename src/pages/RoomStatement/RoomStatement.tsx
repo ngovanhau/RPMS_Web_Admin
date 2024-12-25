@@ -245,7 +245,7 @@ const DashBoardRoomStatement: React.FC = () => {
         });
         return;
       }
-
+      fetchInitialData()
       // Nếu xóa thành công, tiếp tục xử lý cập nhật.
       if (selectedBuilding) {
         await getServicemeterByBuildingId(selectedBuilding.id);

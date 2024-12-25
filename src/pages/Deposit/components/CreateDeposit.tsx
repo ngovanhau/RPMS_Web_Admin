@@ -210,7 +210,6 @@ const CreateDeposit: React.FC<CreateDepositProps> = ({
   };
 
   const handleSubmit = (e: React.FormEvent) => {
-    console.log("Form Data: ", formData); // Kiểm tra formData trước khi submit
     e.preventDefault();
     const cleanedAmount = formData.deposit_amount
       ?.toString()

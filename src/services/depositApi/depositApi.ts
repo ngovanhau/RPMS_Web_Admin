@@ -76,7 +76,8 @@ export const changeStatusDepositById = async (id: string, status: number) => {
 
   export const updateFailure = async ( depositId : string, note: string, amount : number ) => {
     try {
-      const response = await api.put(`/deposit/updatefailure?`)
+      const response = await api.put(`/deposit/updatefailure?id=${depositId}&note=${note}&refund=${amount}`)
+      return response.data
     } catch (error) {
       console.log(error)
     }

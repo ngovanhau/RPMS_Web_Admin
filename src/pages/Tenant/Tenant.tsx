@@ -187,18 +187,19 @@ const Tenant: React.FC = () => {
                           </button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className="bg-white ml-32">
+                        <DropdownMenuItem
+                            onSelect={() => handleEditClick(tenant)}
+                          >
+                            <FaEdit className="w-4 h-4 text-gray-600 mr-2" />
+                            Chỉnh sửa
+                          </DropdownMenuItem>
                           <DropdownMenuItem
                             onSelect={() => handleDelete(tenant)}
                           >
                             <FaTrash className="w-4 h-4 text-gray-600 mr-2" />
                             Xóa
                           </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onSelect={() => handleEditClick(tenant)}
-                          >
-                            <FaEdit className="w-4 h-4 text-gray-600 mr-2" />
-                            Chỉnh sửa
-                          </DropdownMenuItem>
+
                         </DropdownMenuContent>
                       </DropdownMenu>
                       <div onClick={() => handleView(tenant)}>

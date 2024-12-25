@@ -45,16 +45,17 @@ const TenantRow: React.FC<TenantsRowProps> = ({
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button>
-              <MoreHorizontal/>
+              <MoreHorizontal />
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="bg-white ml-32">
-            <DropdownMenuItem onSelect={handleDelete}>
-            <FaTrash className="w-4 h-4 text-gray-600" />
-              Xóa</DropdownMenuItem>
             <DropdownMenuItem onSelect={handleEditClick}>
-            <FaEdit className="w-4 h-4 text-gray-600" />
+              <FaEdit className="w-4 h-4 text-gray-600" />
               Chỉnh sửa
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={handleDelete}>
+              <FaTrash className="w-4 h-4 text-gray-600" />
+              Xóa
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -81,7 +82,7 @@ const TenantRow: React.FC<TenantsRowProps> = ({
       </div>
       <div className="w-[26%] border border-gray-300 px-4  flex items-center justify-start">
         <span className="text-gray-600 font-semibold text-[15px] text-left">
-            {tenant.email}
+          {tenant.email}
         </span>
       </div>
     </div>

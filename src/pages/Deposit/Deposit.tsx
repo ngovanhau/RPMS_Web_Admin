@@ -15,6 +15,7 @@ import {
   getAllDeposit,
   getDepositByBuildingId,
   updateDeposit,
+  updateFailure,
 } from "@/services/depositApi/depositApi";
 import useDepositStore from "@/stores/depositStore";
 import OptionSelector from "../Deposit/components/OptionSelector";
@@ -38,8 +39,8 @@ const DashBoard: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-    const [failureModal, setFailureModal] = useState(false);
-    const [reasonCancel, setReasonCancel] = useState<string>("");
+  const [failureModal, setFailureModal] = useState(false);
+  const [reasonCancel, setReasonCancel] = useState<string>("");
   // State để lưu booking được chọn
   const [selectedDeposit, setSelectedDeposit] = useState<Deposit | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
@@ -81,21 +82,21 @@ const DashBoard: React.FC = () => {
     }
   };
 
-    // const handleUpdateBookingFailure = async () => {
-    //   try {
-    //     if(selectedDeposit) {
-    //       const response = await handleUpdateDepositFailure(selectedBooking.id , reasonCancel)
-    //       console.log(response)
-    //       if(response.isSuccess){
-    //         setFailureModal(false)
-    //         setReasonCancel("")
-    //         await fetchInitialData()
-    //       }
-    //     }
-    //   } catch (error) {
-    //     console.log(error)
-    //   }
-    // };
+  // const handleUpdateBookingFailure = async () => {
+  //   try {
+  //     if(selectedDeposit) {
+  //       const response = await handleUpdateDepositFailure(selectedBooking.id , reasonCancel)
+  //       console.log(response)
+  //       if(response.isSuccess){
+  //         setFailureModal(false)
+  //         setReasonCancel("")
+  //         await fetchInitialData()
+  //       }
+  //     }
+  //   } catch (error) {
+  //     console.log(error)
+  //   }
+  // };
 
   useEffect(() => {
     if (
@@ -152,11 +153,10 @@ const DashBoard: React.FC = () => {
     await fetchInitialData();
   };
 
-    const handleFailureDeposit = async (deposit: Deposit) => {
-      setFailureModal(true);
-      setSelectedDeposit(deposit);
-    };
-
+  const handleFailureDeposit = async (deposit: Deposit) => {
+    setFailureModal(true);
+    setSelectedDeposit(deposit);
+  };
 
   const handleAddDeposit = async (deposit: Deposit) => {
     try {
@@ -186,6 +186,18 @@ const DashBoard: React.FC = () => {
       console.error("Error adding/updating booking:", error);
     }
   };
+
+  const handleUpdateFailure = async () => {
+    if(selectedDeposit){
+      const response = await updateFailure(selectedDeposit?.id, reasonCancel, selectedDeposit?.deposit_amount)
+      if(response.isSuccess){
+        setFailureModal(false)
+        setSelectedDeposit(null)
+        await fetchInitialData();
+      }
+    }
+
+  }
 
   const handleStatusChange = async (deposit: Deposit, newStatus: number) => {
     try {
@@ -434,7 +446,7 @@ const DashBoard: React.FC = () => {
         deposit={selectedDeposit}
       />
 
-<CustomModal
+      <CustomModal
         header="Đánh dấu thất bại"
         className="max-w-xl"
         isOpen={failureModal}
@@ -452,7 +464,7 @@ const DashBoard: React.FC = () => {
                   target.style.height = "auto"; // Reset chiều cao để tính lại
                   target.style.height = `${target.scrollHeight}px`; // Gán chiều cao mới dựa trên nội dung
                 }}
-                rows={4} 
+                rows={4}
                 placeholder="Nhập lý do hủy..."
               ></textarea>
             </div>
@@ -466,13 +478,13 @@ const DashBoard: React.FC = () => {
               >
                 Hủy
               </button>
-              {/* <button
-                onClick={handleUpdateBookingFailure}
+              <button
+                onClick={handleUpdateFailure}
                 type="submit"
                 className="px-4 py-2 text-white rounded hover:bg-blue-700 bg-themeColor"
               >
                 Lưu
-              </button> */}
+              </button>
             </div>
           </div>
         }

@@ -115,10 +115,13 @@ const DashBoardRoom: React.FC = () => {
     }
   };
 
-  const handleSubmitRoom = async (room: Room) => {
+  const handleSubmitRoom = async (room: Room) => { 
     try {
       await editRoom(room);
       await getRoomByBuildingId(selectedBuildingId);
+      if(selectedRoomId){
+        await getRoomById(selectedRoomId)
+      }
       setIsOpenRoomForm(false);
     } catch (err) {
       setError("Failed to update building");

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Booking, Building, cuBooking, Room } from "@/types/types";
 import {
   getRoomsByBuildingIdAndStatus,
@@ -14,11 +14,12 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { CalendarDays } from "lucide-react";
+
 interface CreateBookingProps {
   onSubmit: (booking: cuBooking) => void;
   onClose: () => void;
   buildings: Building[];
-  initialData?: cuBooking;
+  initialData?: Booking; // nếu có => đang ở chế độ sửa
 }
 
 const CreateBooking: React.FC<CreateBookingProps> = ({
@@ -27,153 +28,222 @@ const CreateBooking: React.FC<CreateBookingProps> = ({
   buildings,
   initialData,
 }) => {
-  const [formData, setFormData] = useState<Partial<cuBooking>>(
-    initialData || {
-      date: "",
-      roomid: "",
-      status: 0,
-      note: "",
-      userId: "",
-    }
-  );
+  // Kiểm tra đang ở chế độ Sửa (Edit) hay Tạo mới (Create)
+  const isEditMode = Boolean(initialData && initialData.id);
 
-  const [tempState, setTempState] = useState<{
-    phone: string;
-    email: string;
-  }>({
-    phone: "",
-    email: "",
+  // State formData
+  const [formData, setFormData] = useState<Partial<cuBooking>>({
+    id: "",
+    roomid: "",
+    userId: "",
+    date: "",
+    status: 0,
+    note: "",
   });
 
-  const [selectedBuildingId, setSelectedBuildingId] = useState<string>("");
+  // Thông tin tòa nhà, phòng (để load danh sách phòng)
+  const [buildingId, setBuildingId] = useState<string>("");
+  const [buildingName, setBuildingName] = useState<string>("");
   const [rooms, setRooms] = useState<Room[]>([]);
-  const [roomName, setRoomName] = useState<string>(""); // Room name
+
+  // Thông tin khách hàng (để hiển thị read-only khi Edit)
   const [customerName, setCustomerName] = useState<string>("");
-  const [buildingName, setBuildingName] = useState<string>(""); // Building name
+  const [phone, setPhone] = useState<string>("");
+  const [email, setEmail] = useState<string>("");
+
+  // Danh sách khách hàng được lưu trong store
   const listCustomer = useTenantStore.getState().allTenants;
 
-  // Gọi API khi modal mở và initialData có roomid
+  // ------------------------------------------------------------
+  // Load dữ liệu khi mở form
+  // ------------------------------------------------------------
   useEffect(() => {
-    const fetchRoomAndBuilding = async () => {
+    const loadCustomers = async () => {
+      // Gọi API để lấy danh sách khách hàng có status 100
       await getCustomerByStatus(100);
-      if (initialData?.roomid) {
-        try {
-          // Gọi API lấy thông tin phòng
-          const roomData = await getRoomById(initialData.roomid);
-          if (roomData) {
-            setRoomName(roomData.data.data.room_name || "");
-            setSelectedBuildingId(roomData.data.building_Id || "");
-            handleInputChange("roomid", initialData.roomid);
-          }
+    };
 
-          // Gọi API lấy thông tin tòa nhà
-          const buildingResponse = await getBuildingByRoomId(
-            initialData.roomid
-          );
-          if (buildingResponse) {
-            setBuildingName(buildingResponse.data.building_name || "");
-          }
-        } catch (error) {
-          console.error("Error fetching room/building data:", error);
+    const loadRoomAndBuilding = async (roomId: string) => {
+      try {
+        const roomRes = await getRoomById(roomId);
+        const buildingRes = await getBuildingByRoomId(roomId);
+
+        // Lấy buildingId => để tiếp tục load danh sách phòng
+        if (buildingRes?.data) {
+          setBuildingId(buildingRes.data.id);
+          setBuildingName(buildingRes.data.building_name || "");
         }
+        // Gán roomid (để hiển thị trong <select>)
+        if (roomRes?.data?.data) {
+          handleInputChange("roomid", roomRes.data.data.id);
+        }
+      } catch (error) {
+        console.error("Error fetching room/building:", error);
       }
     };
 
-    if (initialData) {
+    if (isEditMode && initialData) {
+      // Chế độ Sửa
       setFormData({
-        ...initialData,
-        date: formatDateToDatetimeLocal(initialData.date), // Chuyển ngày về định dạng hợp lệ
+        id: initialData.id,
+        roomid: initialData.roomid,
+        userId: initialData.userId,
+        date: formatDateToDatetimeLocal(initialData.date),
+        status: initialData.status,
+        note: initialData.note, // <-- Lấy ghi chú từ initialData để sửa
       });
-      fetchRoomAndBuilding();
-      getCustomerByStatus(100);
-    } else {
-      getCustomerByStatus(100);
-    }
-  }, [initialData]);
+      setCustomerName(initialData.customername);
+      setPhone(initialData.phone);
+      setEmail(initialData.email);
 
-  // Gọi API để lấy danh sách phòng khi chọn tòa nhà
+      loadCustomers();
+      loadRoomAndBuilding(initialData.roomid);
+    } else {
+      // Chế độ Tạo
+      loadCustomers();
+      setFormData({
+        id: "",
+        roomid: "",
+        userId: "",
+        date: "",
+        status: 0,
+        note: "",
+      });
+    }
+  }, [initialData, isEditMode]);
+
+  // ------------------------------------------------------------
+  // Khi biết buildingId => load danh sách phòng
+  // ------------------------------------------------------------
   useEffect(() => {
-    if (selectedBuildingId) {
+    if (buildingId) {
       (async () => {
-        const fetchedRooms = await getRoomsByBuildingIdAndStatus(
-          selectedBuildingId,
-          0
-        );
-        setRooms(fetchedRooms);
+        try {
+          const fetchedRooms = await getRoomsByBuildingIdAndStatus(buildingId, 0);
+
+          // Nếu đang ở chế độ Edit & phòng cũ (initialData.roomid) không nằm trong fetchedRooms
+          // => Thêm thủ công để <select> vẫn hiển thị được phòng cũ
+          if (isEditMode && initialData?.roomid) {
+            const hasRoom = fetchedRooms.some(
+              (r: Room) => r.id === initialData.roomid
+            );
+            if (!hasRoom) {
+              const oldRoomRes = await getRoomById(initialData.roomid);
+              if (oldRoomRes?.data?.data) {
+                fetchedRooms.push(oldRoomRes.data.data);
+              }
+            }
+          }
+
+          setRooms(fetchedRooms);
+        } catch (error) {
+          console.error("Error fetching rooms:", error);
+        }
       })();
     } else {
       setRooms([]);
     }
-  }, [selectedBuildingId]);
+  }, [buildingId, isEditMode, initialData]);
 
-  // Xử lý thay đổi form
-  const handleInputChange = (
-    field: keyof cuBooking,
-    value: string | number
-  ) => {
+  // ------------------------------------------------------------
+  // Hàm xử lý chọn tòa nhà (khi tạo mới)
+  // ------------------------------------------------------------
+  const handleSelectBuildingCreate = (id: string) => {
+    setBuildingId(id);
+  };
+
+  // ------------------------------------------------------------
+  // Hàm handleInputChange
+  // ------------------------------------------------------------
+  const handleInputChange = (field: keyof cuBooking, value: string | number) => {
     setFormData((prev) => ({
       ...prev,
       [field]: value,
     }));
   };
 
-  // Xử lý submit
+  // ------------------------------------------------------------
+  // Submit form
+  // ------------------------------------------------------------
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Danh sách các trường cần kiểm tra
-    const requiredFields = {
-      roomid: "Phòng",
-    };
-
-    // Tìm các trường chưa được điền
-    const missingFields = Object.keys(requiredFields).filter(
-      (field) => !formData[field as keyof cuBooking]
-    );
-
-    if (missingFields.length > 0) {
-      const missingFieldNames = missingFields.map(
-        (field) => requiredFields[field as keyof typeof requiredFields]
-      );
-      alert(
-        `Vui lòng điền đầy đủ thông tin! Các trường thiếu: ${missingFieldNames.join(
-          ", "
-        )}`
-      );
-      return;
+    if (isEditMode && initialData) {
+      // Chế độ Sửa => có thể sửa room, date, note
+      const updatedBooking: cuBooking = {
+        id: initialData.id,
+        roomid: formData.roomid || initialData.roomid,
+        userId: initialData.userId,
+        date: formData.date || initialData.date,
+        status: initialData.status,
+        note: formData.note || initialData.note, // <-- cập nhật note (nếu người dùng sửa)
+      };
+      onSubmit(updatedBooking);
+    } else {
+      // Chế độ Tạo => tạo mới booking
+      if (!formData.roomid || !formData.userId) {
+        alert("Vui lòng chọn phòng và khách hàng trước khi lưu.");
+        return;
+      }
+      const newBooking: cuBooking = {
+        id: "",
+        roomid: formData.roomid,
+        userId: formData.userId,
+        date: formData.date || new Date().toISOString(),
+        status: formData.status || 0,
+        note: formData.note || "",
+      };
+      onSubmit(newBooking);
     }
-    // Nếu không thiếu trường nào, tiếp tục xử lý
-    onSubmit({ ...formData } as cuBooking);
 
     onClose();
   };
 
+  // ------------------------------------------------------------
+  // formatDateToDatetimeLocal => YYYY-MM-DDTHH:mm
+  // ------------------------------------------------------------
   const formatDateToDatetimeLocal = (dateString: string): string => {
     if (!dateString) return "";
     const date = new Date(dateString);
-    const isoString = date.toISOString(); // Chuẩn ISO 8601: 2024-06-14T12:30:00.000Z
-    return isoString.slice(0, 16); // Lấy 'YYYY-MM-DDTHH:MM'
+    return date.toISOString().slice(0, 16);
   };
+
+  // ------------------------------------------------------------
+  // Render
+  // ------------------------------------------------------------
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      {/* Tòa nhà */}
-      <div>
-        <label className="block text-sm font-medium mb-1">Tòa nhà</label>
-        <select
-          value={selectedBuildingId}
-          onChange={(e) => setSelectedBuildingId(e.target.value)}
-          className="w-full p-2 border rounded bg-white focus:outline-none"
-        >
-          <option value="">{buildingName || "Chọn tòa nhà"}</option>
-          {buildings.map((building) => (
-            <option key={building.id} value={building.id}>
-              {building.building_name}
-            </option>
-          ))}
-        </select>
-      </div>
+      <h2 className="text-lg font-semibold">
+        {isEditMode ? "Chỉnh sửa Booking" : "Tạo mới Booking"}
+      </h2>
 
-      {/* Phòng */}
+      {/* ------------- Tòa nhà ------------- */}
+      {isEditMode ? (
+        <div>
+          <label className="block text-sm font-medium mb-1">Tòa nhà</label>
+          <div className="w-full p-2 border rounded bg-gray-100">
+            {buildingName || "Chưa có thông tin tòa nhà"}
+          </div>
+        </div>
+      ) : (
+        <div>
+          <label className="block text-sm font-medium mb-1">Tòa nhà</label>
+          <select
+            value={buildingId}
+            onChange={(e) => handleSelectBuildingCreate(e.target.value)}
+            className="w-full p-2 border rounded bg-white focus:outline-none"
+          >
+            <option value="">Chọn tòa nhà</option>
+            {buildings.map((b) => (
+              <option key={b.id} value={b.id}>
+                {b.building_name}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
+
+      {/* ------------- Phòng ------------- */}
       <div>
         <label className="block text-sm font-medium mb-1">Phòng</label>
         <select
@@ -181,7 +251,7 @@ const CreateBooking: React.FC<CreateBookingProps> = ({
           onChange={(e) => handleInputChange("roomid", e.target.value)}
           className="w-full p-2 border rounded bg-white focus:outline-none"
         >
-          <option value="">{roomName || "Chọn phòng"}</option>
+          <option value="">Chọn phòng</option>
           {rooms.map((room) => (
             <option key={room.id} value={room.id}>
               {room.room_name}
@@ -190,68 +260,70 @@ const CreateBooking: React.FC<CreateBookingProps> = ({
         </select>
       </div>
 
-      {/* Các trường khác */}
-      <div>
-        <label className="block text-sm font-medium mb-1">Tên khách hàng</label>
-        {/* <input
-          type="text"
-          value={formData.customername}
-          onChange={(e) => handleInputChange("customername", e.target.value)}
-          className="w-full p-2 border rounded"
-        /> */}
-        <select
-          value={formData.userId}
-          onChange={(e) => {
-            const selectedUserId = e.target.value;
-            handleInputChange("userId", e.target.value);
-            const selectedCustomer = listCustomer.find(
-              (customer) => customer.userId == selectedUserId
-            );
-            if (selectedCustomer) {
-              setTempState((prev) => ({
-                ...prev,
-                phone: selectedCustomer.phone_number,
-                email: selectedCustomer.email,
-              }));
-              setCustomerName(selectedCustomer.customer_name || "");
-            }
-          }}
-          className="w-full p-2 border rounded bg-white focus:outline-none"
-        >
-          <option value="">{"Chọn khách hàng"}</option>
-          {listCustomer.map((customer) => (
-            <option key={customer.id} value={customer.userId}>
-              {customer.customer_name}
-            </option>
-          ))}
-        </select>
-      </div>
+      {/* ------------- Khách hàng ------------- */}
+      {isEditMode ? (
+        <div>
+          <label className="block text-sm font-medium mb-1">Khách hàng</label>
+          <div className="w-full p-2 border rounded bg-gray-100">
+            {customerName || "Chưa có thông tin khách hàng"}
+          </div>
+        </div>
+      ) : (
+        <div>
+          <label className="block text-sm font-medium mb-1">Khách hàng</label>
+          <select
+            value={formData.userId}
+            onChange={(e) => {
+              const userIdSelected = e.target.value;
+              handleInputChange("userId", userIdSelected);
 
+              // Tìm trong listCustomer để lấy thông tin hiển thị
+              const foundCustomer = listCustomer.find(
+                (c) => c.userId === userIdSelected
+              );
+              if (foundCustomer) {
+                setCustomerName(foundCustomer.customer_name || "");
+                setPhone(foundCustomer.phone_number || "");
+                setEmail(foundCustomer.email || "");
+              }
+            }}
+            className="w-full p-2 border rounded bg-white focus:outline-none"
+          >
+            <option value="">Chọn khách hàng</option>
+            {listCustomer.map((customer) => (
+              <option key={customer.id} value={customer.userId}>
+                {customer.customer_name}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
+
+      {/* ------------- Số điện thoại ------------- */}
       <div>
         <label className="block text-sm font-medium mb-1">Số điện thoại</label>
-        <div className="w-full p-2 border rounded bg-">
-          {tempState.phone || "Chưa có số điện thoại"}
+        <div className="w-full p-2 border rounded bg-gray-100">
+          {phone || "Chưa có số điện thoại"}
         </div>
       </div>
 
+      {/* ------------- Email ------------- */}
       <div>
         <label className="block text-sm font-medium mb-1">Email</label>
-        <div className="w-full p-2 border rounded bg-">
-          {tempState.email || "Chưa có email"}
+        <div className="w-full p-2 border rounded bg-gray-100">
+          {email || "Chưa có email"}
         </div>
       </div>
 
+      {/* ------------- Ngày ------------- */}
       <div>
         <label className="block text-sm font-medium mb-1">Ngày</label>
-        {/* <input
-          type="datetime-local"
-          value={formData.date || ""}
-          onChange={(e) => handleInputChange("date", e.target.value)}
-          className="w-full p-2 border rounded"
-        /> */}
         <Popover>
           <PopoverTrigger asChild>
-            <button className="w-full px-4 py-2 border border-gray-300 rounded-[8px] text-left flex flex-row justify-between">
+            <button
+              type="button"
+              className="w-full px-4 py-2 border border-gray-300 rounded-[8px] text-left flex flex-row justify-between"
+            >
               {formData.date
                 ? new Date(formData.date).toLocaleDateString("vi-VN")
                 : "Chọn ngày"}
@@ -265,7 +337,7 @@ const CreateBooking: React.FC<CreateBookingProps> = ({
               onSelect={(date) =>
                 setFormData((prev) => ({
                   ...prev,
-                  date: date ? date.toISOString() : "",
+                  date: date ? date.toISOString().slice(0, 16) : "",
                 }))
               }
               className="rounded-md border"
@@ -274,6 +346,7 @@ const CreateBooking: React.FC<CreateBookingProps> = ({
         </Popover>
       </div>
 
+      {/* ------------- Ghi chú (cho phép sửa ở cả 2 chế độ) ------------- */}
       <div>
         <label className="block text-sm font-medium mb-1">Ghi chú</label>
         <textarea
@@ -284,7 +357,7 @@ const CreateBooking: React.FC<CreateBookingProps> = ({
         />
       </div>
 
-      {/* Nút lưu */}
+      {/* ------------- Nút hành động ------------- */}
       <div className="flex justify-end space-x-4">
         <button
           type="button"
@@ -297,7 +370,7 @@ const CreateBooking: React.FC<CreateBookingProps> = ({
           type="submit"
           className="px-4 py-2 text-white rounded hover:bg-blue-700 bg-themeColor"
         >
-          Lưu
+          {isEditMode ? "Lưu" : "Tạo mới"}
         </button>
       </div>
     </form>
