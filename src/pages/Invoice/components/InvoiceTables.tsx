@@ -1,7 +1,7 @@
 // InvoiceTable.tsx
 import React, { useMemo, useState } from "react";
 import { Bill } from "@/types/types";
-import { AiOutlineCheck, AiOutlineEdit, AiOutlineDelete } from "react-icons/ai";
+import { AiOutlineCheck, AiOutlineEdit, AiOutlineDelete, AiOutlineCreditCard  } from "react-icons/ai";
 
 import {
   Tooltip,
@@ -35,6 +35,7 @@ interface InvoiceTableProps {
   onDelete: (id: string) => void;
   onApproved: (bill: Bill) => void;
   onView: (bill: Bill) => void;
+  onPayMoney : (bill : Bill ) => void
 }
 
 const formatPercentage = (value: number) => {
@@ -51,8 +52,9 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
   onApproved,
   onDelete,
   onView,
+  onPayMoney
 }) => {
-  const ITEMS_PER_PAGE = 8; // Số lượng hóa đơn mỗi trang
+  const ITEMS_PER_PAGE = 10; // Số lượng hóa đơn mỗi trang
   const [currentPage, setCurrentPage] = useState(1);
 
   // Tính toán số trang
@@ -118,7 +120,7 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
 
   return (
     <div className="h-[100%] w-full">
-      <div className="h-[80%] w-full">
+      <div className="h-[90%] w-full">
         <div className="w-full max-w-[80vw] overflow-x-auto">
           <table className="w-full table-auto text-sm text-left">
             {" "}
@@ -156,59 +158,52 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
                 return (
                   <tr
                     key={bill.id}
-                    className="border-b hover:bg-blue-50 text-blue-900 h-12"
+                    className="border-b hover:bg-blue-50 text-black h-12"
                   >
                     <td className="px-4 py-2 border-2 border-gray-300 whitespace-nowrap text-center text-sm">
                       <div className="flex gap-2 justify-center">
-                        {bill.status === 0 ? (
-                          // Actions khi hóa đơn chưa được duyệt
-                          <>
-                            <div className="flex flex-row justify-start gap-2 items-center">
-                              <DropdownMenu>
-                                <DropdownMenuTrigger>
-                                  <Ellipsis />
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent className="bg-white">
-                                  <DropdownMenuItem
-                                    onClick={() => onEdit(bill)}
-                                  >
-                                    <div className="flex flex-row gap-4">
-                                      <AiOutlineEdit className="h-4 w-4 text-blue-500 hover:text-blue-700 cursor-pointer" />
-                                      <span className="text-gray-700">
-                                        Chỉnh sửa
-                                      </span>
-                                    </div>
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem
-                                    onClick={() => onDelete(bill.id)}
-                                  >
-                                    <div className="flex flex-row gap-4">
-                                      <AiOutlineDelete className="h-4 w-4 text-red-500 hover:text-red-700 cursor-pointer" />
-                                      <span className="text-gray-700">Xóa</span>
-                                    </div>
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                              <div onClick={() => onView(bill)}>
+                        <div className="flex flex-row justify-start gap-2 items-center">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger>
+                              <Ellipsis />
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent className="bg-white">
+                              <DropdownMenuItem onClick={() => onEdit(bill)}>
                                 <div className="flex flex-row gap-4">
-                                  <IoEye className="w-5 h-5 text-gray-600" />
+                                  <AiOutlineEdit className="h-4 w-4 text-blue-500 hover:text-blue-700 cursor-pointer" />
+                                  <span className="text-gray-700">
+                                    Chỉnh sửa
+                                  </span>
                                 </div>
-                              </div>
+                              </DropdownMenuItem>
+                              {
+                                bill.status_payment === 0  && (
+                                <DropdownMenuItem onClick={() => onPayMoney(bill)}>
+                                  <div className="flex flex-row gap-4">
+                                    <AiOutlineCreditCard  className="h-4 w-4 text-blue-500 hover:text-blue-700 cursor-pointer" />
+                                    <span className="text-gray-700">
+                                      Thanh toán
+                                    </span>
+                                  </div>
+                                </DropdownMenuItem>
+                                )
+                              }
+                              <DropdownMenuItem
+                                onClick={() => onDelete(bill.id)}
+                              >
+                                <div className="flex flex-row gap-4">
+                                  <AiOutlineDelete className="h-4 w-4 text-red-500 hover:text-red-700 cursor-pointer" />
+                                  <span className="text-gray-700">Xóa</span>
+                                </div>
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                          <div onClick={() => onView(bill)}>
+                            <div className="flex flex-row gap-4">
+                              <IoEye className="w-5 h-5 text-themeColor" />
                             </div>
-                          </>
-                        ) : (
-                          // Actions khi hóa đơn đã được duyệt
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger>
-                                <AiOutlineDelete className="h-4 w-4 text-red-500 opacity-50 cursor-not-allowed" />
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                <p>Không thể xóa</p>
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-                        )}
+                          </div>
+                        </div>
                       </div>
                     </td>
                     <td className="border-2 min-w-[200px] border-gray-300 px-4 h-14 text-sm text-left">
@@ -242,7 +237,7 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
                     </td>
 
                     <td className="border border-gray-300 px-4  py-2 font-bold whitespace-nowrap text-sm">
-                      {formatCurrency(calculateFinalAmount(bill))}
+                      {formatCurrency(bill.final_amount)}
                     </td>
 
                     {/* Cột "Đã thanh toán" */}

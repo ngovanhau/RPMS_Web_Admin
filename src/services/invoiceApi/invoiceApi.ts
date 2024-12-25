@@ -74,9 +74,17 @@ export const deleteBill = async (billId: string) => {
 export const getServiceMeterReadingByRoomId = async ( roomId : string ) => {
   try {
     const response = await api.get(`/servicemeterreadings/getservicebyroomid?id=${roomId}`)
-    console.log(response.data)
     return response.data
   } catch (error) {
     throw error;
+  }
+}
+
+export const updatePaymentWeb = async ( id : string , paymentmethod : string) => {
+  try {
+    const response = await api.put(`/bill/updatepaymentweb?id=${id}&paymentmethod=${paymentmethod}`)
+    return response.data
+  } catch (error) {
+    console.log(error)
   }
 }

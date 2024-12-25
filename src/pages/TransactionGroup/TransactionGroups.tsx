@@ -35,6 +35,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination"; // Import Pagination components
 import TransactionGroupDetail from "./components/TransactionGroupDetail";
+import { IoEye } from "react-icons/io5";
 
 const TransactionGroups = () => {
   const userData = useAuthStore((state) => state.userData);
@@ -240,7 +241,7 @@ const TransactionGroups = () => {
                           <div
                             onClick={() => onViewDetails(group)}
                           >
-                            <Eye className="mr-2 h-5 w-5 text-black" />
+                              <IoEye className="w-5 mr-2 h-5 text-themeColor" />
                           </div>
                         </td>
                         <td className="px-4 py-3 border-2 border-gray-300 text-md text-gray-900">

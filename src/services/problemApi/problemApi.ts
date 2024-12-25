@@ -33,7 +33,7 @@ export const updateProblemById = async (id: string, problem: Problem) => {
   try {
     const response = await api.put(`/problem/update?id=${id}`, problem);
     useProblemStore.getState().updateProblem(id, problem);
-    return response;
+    return response.data;
   } catch (error) {
     console.error("Lỗi khi cập nhật vấn đề:", error);
     throw error;
@@ -44,8 +44,9 @@ export const updateProblemById = async (id: string, problem: Problem) => {
 // Xóa một vấn đề bằng ID và cập nhật store
 export const deleteProblemById = async (id: string) => {
   try {
-    await api.delete(`/problem/delete?id=${id}`);
+    const response = await api.delete(`/problem/delete?id=${id}`);
     useProblemStore.getState().removeProblem(id);
+    return response.data
   } catch (error) {
     console.error("Lỗi khi xóa vấn đề:", error);
     throw error;

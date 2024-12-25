@@ -18,6 +18,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import EditTransactionForm from "./TransactionEditForm";
+import { IoEye } from "react-icons/io5";
 
 interface TransactionsTableProps {
   onSelect: (transaction: Transaction) => void;
@@ -134,40 +135,49 @@ const TransactionsTable: React.FC<TransactionsTableProps> = ({
                         index % 2 === 0 ? "bg-gray-50" : "bg-white"
                       } hover:bg-blue-100 h-14`}
                     >
-                      <td className="px-4 border-2 border-gray-300 py-2 relative">
-                        {/* Dropdown Menu */}
-                        <DropdownMenu>
-                          <DropdownMenuTrigger>
-                            <MoreHorizontal className="w-5 h-5" />
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent className="bg-white">
-                            <DropdownMenuItem
-                              className="flex flex-row"
-                              onClick={() => {
-                                setSelectedTransaction(transaction);
-                                setIsEditModalOpen(true);
-                              }}
-                            >
-                              <Edit className="w-4 h-4 mr-2 " />
-                              Sửa
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => onSelect(transaction)}
-                            >
-                              <Eye className="mr-2 h-4 w-4 text-purple-500" />
-                              Xem chi tiết
-                            </DropdownMenuItem>
+                      <td className="border-2 border-gray-300 px-4 py-2 text-center align-middle">
+                        <div
+                          className="space-x-4"
+                          style={{
+                            display: "inline-flex",
+                            verticalAlign: "middle",
+                          }}
+                        >
+                          {/* Dropdown Menu */}
+                          <div>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger>
+                                <MoreHorizontal className="w-5 h-5" />
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent className="bg-white">
+                                <DropdownMenuItem
+                                  className="flex flex-row"
+                                  onClick={() => {
+                                    setSelectedTransaction(transaction);
+                                    setIsEditModalOpen(true);
+                                  }}
+                                >
+                                  <Edit className="w-4 h-4 mr-2 " />
+                                  Sửa
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onClick={() => handleDelete(transaction.id)}
+                                  className="flex flex-row"
+                                >
+                                  <Trash className="w-4 h-4 mr-2" />
+                                  Xóa
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
 
-                            <DropdownMenuItem
-                              onClick={() => handleDelete(transaction.id)}
-                              className="flex flex-row"
-                            >
-                              <Trash className="w-4 h-4 mr-2" />
-                              Xóa
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                          {/* Eye Icon */}
+                          <div onClick={() => onSelect(transaction)}>
+                            <IoEye className="w-5 h-5 text-themeColor cursor-pointer" />
+                          </div>
+                        </div>
                       </td>
+
                       <td className="px-4 py-2 border-2 border-gray-300 text-left">
                         {transaction?.namereason}
                       </td>

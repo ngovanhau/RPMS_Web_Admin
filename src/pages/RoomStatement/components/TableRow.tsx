@@ -9,6 +9,7 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal } from "lucide-react";
+import { IoEye } from "react-icons/io5";
 
 interface TableRowProps {
   ServiceMeterReadings: ServiceMeterReadings;
@@ -47,7 +48,7 @@ const TableRow: React.FC<TableRowProps> = ({
           </DropdownMenuContent>
         </DropdownMenu>
         <div onClick={() => onViewDetails(ServiceMeterReadings)}>
-          <Eye className="mr-2 h-4 w-4 " />
+          <IoEye className="w-5 h-5 text-themeColor" />
         </div>
       </td>
       <td className="border-2 border-gray-300 px-4 py-2 whitespace-nowrap text-sm">
@@ -57,7 +58,9 @@ const TableRow: React.FC<TableRowProps> = ({
         {ServiceMeterReadings.room_name}
       </td>
       <td className="border-2 border-gray-300 px-4 py-2 whitespace-nowrap text-sm">
-        {ServiceMeterReadings.status === 0 ? ('Chưa tạo hóa đơn') : ('Đã tạo hóa đơn')}
+        {ServiceMeterReadings.status === 0
+          ? "Chưa tạo hóa đơn"
+          : "Đã tạo hóa đơn"}
       </td>
       <td className="border-2 border-gray-300 px-4 py-2 whitespace-nowrap text-sm">
         {ServiceMeterReadings.recorded_by}

@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Booking } from "@/types/types";
 import { FiTrash, FiEdit2, FiMoreHorizontal, FiEye } from "react-icons/fi";
-
+import { IoEye } from "react-icons/io5";
 
 type BookingActionProps = {
   booking: Booking;
@@ -43,10 +43,7 @@ const BookingAction: React.FC<BookingActionProps> = ({
     setIsDropdownOpen(!isDropdownOpen);
   };
 
-  const handleMenuItemClick = (
-    e: React.MouseEvent,
-    action: () => void
-  ) => {
+  const handleMenuItemClick = (e: React.MouseEvent, action: () => void) => {
     e.stopPropagation();
     action();
     setIsDropdownOpen(false);
@@ -72,7 +69,8 @@ const BookingAction: React.FC<BookingActionProps> = ({
               className="flex items-center p-2 cursor-pointer hover:bg-gray-100 text-gray-600"
               onClick={(e) => handleMenuItemClick(e, () => onView(booking))}
             >
-              <FiEye className="mr-2" /> View
+              <IoEye className="w-5 h-5 text-themeColor" />
+              View
             </li>
             <li
               className="flex items-center p-2 cursor-pointer hover:bg-gray-100 text-gray-600"
@@ -82,7 +80,9 @@ const BookingAction: React.FC<BookingActionProps> = ({
             </li>
             <li
               className="flex items-center p-2 cursor-pointer hover:bg-gray-100 text-gray-600"
-              onClick={(e) => handleMenuItemClick(e, () => onDelete(booking.id))}
+              onClick={(e) =>
+                handleMenuItemClick(e, () => onDelete(booking.id))
+              }
             >
               <FiTrash className="mr-2" /> Delete
             </li>

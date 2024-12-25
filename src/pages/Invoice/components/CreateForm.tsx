@@ -19,15 +19,23 @@ import { useBuildingStore } from "@/stores/buildingStore";
 import { getRoomByBuildingId } from "@/services/buildingApi/buildingApi";
 import { getServiceByRoomId } from "@/services/servicesApi/servicesApi";
 import { getServiceMeterReadingByRoomId } from "@/services/invoiceApi/invoiceApi";
-import { getContractByBuildingId } from "@/services/contractApi/contractApi";
+import {
+  getContractByBuildingId,
+  getServiceMeterByRoomIdAndStatus,
+} from "@/services/contractApi/contractApi";
 import useContractStore from "@/stores/contractStore";
 import { getServicemeterByRoomId } from "@/services/roomStatementApi/roomStatementApi";
 import { getRoomsByBuildingIdAndStatus } from "@/services/bookingApi/bookingApi";
-
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import dayjs from "dayjs";
+import customParseFormat from "dayjs/plugin/customParseFormat";
+dayjs.extend(customParseFormat);
 interface CreateBillFormProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (bill: Bill, serviceMeterid : string) => void;
+  onSubmit: (bill: Bill, serviceMeterid: string) => void;
   serviceMeterReading?: ServiceMeterReadings;
 }
 
@@ -55,7 +63,7 @@ const CreateBillForm: React.FC<CreateBillFormProps> = ({
       .toISOString()
       .split("T")[0],
     cost_room: 0,
-    cost_service: 0,
+    payment_date: new Date().toISOString(),
     total_amount: 0,
     penalty_amount: 0,
     discount: 0,
@@ -71,7 +79,7 @@ const CreateBillForm: React.FC<CreateBillFormProps> = ({
   const [customerError, setCustomerError] = useState<string>("");
   const [serviceMeterReadingData, setServiceMeterReadingData] =
     useState<ServiceMeterReadings | null>(null);
-  const [serviceMeterid, setServiceMeterId] = useState<string>("")
+  const [serviceMeterid, setServiceMeterId] = useState<string>("");
   const [serviceCost, setServiceCost] = useState<number | null>(0);
   const [electricityMoney, setElectricityMoney] = useState<number | null>(0);
   const [waterMoney, setWaterMoney] = useState<number | null>(0);
@@ -170,7 +178,7 @@ const CreateBillForm: React.FC<CreateBillFormProps> = ({
       setSelectedBuilding(building);
 
       // Fetch rooms for the selected building
-      await getRoomsByBuildingIdAndStatus(selectedBuildingId,1);
+      await getRoomsByBuildingIdAndStatus(selectedBuildingId, 1);
       await getContractByBuildingId(selectedBuildingId);
       setBill((prev) => ({
         ...prev,
@@ -229,16 +237,18 @@ const CreateBillForm: React.FC<CreateBillFormProps> = ({
           customer_name: contract?.customerName || "",
         }));
         // Fetch service meter readings
-        const serviceMeterReading = await getServicemeterByRoomId(
-          selectedRoom.id
+        const serviceMeterReading = await getServiceMeterByRoomIdAndStatus(
+          selectedRoom.id,
+          0
         );
-        setServiceMeterReadingData(serviceMeterReading?.data.data);
-        setServiceMeterId(serviceMeterReading?.data.data.id)
+        setServiceMeterReadingData(serviceMeterReading?.data);
+        setServiceMeterId(serviceMeterReading.data.id);
         // Initialize total service cost
         let totalServiceCost = 0;
 
         // Fetch services related to the room
         const serviceResponse = await getServiceByRoomId(selectedRoom.id);
+        console.log(serviceResponse);
         if (serviceResponse.isSuccess) {
           const serviceCost = serviceResponse.data.reduce(
             (total: number, item: Service) => {
@@ -347,224 +357,242 @@ const CreateBillForm: React.FC<CreateBillFormProps> = ({
       header="Thêm mới"
       isOpen={isOpen}
       onClose={onClose}
-      className="max-w-2xl"
+      className="max-w-[50%]"
     >
-      <Card className="p-6">
-        <div className="space-y-4">
-          {/* Bill Name */}
-          <div className="space-y-2">
-            <Label htmlFor="bill_name">Tên hóa đơn</Label>
-            <Input
-              id="bill_name"
-              name="bill_name"
-              value={bill.bill_name}
-              onChange={handleInputChange}
-              placeholder="VD: Hóa đơn tháng 11/2024"
-              className="border-gray-300 rounded h-12"
-            />
-            {errors.bill_name && (
-              <span className="text-red-500 text-sm">{errors.bill_name}</span>
-            )}
-          </div>
-
-          {/* Building Selection */}
-          <div className="space-y-2">
-            <Label htmlFor="building_id" className="text-red-500">
-              Tòa nhà *
-            </Label>
-            {buildings.length > 0 ? (
-              <select
-                id="building_id"
-                name="building_id"
-                value={bill.building_id}
-                onChange={handleBuildingChange}
-                className={`w-full border rounded p-2 ${
-                  errors.building_id ? "border-red-500" : "border-gray-300"
-                }`}
-                required
-              >
-                <option value="">Chọn tòa nhà</option>
-                {buildings.map((building: Building) => (
-                  <option key={building.id} value={building.id}>
-                    {building.building_name}
-                  </option>
-                ))}
-              </select>
-            ) : (
-              <p>Đang tải danh sách tòa nhà...</p>
-            )}
-            {errors.building_id && (
-              <span className="text-red-500 text-sm">{errors.building_id}</span>
-            )}
-
-            {/* Display Selected Building Details */}
-            {selectedBuilding && (
-              <div className="mt-2 px-2 py-4 border border-gray-200 rounded bg-gray-50">
-                <p>
-                  <strong className="text-themeColor">Địa chỉ: </strong>{" "}
-                  {selectedBuilding.address}, {selectedBuilding.district},{" "}
-                  {selectedBuilding.city}
-                </p>
-                <p>
-                  <strong className="text-themeColor">Số tầng: </strong>{" "}
-                  {selectedBuilding.number_of_floors}
-                </p>
-                {/* Add more details as needed */}
-              </div>
-            )}
-          </div>
-
-          {/* Room Selection */}
-          <div className="space-y-2">
-            <Label htmlFor="roomid" className="text-red-500">
-              Phòng *
-            </Label>
-            {bill.building_id ? (
-              filteredRooms.length > 0 ? (
-                <select
-                  id="roomid"
-                  name="roomid"
-                  value={bill.roomid}
-                  onChange={handleRoomChange}
-                  className={`w-full border rounded p-2 ${
-                    errors.roomid ? "border-red-500" : "border-gray-300"
-                  }`}
-                  required
-                >
-                  <option value="">Chọn phòng</option>
-                  {filteredRooms.map((room: Room) => (
-                    <option key={room.id} value={room.id}>
-                      {room.room_name || `Phòng ${room.id}`}
-                    </option>
-                  ))}
-                </select>
-              ) : (
-                <p>Không có phòng nào cho tòa nhà này.</p>
-              )
-            ) : (
-              <p>Vui lòng chọn tòa nhà trước.</p>
-            )}
-            {errors.roomid && (
-              <span className="text-red-500 text-sm">{errors.roomid}</span>
-            )}
-            {customerError && (
-              <span className="text-red-500 text-sm">{customerError}</span>
-            )}
-          </div>
-
-          {/* Customer Name */}
-          <div className="space-y-2">
-            <Label htmlFor="customer_name">Tên khách hàng</Label>
-            <Input
-              disabled
-              id="customer_name"
-              name="customer_name"
-              value={bill.customer_name}
-              onChange={handleInputChange}
-              placeholder="Nhập tên khách hàng"
-            />
-          </div>
-
-          {/* Cost Room */}
-          <div className="space-y-2">
-            <Label htmlFor="cost_room" className="text-red-500">
-              Giá phòng (VNĐ) *
-            </Label>
-
-            <div
-              className={`bg-gray-100 border rounded p-2 ${
-                errors.cost_room ? "border-red-500" : "border-gray-300"
-              }`}
-              aria-readonly="true"
-              role="textbox"
-              tabIndex={0} // Makes the div focusable for accessibility
-            >
-              <span>
-                {bill.cost_room
-                  ? new Intl.NumberFormat("vi-VN", {
-                      style: "currency",
-                      currency: "VND",
-                    }).format(bill.cost_room)
-                  : "Giá phòng tự động điền từ phòng đã chọn"}
-              </span>
+      <LocalizationProvider dateAdapter={AdapterDayjs}>
+        <Card className="p-6 text-black">
+          <div className="space-y-4">
+            {/* Bill Name */}
+            <div className="space-y-2">
+              <Label htmlFor="bill_name">Tên hóa đơn</Label>
+              <Input
+                id="bill_name"
+                name="bill_name"
+                value={bill.bill_name}
+                onChange={handleInputChange}
+                placeholder="VD: Hóa đơn tháng 11/2024"
+                className="border-gray-300 rounded h-12"
+              />
+              {errors.bill_name && (
+                <span className="text-red-500 text-sm">{errors.bill_name}</span>
+              )}
             </div>
 
-            {errors.cost_room && (
-              <span className="text-red-500 text-sm">{errors.cost_room}</span>
-            )}
-          </div>
+            <div className="w-full justify-between flex flex-row">
+              {/* Building Selection */}
+              <div className="w-[48%]">
+                <Label htmlFor="building_id" className="text-red-500">
+                  Tòa nhà *
+                </Label>
+                {buildings.length > 0 ? (
+                  <select
+                    id="building_id"
+                    name="building_id"
+                    value={bill.building_id}
+                    onChange={handleBuildingChange}
+                    className={`w-full border rounded p-2 ${
+                      errors.building_id ? "border-red-500" : "border-gray-300"
+                    }`}
+                    required
+                  >
+                    <option value="">Chọn tòa nhà</option>
+                    {buildings.map((building: Building) => (
+                      <option key={building.id} value={building.id}>
+                        {building.building_name}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <p>Đang tải danh sách tòa nhà...</p>
+                )}
+                {errors.building_id && (
+                  <span className="text-red-500 text-sm">
+                    {errors.building_id}
+                  </span>
+                )}
 
-          {/* Cost Service */}
-          <div className="space-y-2">
-            <Label htmlFor="cost_service">Chi phí dịch vụ (VNĐ)</Label>
-            <table className="min-w-full bg-white border">
-              <thead>
-                <tr className="bg-themeColor text-white border-2 border-gray-300">
-                  <th className="py-2 px-4 bg-themeColor text-white border-2 border-gray-300">
-                    Loại Chi Phí
-                  </th>
-                  <th className="py-2 px-4 bg-themeColor text-white border-2 border-gray-300">
-                    Chỉ số
-                  </th>
-                  <th className="py-2 px-4 bg-themeColor text-white border-2 border-gray-300">
-                    Đơn giá
-                  </th>
-                  <th className="py-2 px-4 bg-themeColor text-white border-2 border-gray-300">
-                    Số Tiền (VNĐ)
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {/* Tiền Dịch Vụ */}
-                <tr>
-                  <td className="py-2 px-4 border-2 ">Tiền Dịch Vụ</td>
-                  <td className="py-2 px-4 "></td>
-                  <td className="py-2 px-4 "></td>
-                  <td className="py-2 px-4 border-2  text-center">
-                    {serviceCost ? serviceCost.toLocaleString() : 0} đ
-                  </td>
-                </tr>
-                {/* Tiền Điện Nước */}
-                <tr>
-                  <td className="py-2 px-4 border-2 ">Tiền Điện</td>
-                  <td className="py-2 px-4 border-2 text-center">
-                    {(serviceMeterReadingData?.electricity_new ?? 0) -
-                      (serviceMeterReadingData?.electricity_old ?? 0)}
-                  </td>
-                  <td className="py-2 px-4 border-2 text-center">
-                    {serviceMeterReadingData?.electricity_price} đ
-                  </td>
-                  <td className="py-2 px-4 border-2 text-center">
-                    {electricityMoney ? electricityMoney.toLocaleString() : 0} đ
-                  </td>
-                </tr>
-                <tr>
-                  <td className="py-2 px-4 border-2 ">Tiền Nước</td>
-                  <td className="py-2 px-4 border-2 text-center">
-                    {(serviceMeterReadingData?.water_new ?? 0) -
-                      (serviceMeterReadingData?.water_old ?? 0)}
-                  </td>
-                  <td className="py-2 px-4 border-2 text-center">
-                    {serviceMeterReadingData?.water_price} đ
-                  </td>
-                  <td className="py-2 px-4 border-2  text-center">
-                    {waterMoney ? waterMoney.toLocaleString() : 0} đ
-                  </td>
-                </tr>
-                {/* Tổng Tiền */}
-                <tr>
-                  <td className="py-2 px-4 font-bold text-themeColor">
-                    Tổng Tiền
-                  </td>
-                  <td className="py-2 px-4 font-bold"></td>
-                  <td className="py-2 px-4 font-bold"></td>
-                  <td className="py-2 px-4 font-bold text-center text-themeColor">
-                    {bill?.cost_service?.toLocaleString()} đ
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-            {/* <Input
+                {/* Display Selected Building Details */}
+                {selectedBuilding && (
+                  <div className="mt-2 px-2 py-4 border border-gray-200 rounded bg-gray-50">
+                    <p>
+                      <strong className="text-themeColor">Địa chỉ: </strong>{" "}
+                      {selectedBuilding.address}, {selectedBuilding.district},{" "}
+                      {selectedBuilding.city}
+                    </p>
+                    <p>
+                      <strong className="text-themeColor">Số tầng: </strong>{" "}
+                      {selectedBuilding.number_of_floors}
+                    </p>
+                    {/* Add more details as needed */}
+                  </div>
+                )}
+              </div>
+
+              {/* Room Selection */}
+              <div className="w-[48%]">
+                <Label htmlFor="roomid" className="text-red-500">
+                  Phòng *
+                </Label>
+                {bill.building_id ? (
+                  filteredRooms.length > 0 ? (
+                    <select
+                      id="roomid"
+                      name="roomid"
+                      value={bill.roomid}
+                      onChange={handleRoomChange}
+                      className={`w-full border rounded-[8px] p-2 ${
+                        errors.roomid ? "border-red-500" : "border-gray-300"
+                      }`}
+                      required
+                    >
+                      <option value="">Chọn phòng</option>
+                      {filteredRooms.map((room: Room) => (
+                        <option key={room.id} value={room.id}>
+                          {room.room_name || `Phòng ${room.id}`}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <div className="h-10 border border-gray-300 rounded-[8px] flex justify-start pl-4 items-center">
+                      <p>Không có phòng nào cho tòa nhà này.</p>
+                    </div>
+                  )
+                ) : (
+                  <div className="h-10 border border-gray-300 rounded-[8px] flex justify-start pl-4 items-center">
+                    <p>Vui lòng chọn tòa nhà trước.</p>
+                  </div>
+                )}
+                {errors.roomid && (
+                  <span className="text-red-500 text-sm">{errors.roomid}</span>
+                )}
+                {customerError && (
+                  <span className="text-red-500 text-sm">{customerError}</span>
+                )}
+              </div>
+            </div>
+
+            <div className="w-full flex flex-row justify-between">
+              {/* Customer Name */}
+              <div className="w-[48%] ">
+                <Label htmlFor="customer_name">Tên khách hàng</Label>
+                {/* <Input
+                disabled
+                id="customer_name"
+                name="customer_name"
+                value={bill.customer_name}
+                onChange={handleInputChange}
+                placeholder="Nhập tên khách hàng"
+                className="border border-gray-300 rounded-[8px] text-black"
+              /> */}
+                <div className="border border-gray-300 h-10 rounded-[8px] p-2 text-black">
+                  {bill.customer_name}
+                </div>
+              </div>
+
+              {/* Cost Room */}
+              <div className="w-[48%] ">
+                <Label htmlFor="cost_room" className="text-red-500">
+                  Giá phòng (VNĐ) *
+                </Label>
+
+                <div
+                  className={`bg-white border rounded-[8px] p-2 ${
+                    errors.cost_room ? "border-red-500" : "border-gray-300"
+                  }`}
+                  aria-readonly="true"
+                  role="textbox"
+                  tabIndex={0} // Makes the div focusable for accessibility
+                >
+                  <span>
+                    {bill.cost_room
+                      ? new Intl.NumberFormat("vi-VN", {
+                          style: "currency",
+                          currency: "VND",
+                        }).format(bill.cost_room)
+                      : "Giá phòng"}
+                  </span>
+                </div>
+
+                {errors.cost_room && (
+                  <span className="text-red-500 text-sm">
+                    {errors.cost_room}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* Cost Service */}
+            <div className="space-y-2">
+              <Label htmlFor="cost_service">Chi phí dịch vụ (VNĐ)</Label>
+              <table className="min-w-full bg-white border">
+                <thead>
+                  <tr className="bg-themeColor text-white border-2 border-gray-300">
+                    <th className="py-2 px-4 bg-themeColor text-white border-2 border-gray-300">
+                      Loại Chi Phí
+                    </th>
+                    <th className="py-2 px-4 bg-themeColor text-white border-2 border-gray-300">
+                      Chỉ số
+                    </th>
+                    <th className="py-2 px-4 bg-themeColor text-white border-2 border-gray-300">
+                      Đơn giá
+                    </th>
+                    <th className="py-2 px-4 bg-themeColor text-white border-2 border-gray-300">
+                      Số Tiền (VNĐ)
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {/* Tiền Điện Nước */}
+                  <tr>
+                    <td className="py-2 px-4 border-2 ">Tiền Điện</td>
+                    <td className="py-2 px-4 border-2 text-center">
+                      {(serviceMeterReadingData?.electricity_new ?? 0) -
+                        (serviceMeterReadingData?.electricity_old ?? 0)}
+                    </td>
+                    <td className="py-2 px-4 border-2 text-center">
+                      {serviceMeterReadingData?.electricity_price} đ
+                    </td>
+                    <td className="py-2 px-4 border-2 text-center">
+                      {electricityMoney ? electricityMoney.toLocaleString() : 0}{" "}
+                      đ
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 px-4 border-2 ">Tiền Nước</td>
+                    <td className="py-2 px-4 border-2 text-center">
+                      {(serviceMeterReadingData?.water_new ?? 0) -
+                        (serviceMeterReadingData?.water_old ?? 0)}
+                    </td>
+                    <td className="py-2 px-4 border-2 text-center">
+                      {serviceMeterReadingData?.water_price} đ
+                    </td>
+                    <td className="py-2 px-4 border-2  text-center">
+                      {waterMoney ? waterMoney.toLocaleString() : 0} đ
+                    </td>
+                  </tr>
+                  {/* Tiền Dịch Vụ */}
+                  <tr>
+                    <td className="py-2 px-4  ">Tiền Dịch Vụ</td>
+                    <td className="py-2 px-4 "></td>
+                    <td className="py-2 px-4 "></td>
+                    <td className="py-2 px-4  text-center">
+                      {serviceCost ? serviceCost.toLocaleString() : 0} đ
+                    </td>
+                  </tr>
+                  {/* Tổng Tiền */}
+                  <tr>
+                    <td className="py-2 px-4 font-bold text-themeColor">
+                      Tổng Tiền
+                    </td>
+                    <td className="py-2 px-4 font-bold"></td>
+                    <td className="py-2 px-4 font-bold"></td>
+                    <td className="py-2 px-4 font-bold text-center text-themeColor">
+                      {bill?.cost_service?.toLocaleString()} đ
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              {/* <Input
               id="cost_service"
               name="cost_service"
               type="number"
@@ -576,98 +604,117 @@ const CreateBillForm: React.FC<CreateBillFormProps> = ({
               onChange={handleInputChange}
               placeholder="Nhập chi phí dịch vụ"
             /> */}
-          </div>
+            </div>
+            <div className="w-full flex flex-row justify-between">
+              {/* Penalty Amount */}
+              <div className="w-[48%]">
+                <Label htmlFor="penalty_amount">Tiền phạt (VNĐ)</Label>
+                <Input
+                  id="penalty_amount"
+                  name="penalty_amount"
+                  type="number"
+                  value={bill.penalty_amount}
+                  onChange={handleInputChange}
+                  placeholder="Nhập tiền phạt (nếu có)"
+                  className="rounded-[8px] h-12 border border-gray-300"
+                />
+              </div>
 
-          {/* Penalty Amount */}
-          <div className="space-y-2">
-            <Label htmlFor="penalty_amount">Tiền phạt (VNĐ)</Label>
-            <Input
-              id="penalty_amount"
-              name="penalty_amount"
-              type="number"
-              value={bill.penalty_amount}
-              onChange={handleInputChange}
-              placeholder="Nhập tiền phạt (nếu có)"
-            />
-          </div>
+              {/* Discount */}
+              <div className="w-[48%]">
+                <Label htmlFor="discount">Giảm giá (%)</Label>
+                <Input
+                  id="discount"
+                  name="discount"
+                  type="number"
+                  value={bill.discount}
+                  onChange={handleInputChange}
+                  placeholder="Nhập % giảm giá"
+                  min="0"
+                  max="100"
+                  className="rounded-[8px] h-12 border border-gray-300"
+                />
+              </div>
+            </div>
 
-          {/* Discount */}
-          <div className="space-y-2">
-            <Label htmlFor="discount">Giảm giá (%)</Label>
-            <Input
-              id="discount"
-              name="discount"
-              type="number"
-              value={bill.discount}
-              onChange={handleInputChange}
-              placeholder="Nhập % giảm giá"
-              min="0"
-              max="100"
-            />
-          </div>
+            {/* Due Date */}
+            <div className="w-full flex flex-row justify-between ">
+              <div className="space-y-2 w-[48%] mt-4">
+                <div className="relative">
+                  {/* <Input
+                  id="due_date"
+                  name="due_date"
+                  type="date"
+                  value={bill.due_date?.split("T")[0] || ""}
+                  onChange={handleInputChange}
+                  className="rounded-[8px] border border-gray-300"
+                /> */}
+                  <DatePicker
+                    label="Hạn thanh toán"
+                    value={
+                      bill.due_date ? dayjs(bill.due_date, "YYYY-MM-DD") : null
+                    }
+                    onChange={(date) =>
+                      setBill((prev) => ({
+                        ...prev,
+                        due_date: date ? dayjs(date).format("YYYY-MM-DD") : "",
+                      }))
+                    }
+                    views={["day"]}
+                    format="DD/MM/YYYY"
+                  />
+                </div>
+              </div>
+            </div>
 
-          {/* Due Date */}
-          <div className="space-y-2">
-            <Label htmlFor="due_date">Hạn thanh toán</Label>
-            <div className="relative">
-              <Input
-                id="due_date"
-                name="due_date"
-                type="date"
-                value={bill.due_date?.split("T")[0] || ""}
+            {/* Note */}
+            <div className="space-y-2">
+              <Label htmlFor="note">Ghi chú</Label>
+              <Textarea
+                id="note"
+                name="note"
+                value={bill.note}
                 onChange={handleInputChange}
+                placeholder="Nhập ghi chú (nếu có)"
+                className="rounded-[8px] border border-gray-300 h-20"
               />
-              <Calendar className="absolute right-3 top-2.5 h-5 w-5 text-gray-500" />
+            </div>
+
+            {/* Total and Final Amount */}
+            <div className="bg-gray-50 p-4 rounded-lg space-y-2">
+              <div className="flex justify-between items-center">
+                <span>Tổng tiền (chưa tính phạt/giảm giá):</span>
+                <span className="text-lg text-blue-600">
+                  {(bill.total_amount ?? 0).toLocaleString("vi-VN")} VNĐ
+                </span>
+              </div>
+              <div className="flex justify-between items-center font-semibold">
+                <span>Số tiền cuối cùng:</span>
+                <span className="text-xl text-blue-600">
+                  {(bill.final_amount ?? 0).toLocaleString("vi-VN")} VNĐ
+                </span>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex justify-end space-x-4">
+              <Button
+                className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+                variant="outline"
+                onClick={onClose}
+              >
+                Hủy
+              </Button>
+              <Button
+                className="px-4 py-2 text-white rounded hover:bg-blue-700 bg-themeColor"
+                onClick={handleSubmit}
+              >
+                Lưu
+              </Button>
             </div>
           </div>
-
-          {/* Note */}
-          <div className="space-y-2">
-            <Label htmlFor="note">Ghi chú</Label>
-            <Textarea
-              id="note"
-              name="note"
-              value={bill.note}
-              onChange={handleInputChange}
-              placeholder="Nhập ghi chú (nếu có)"
-              className="h-20"
-            />
-          </div>
-
-          {/* Total and Final Amount */}
-          <div className="bg-gray-50 p-4 rounded-lg space-y-2">
-            <div className="flex justify-between items-center">
-              <span>Tổng tiền (chưa tính phạt/giảm giá):</span>
-              <span className="text-lg text-blue-600">
-                {(bill.total_amount ?? 0).toLocaleString("vi-VN")} VNĐ
-              </span>
-            </div>
-            <div className="flex justify-between items-center font-semibold">
-              <span>Số tiền cuối cùng:</span>
-              <span className="text-xl text-blue-600">
-                {(bill.final_amount ?? 0).toLocaleString("vi-VN")} VNĐ
-              </span>
-            </div>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="flex justify-end space-x-4">
-            <Button
-              className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
-              variant="outline"
-              onClick={onClose}
-            >
-              Hủy
-            </Button>
-            <Button
-              className="px-4 py-2 text-white rounded hover:bg-blue-700 bg-themeColor"
-              onClick={handleSubmit}
-            >
-              Lưu
-            </Button>
-          </div>
-        </div>
-      </Card>
+        </Card>
+      </LocalizationProvider>
     </CustomModal>
   );
 };

@@ -89,6 +89,7 @@ export const getRoomById = async (roomId: string | null) => {
   }
 };
 
+
 export const deleteRoom = async (roomId: string | null) => {
   try {
     const response = await api.delete(`/room/delete?id=${roomId}`);

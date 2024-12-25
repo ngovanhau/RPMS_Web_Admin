@@ -93,3 +93,30 @@ export const getCustomerByStatus = async ( status : number ) => {
     console.log(error)
   }
 }
+
+export const extendContract = async ( id : string, price : number , date : Date, note: string) => {
+  try {
+    const response = await api.put(`/contract/extension?id=${id}&price=${price}&date=${date}&note=${note}`)
+    return response.data
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+export const liquidationContract = async ( id : string, type : number , data : any) => {
+  try {
+    const response = await api.put(`/contract/liquidation?id=${id}&type=${type}`,data)
+    return response.data
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+export const getServiceMeterByRoomIdAndStatus = async ( roomId : string, status : number ) => {
+  try {
+    const response = await api.get(`/servicemeterreadings/getservicebyroomidandstatus?id=${roomId}&status=${status}`)
+    return response.data
+  } catch (error) {
+    return (error as any).response.data 
+  }
+}

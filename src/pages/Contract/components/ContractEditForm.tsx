@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { Contract } from "@/types/types";
 import { getallService } from "@/services/servicesApi/servicesApi";
-import useServiceStore from "@/stores/servicesStore";
-import Select from "react-select";
 import { getroombystatus } from "@/services/tenantApi/tenant";
 import { Room } from "@/types/types";
 import { getCustomerNoRoom } from "@/services/contractApi/contractApi";
-import useTenantStore from "@/stores/tenantStore";
 import { deleteImage, uploadImage } from "@/services/imageApi/imageApi";
 import { Upload, message } from "antd";
 import type { GetProp, UploadFile, UploadProps } from "antd";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import dayjs, { Dayjs } from "dayjs";
+import "dayjs/locale/vi";
+dayjs.locale("vi");
 type FileType = Parameters<GetProp<UploadProps, "beforeUpload">>[0];
 
 interface EditContractFormProps {
@@ -24,49 +25,33 @@ const EditContractForm: React.FC<EditContractFormProps> = ({
   const [contract, setContract] = useState<Partial<Contract>>(initialContract);
   const [modifiedData, setModifiedData] = useState<Partial<Contract>>({});
   const [listRoom, setListRoom] = useState<Room[]>([]);
-  const [uploading, setUploading] = useState(false);
-  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
-  const [visible, setVisible] = useState(false);
-  const [activeImageIndex, setActiveImageIndex] = useState(0);
+
   const [fileList, setFileList] = useState<UploadFile[]>([]);
-  // Fetch data from stores
-  const services = useServiceStore.getState().services;
-  const listCustomer = useTenantStore.getState().tenantsWithoutRoom;
-
-  // Handle field changes
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target;
-    setContract((prevState) => ({ ...prevState, [name]: value }));
-
-    // Track changes in modifiedData
-    setModifiedData((prevState) => ({ ...prevState, [name]: value }));
-  };
+ 
 
   const onChange: UploadProps["onChange"] = async ({ file }) => {
     if (file.originFileObj && file.status === "uploading") {
       try {
         // Xóa ảnh cũ trước khi tải ảnh mới
         await handleRemoveImage();
-  
+
         // Tải ảnh mới
         const imageUrl = await uploadImage(file.originFileObj);
         if (imageUrl) {
           const updatedFile: UploadFile = {
-            uid: '-1', // Định danh tạm thời
+            uid: "-1", // Định danh tạm thời
             name: file.name || "image.png", // Tên ảnh
             url: imageUrl, // URL của ảnh mới
             status: "done",
           };
-  
+
           // Cập nhật giao diện và trạng thái hợp đồng
           setFileList([updatedFile]);
           setModifiedData((prevState) => ({
             ...prevState,
             image: imageUrl,
           }));
-  
+
           message.success("Ảnh đã tải lên thành công!");
         } else {
           throw new Error("Không nhận được URL ảnh từ API.");
@@ -78,7 +63,7 @@ const EditContractForm: React.FC<EditContractFormProps> = ({
       }
     }
   };
-  
+
   // Xóa ảnh
   const handleRemoveImage = async () => {
     if (contract.image) {
@@ -90,10 +75,10 @@ const EditContractForm: React.FC<EditContractFormProps> = ({
           ...prevState,
           image: "",
         }));
-  
+
         // Xóa ảnh khỏi giao diện
         setFileList([]);
-  
+
         message.success("Ảnh đã được xóa!");
       } catch (error) {
         console.error("Lỗi khi xóa ảnh:", error);
@@ -101,7 +86,6 @@ const EditContractForm: React.FC<EditContractFormProps> = ({
       }
     }
   };
-  
 
   const onPreview = async (file: UploadFile) => {
     let src = file.url as string;
@@ -133,20 +117,6 @@ const EditContractForm: React.FC<EditContractFormProps> = ({
     // Đồng bộ modifiedData với dữ liệu contract khi vào trang
     setModifiedData(initialContract);
   }, [initialContract]);
-  
-  // Handle room change
-  const handleRoomChange = (selectedRoom: { value: string; label: string }) => {
-    setContract((prevState) => ({
-      ...prevState,
-      room: selectedRoom.label,
-      roomId: selectedRoom.value,
-    }));
-    setModifiedData((prevState) => ({
-      ...prevState,
-      room: selectedRoom.label,
-      roomId: selectedRoom.value,
-    }));
-  };
 
   // Fetch initial data (rooms and customers)
   useEffect(() => {
@@ -160,8 +130,8 @@ const EditContractForm: React.FC<EditContractFormProps> = ({
 
         if (contract?.image) {
           const updatedFile: UploadFile = {
-            uid: '-1',
-            name: 'image.png',
+            uid: "-1",
+            name: "image.png",
             url: contract.image,
             status: "done",
           };
@@ -175,160 +145,171 @@ const EditContractForm: React.FC<EditContractFormProps> = ({
     fetchData();
   }, []);
 
-  // Format service options for react-select
-  const serviceOptions = services.map((service) => ({
-    value: service.id,
-    label: service.service_name,
-  }));
-
-  // Format room options for react-select
-  const roomOptions = listRoom.map((room) => ({
-    value: room.id,
-    label: room.room_name || "Phòng không tên",
-  }));
-
-  // Format customer options for react-select
-  const customerOptions = listCustomer.map((customer) => ({
-    value: customer.id || "",
-    label: customer.customer_name,
-  }));
-
-  // Helper function to safely convert to ISO string
-  const formatDateToISO = (date: Date | string | undefined) => {
-    if (date instanceof Date) {
-      return date.toISOString().split("T")[0]; // Convert Date object to 'YYYY-MM-DD'
-    }
-    if (typeof date === "string") {
-      const parsedDate = new Date(date);
-      return parsedDate.toISOString().split("T")[0]; // Convert string to Date and format
-    }
-    return ""; // Return empty string if the date is undefined or invalid
-  };
-
   return (
     <form onSubmit={handleSubmit} className="space-y-6 bg-white p-8 mx-auto">
       {/* Form Fields */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="flex flex-col w-full gap-6">
         {/* Contract Name */}
-        <div>
-          <label className="block text-sm font-semibold text-gray-600 mb-1">
-            Tên Hợp Đồng
-          </label>
-          <input
-            type="text"
-            name="contract_name"
-            value={contract.contract_name || ""}
-            onChange={handleChange}
-            className="border rounded-lg p-3 w-full focus:ring-2 focus:ring-blue-400 focus:outline-none"
-            placeholder="Nhập tên hợp đồng"
-            required
-          />
+        <div className="w-full flex flex-row justify-between">
+          <div className="w-[48%] flex flex-col">
+            <label className="block text-sm font-semibold text-black mb-1">
+              Tên Hợp Đồng
+            </label>
+            <div className="border border-gray-300 h-12 rounded-[8px] w-full px-2 flex items-center cursor-not-allowed hover:text-red-500">
+              <span>{contract.contract_name || "Chưa có tên hợp đồng"}</span>
+            </div>
+          </div>
+
+          {/* Room */}
+          <div className="w-[48%] flex flex-col">
+            <label className="block text-sm font-semibold text-gray-600 mb-1">
+              Phòng
+            </label>
+            <div className="border rounded-[8px] border-gray-300 h-12 p-3 w-full bg-white text-black flex items-center cursor-not-allowed hover:text-red-500">
+              <span>{contract.room || "Chưa chọn phòng"}</span>
+            </div>
+          </div>
+        </div>
+        <div className="w-full flex flex-row justify-between">
+          <div className="w-[48%]">
+            <label className="block text-sm font-semibold text-gray-600 mb-1">
+              Khách Hàng
+            </label>
+            <div className="border border-gray-300 h-12 rounded-[8px] px-2 flex items-center cursor-not-allowed hover:text-red-500">
+              <span>{contract?.customerName || "Chưa chọn khách hàng"}</span>
+            </div>
+          </div>
+
+          <div className="w-[48%]">
+            <div>
+              <label className="block text-sm font-semibold text-gray-600 mb-1">
+                Phí Phòng (VND)
+              </label>
+              <div className="w-full border border-gray-300 rounded-[8px] h-12 justify-start p-2 items-center flex cursor-not-allowed hover:text-red-500">
+                <span>
+                  {contract.room_fee?.toLocaleString() || "Chưa có phí phòng"}{" "}
+                  VNĐ
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
 
-
-
-        {/* Room */}
-        <div>
-          <label className="block text-sm font-semibold text-gray-600 mb-1">
-            Phòng
-          </label>
-          <Select
-            options={roomOptions}
-            value={{
-              label: contract.room || "Chọn phòng",
-              value: contract.roomId || "",
-            }}
-            onChange={(selected) =>
-              handleRoomChange(selected as { value: string; label: string })
-            }
-            className="border rounded-lg w-full focus:ring-2 focus:ring-blue-400 focus:outline-none"
-            placeholder="Chọn phòng"
-          />
+        <div className="w-full flex flex-row justify-between">
+          {/* Ngày bắt đầu */}
+          <div className="w-[48%] flex flex-col">
+            <label className="block text-sm font-semibold text-gray-600 mb-1">
+              Ngày Bắt Đầu
+            </label>
+            <DatePicker
+              value={dayjs(contract.start_day)} // Chuyển Date sang Dayjs
+              format="DD/MM/YYYY" // Hiển thị định dạng dd/MM/yyyy
+              slotProps={{
+                textField: {
+                  fullWidth: true,
+                  required: true,
+                  variant: "outlined",
+                  InputProps: {
+                    style: {
+                      height: "48px", // Đặt chiều cao cố định (tương ứng h-10)
+                    },
+                  },
+                  className:
+                    "h-12 border border-gray-300 rounded-[8px] p-3 w-full focus:ring-2 focus:ring-blue-400 focus:outline-none",
+                },
+              }}
+            />
+          </div>
+          <div className="w-[48%] flex flex-col">
+            <label className="block text-sm font-semibold text-gray-600 mb-1">
+              Ngày Kết Thúc
+            </label>
+            <DatePicker
+              value={dayjs(contract.end_day)} // Chuyển Date sang Dayjs
+              onChange={(date) =>
+                setContract((prev) => ({
+                  ...prev,
+                  end_day: date ? date.toDate() : prev.end_day, // Chuyển Dayjs thành Date
+                }))
+              }
+              format="DD/MM/YYYY" // Hiển thị định dạng dd/MM/yyyy
+              slotProps={{
+                textField: {
+                  fullWidth: true,
+                  required: true,
+                  variant: "outlined",
+                  InputProps: {
+                    style: {
+                      height: "48px", // Đặt chiều cao cố định (tương ứng h-10)
+                    },
+                  },
+                  className:
+                    "h-12 border border-gray-300 rounded-[8px] p-3 w-full focus:ring-2 focus:ring-blue-400 focus:outline-none",
+                },
+              }}
+            />
+          </div>
         </div>
 
-        {/* Start Date */}
-        <div>
-          <label className="block text-sm font-semibold text-gray-600 mb-1">
-            Ngày Bắt Đầu
-          </label>
-          <input
-            type="date"
-            name="start_day"
-            value={formatDateToISO(modifiedData.start_day)}
-            onChange={(e) => {
-              const newDate = new Date(e.target.value);
-              setModifiedData({
-                ...modifiedData,
-                start_day: newDate,
-              });
-            }}
-            className="border rounded-lg p-3 w-full focus:ring-2 focus:ring-blue-400 focus:outline-none"
-            required
-          />
-        </div>
+        <div className="w-full flex flex-row justify-between">
+          <div className="w-[48%] flex flex-col">
+            <label className="block text-sm font-semibold text-gray-600 mb-1">
+              Ngày Bắt Đầu Thanh Toán
+            </label>
+            <DatePicker
+              value={dayjs(contract.billing_start_date)} // Chuyển Date sang Dayjs
+              onChange={(date) =>
+                setContract((prev) => ({
+                  ...prev,
+                  billing_start_date: date
+                    ? date.toDate()
+                    : prev.billing_start_date, 
+                }))
+              }
+              format="DD/MM/YYYY" // Hiển thị định dạng dd/MM/yyyy
+              slotProps={{
+                textField: {
+                  fullWidth: true,
+                  required: true,
+                  variant: "outlined",
+                  InputProps: {
+                    style: {
+                      height: "48px", // Đặt chiều cao cố định (tương ứng h-10)
+                    },
+                  },
+                  className:
+                    "h-12 border border-gray-300 rounded-[8px] p-3 w-full focus:ring-2 focus:ring-blue-400 focus:outline-none",
+                },
+              }}
+            />
+          </div>
 
-        {/* End Date */}
-        <div>
-          <label className="block text-sm font-semibold text-gray-600 mb-1">
-            Ngày Kết Thúc
-          </label>
-          <input
-            type="date"
-            name="end_day"
-            value={formatDateToISO(modifiedData.end_day)}
-            onChange={(e) => {
-              const newDate = new Date(e.target.value);
-              setModifiedData({
-                ...modifiedData,
-                end_day: newDate,
-              });
-            }}
-            className="border rounded-lg p-3 w-full focus:ring-2 focus:ring-blue-400 focus:outline-none"
-            required
-          />
-        </div>
-
-        {/* Billing Start Date */}
-        <div>
-          <label className="block text-sm font-semibold text-gray-600 mb-1">
-            Ngày Bắt Đầu Thanh Toán
-          </label>
-          <input
-            type="date"
-            name="billing_start_date"
-            value={formatDateToISO(contract.billing_start_date)}
-            onChange={handleChange}
-            className="border rounded-lg p-3 w-full focus:ring-2 focus:ring-blue-400 focus:outline-none"
-            required
-          />
-        </div>
-
-        {/* Customer */}
-        <div>
-          <label className="block text-sm font-semibold text-gray-600 mb-1">
-            Khách Hàng
-          </label>
-          <Select
-            options={customerOptions}
-            value={{
-              label: contract.customerName || "Chọn khách hàng",
-              value: contract.customerId || "",
-            }}
-            onChange={(selected) => {
-              setContract({
-                ...contract,
-                customerId: selected?.value || "",
-                customerName: selected?.label || "",
-              });
-              setModifiedData({
-                ...modifiedData,
-                customerId: selected?.value || "",
-                customerName: selected?.label || "",
-              });
-            }}
-            className="border rounded-lg w-full focus:ring-2 focus:ring-blue-400 focus:outline-none"
-            placeholder="Chọn khách hàng"
-          />
+          <div className="flex flex-col w-[48%]">
+            <label className="block text-sm font-semibold text-gray-600 mb-1">
+              Kỳ Hạn Thanh Toán (tháng)
+            </label>
+            <select
+              name="payment_term"
+              value={contract.payment_term || ""}
+              onChange={(e) =>
+                setContract((prev) => ({
+                  ...prev,
+                  payment_term: Number(e.target.value),
+                }))
+              }
+              className="border border-gray-300 rounded-[8px] h-12 p-3 w-full focus:ring-2 focus:ring-blue-400 focus:outline-none"
+              required
+            >
+              <option value="" disabled>
+                Chọn kỳ hạn
+              </option>
+              {Array.from({ length: 12 }, (_, i) => i + 1).map((month) => (
+                <option key={month} value={month}>
+                  {month} tháng
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
       </div>
 

@@ -6,7 +6,7 @@ import { getallService } from "@/services/servicesApi/servicesApi";
 import useServiceStore from "@/stores/servicesStore";
 import { ServiceInfo } from "@/types/types";
 import { uploadImage } from "@/services/imageApi/imageApi";
-
+import TextField from "@mui/material/TextField";
 interface EditRoomFormProps {
   isOpen: boolean;
   onClose: () => void;
@@ -36,8 +36,10 @@ const EditRoomForm: React.FC<EditRoomFormProps> = ({
 
   const [paidServiceList, setPaidServiceList] = useState<ServiceInfo[]>([]);
   const [selectedSubDetail, setSelectedSubDetail] = useState<Number>(0);
-  const [imageUrls, setImageUrls] = useState<string[]>(room?.imageUrls || []); // Để lưu các ảnh phòng
-
+  const [imageUrls, setImageUrls] = useState<string[]>(room?.imageUrls || []); 
+  const [utilities, setUtilities] = useState<string>(room?.utilities || "");
+  const [describe, setDescribe] = useState<string>(room?.describe || "");
+  const [note, setNote] = useState<string>(room?.note || "");
   const subDetailsLabel = [
     { id: 0, label: "DỊCH VỤ" },
     { id: 1, label: "ẢNH PHÒNG" },
@@ -59,7 +61,9 @@ const EditRoomForm: React.FC<EditRoomFormProps> = ({
   const handleFormSubmit = (data: Room) => {
     // Thay thế toàn bộ data.roomservice bằng paidServiceList
     data.roomservice = paidServiceList;
-
+    data.utilities = utilities;
+    data.describe = describe;
+    data.note = note;
     // Gán ID của building vào data nếu có
     data.building_Id = building?.id || "";
     data.imageUrls = imageUrls;
@@ -309,7 +313,7 @@ const EditRoomForm: React.FC<EditRoomFormProps> = ({
                           {service?.service_name}
                         </span>
                         <span className="text-gray-700 text-[13px] font-semibold">
-                          {service.service_cost}/{service.collect_fees}
+                          {(service.service_cost.toLocaleString())} đ
                         </span>
                       </div>
                     </div>
@@ -348,6 +352,45 @@ const EditRoomForm: React.FC<EditRoomFormProps> = ({
                   multiple // Cho phép chọn nhiều ảnh
                 />
               </div>
+            </div>
+          )}
+          {selectedSubDetail === 2 && (
+            <div className="w-full pt-4">
+              <TextField
+                label="Tiện ích phòng"
+                variant="outlined"
+                value={utilities}
+                onChange={(e) => setUtilities(e.target.value)}
+                fullWidth
+                multiline
+                maxRows={4}
+              />
+            </div>
+          )}
+          {selectedSubDetail === 3 && (
+            <div className="w-full pt-4">
+              <TextField
+                label="Mô tả"
+                variant="outlined"
+                value={describe}
+                onChange={(e) => setDescribe(e.target.value)}
+                fullWidth
+                multiline
+                maxRows={4}
+              />
+            </div>
+          )}
+          {selectedSubDetail === 4 && (
+            <div className="w-full pt-4">
+              <TextField
+                label="Lưu ý"
+                variant="outlined"
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                fullWidth
+                multiline
+                maxRows={4}
+              />
             </div>
           )}
         </div>

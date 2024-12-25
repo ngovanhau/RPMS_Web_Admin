@@ -15,7 +15,12 @@ import { deleteImage, uploadImage } from "@/services/imageApi/imageApi";
 import Viewer from "react-viewer";
 import { Upload, message } from "antd";
 import type { GetProp, UploadFile, UploadProps } from "antd";
-
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import TextField from "@mui/material/TextField";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import dayjs, { Dayjs } from "dayjs";
+import "dayjs/locale/vi";
+dayjs.locale("vi");
 import {
   getAllBuildings,
   getBuildingByUserId,
@@ -69,6 +74,13 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({
   // const onChange: UploadProps["onChange"] = ({ fileList: newFileList }) => {
   //   setFileList(newFileList);
   // };
+
+  const handleDateChange = (field: "start_day", date: Dayjs | null) => {
+    setContract((prev) => ({
+      ...prev,
+      [field]: date ? date.toDate() : prev[field], // Chuyển Dayjs về Date
+    }));
+  };
 
   const onChange: UploadProps["onChange"] = async ({ file }) => {
     if (file.originFileObj && file.status === "uploading") {
@@ -230,7 +242,7 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({
             name="contract_name"
             value={contract.contract_name || ""}
             onChange={handleChange}
-            className="border rounded-[6px] p-3 h-10 w-full focus:ring-2 focus:ring-blue-400 focus:outline-none"
+            className="border border-gray-300 h-12 rounded-[8px] w-full px-2 flex items-center"
             placeholder="Nhập tên hợp đồng"
             required
           />
@@ -249,7 +261,18 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({
                 setSelectedBuilding(fullBuilding);
               }
             }}
-            className="rounded-[6px] w-full focus:ring-2 focus:ring-blue-400 focus:outline-none"
+            styles={{
+              control: (provided) => ({
+                ...provided,
+                minHeight: "3rem", // Chiều cao h-12 (48px)
+                borderRadius: "0.5rem", // bo tròn giống Tailwind rounded-[8px]
+              }),
+              valueContainer: (provided) => ({
+                ...provided,
+                padding: "0 1rem", // padding giống Tailwind
+              }),
+            }}
+            className="w-full focus:ring-2 focus:ring-blue-400 focus:outline-none"
             placeholder="Chọn tòa nhà"
           />
         </div>
@@ -264,11 +287,27 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({
               onChange={(selected) =>
                 handleRoomChange(selected as { value: string; label: string })
               }
-              className="h-10 rounded-[6px] w-full focus:ring-2 focus:ring-blue-400 focus:outline-none"
+              styles={{
+                control: (provided) => ({
+                  ...provided,
+                  minHeight: "3rem", // h-12 (48px)
+                  borderRadius: "0.375rem", // rounded-[6px]
+                  borderColor: "#D1D5DB", // Tailwind border-gray-300
+                  boxShadow: "none",
+                  "&:hover": {
+                    borderColor: "#93C5FD", // Tailwind focus:ring-blue-400
+                  },
+                }),
+                valueContainer: (provided) => ({
+                  ...provided,
+                  padding: "0 1rem", // Padding giống Tailwind px-2
+                }),
+              }}
+              className="w-full focus:ring-2 focus:ring-blue-400 focus:outline-none"
               placeholder="Chọn phòng"
             />
           ) : (
-            <div className="border border-gray-300 px-2 flex items-center h-10 rounded-[6px]">
+            <div className="border border-gray-300 h-12 rounded-[8px] px-2 flex items-center ">
               <span>Không có phòng</span>
             </div>
           )}
@@ -277,7 +316,7 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({
           <label className="block text-sm font-semibold text-gray-600 mb-1">
             Khách Hàng
           </label>
-          <div className="rounded-[8px] w-full border border-gray-300 p-2 bg-white">
+          <div className="border border-gray-300 h-12 rounded-[8px] px-2 flex items-center">
             {contract?.customerName || "Chưa chọn khách hàng"}
           </div>
         </div>
@@ -285,7 +324,7 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({
           <label className="block text-sm font-semibold text-gray-600 mb-1 ">
             Phí Phòng (VND)
           </label>
-          <div className="w-full border rounded-[8px]  border-gray-200 h-12 justify-start p-2 items-center flex">
+          <div className="w-full border border-gray-300 rounded-[8px] h-12 justify-start p-2 items-center flex">
             <span>{contract.room_fee?.toLocaleString()} VNĐ</span>
           </div>
         </div>
@@ -293,74 +332,124 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({
           <label className="block text-sm font-semibold text-gray-600 mb-1">
             Tiền đặt cọc
           </label>
-          <div className="w-full border rounded-[8px]  border-gray-200 h-12 justify-start p-2 items-center flex">
+          <div className="w-full border border-gray-300 rounded-[8px] h-12 justify-start p-2 items-center flex">
             <span>{contract.deposit?.toLocaleString()} VNĐ</span>
           </div>
         </div>
+        {/* Ngày bắt đầu */}
         <div>
           <label className="block text-sm font-semibold text-gray-600 mb-1">
             Ngày Bắt Đầu
           </label>
-          <input
-            type="date"
-            name="start_day"
-            value={contract.start_day?.toISOString().split("T")[0] || ""}
-            onChange={(e) =>
-              setContract({ ...contract, start_day: new Date(e.target.value) })
-            }
-            className="border rounded-[6px] p-3 w-full focus:ring-2 focus:ring-blue-400 focus:outline-none"
-            required
+          <DatePicker
+            value={dayjs(contract.start_day)} // Chuyển Date sang Dayjs
+            onChange={(date) => handleDateChange("start_day", date)}
+            format="DD/MM/YYYY" // Hiển thị định dạng dd/MM/yyyy
+            slotProps={{
+              textField: {
+                fullWidth: true,
+                required: true,
+                variant: "outlined",
+                InputProps: {
+                  style: {
+                    height: "48px", // Đặt chiều cao cố định (tương ứng h-10)
+                  },
+                },
+                className:
+                  "h-12 border border-gray-300 rounded-[8px] p-3 w-full focus:ring-2 focus:ring-blue-400 focus:outline-none",
+              },
+            }}
           />
         </div>
         <div>
           <label className="block text-sm font-semibold text-gray-600 mb-1">
             Ngày Kết Thúc
           </label>
-          <input
-            type="date"
-            name="end_day"
-            value={contract.end_day?.toISOString().split("T")[0] || ""}
-            onChange={(e) =>
-              setContract({ ...contract, end_day: new Date(e.target.value) })
+          <DatePicker
+            value={dayjs(contract.end_day)} // Chuyển Date sang Dayjs
+            onChange={(date) =>
+              setContract((prev) => ({
+                ...prev,
+                end_day: date ? date.toDate() : prev.end_day, // Chuyển Dayjs thành Date
+              }))
             }
-            className="border rounded-[6px] p-3 w-full focus:ring-2 focus:ring-blue-400 focus:outline-none"
-            required
+            format="DD/MM/YYYY" // Hiển thị định dạng dd/MM/yyyy
+            slotProps={{
+              textField: {
+                fullWidth: true,
+                required: true,
+                variant: "outlined",
+                InputProps: {
+                  style: {
+                    height: "48px", // Đặt chiều cao cố định (tương ứng h-10)
+                  },
+                },
+                className:
+                  "h-12 border border-gray-300 rounded-[8px] p-3 w-full focus:ring-2 focus:ring-blue-400 focus:outline-none",
+              },
+            }}
           />
         </div>
+
         <div>
           <label className="block text-sm font-semibold text-gray-600 mb-1">
             Ngày Bắt Đầu Thanh Toán
           </label>
-          <input
-            type="date"
-            name="billing_start_date"
-            value={
-              contract.billing_start_date?.toISOString().split("T")[0] || ""
+          <DatePicker
+            value={dayjs(contract.billing_start_date)} // Chuyển Date sang Dayjs
+            onChange={(date) =>
+              setContract((prev) => ({
+                ...prev,
+                billing_start_date: date
+                  ? date.toDate()
+                  : prev.billing_start_date, // Chuyển Dayjs thành Date
+              }))
             }
-            onChange={(e) =>
-              setContract({
-                ...contract,
-                billing_start_date: new Date(e.target.value),
-              })
-            }
-            className="border rounded-[6px] p-3 w-full focus:ring-2 focus:ring-blue-400 focus:outline-none"
-            required
+            format="DD/MM/YYYY" // Hiển thị định dạng dd/MM/yyyy
+            slotProps={{
+              textField: {
+                fullWidth: true,
+                required: true,
+                variant: "outlined",
+                InputProps: {
+                  style: {
+                    height: "48px", // Đặt chiều cao cố định (tương ứng h-10)
+                  },
+                },
+                className:
+                  "h-12 border border-gray-300 rounded-[8px] p-3 w-full focus:ring-2 focus:ring-blue-400 focus:outline-none",
+              },
+            }}
           />
         </div>
+
         <div>
           <label className="block text-sm font-semibold text-gray-600 mb-1">
             Kỳ Hạn Thanh Toán (tháng)
           </label>
-          <input
-            type="number"
+          <select
             name="payment_term"
             value={contract.payment_term || ""}
-            onChange={handleChange}
-            className="border rounded-[6px] p-3 w-full focus:ring-2 focus:ring-blue-400 focus:outline-none"
-            placeholder="Nhập kỳ hạn"
+            onChange={(e) =>
+              setContract((prev) => ({
+                ...prev,
+                payment_term: Number(e.target.value),
+              }))
+            }
+            className="border border-gray-300 rounded-[8px] h-12 p-3 w-full focus:ring-2 focus:ring-blue-400 focus:outline-none"
             required
-          />
+          >
+            <option value="" disabled>
+              Chọn kỳ hạn
+            </option>
+            {Array.from({ length: 12 }, (_, i) => i + 1).map((month) => (
+              <option key={month} value={month}>
+                {month} tháng
+              </option>
+            ))}
+          </select>
         </div>
+
         <div>
           <label className="block text-sm font-semibold text-gray-600 mb-1">
             Ảnh Hợp Đồng

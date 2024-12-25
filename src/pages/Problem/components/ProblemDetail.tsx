@@ -9,7 +9,6 @@ import {
   Info,
 } from "lucide-react";
 import { Problem } from "@/types/types";
-import { updateProblemById } from "@/services/problemApi/problemApi";
 import Viewer from "react-viewer"; // Import React Viewer
 
 interface ProblemCardProps {
@@ -18,11 +17,6 @@ interface ProblemCardProps {
 }
 
 const ProblemCard: React.FC<ProblemCardProps> = ({ problem, onClose }) => {
-  const [problemState, setProblemState] = useState(problem?.problem || "");
-  const [descriptionState, setDescriptionState] = useState(
-    problem?.decription || ""
-  );
-  const [isEdited, setIsEdited] = useState(false);
   const [visible, setVisible] = useState(false); // Trạng thái hiển thị Viewer
   const [currentImageIndex, setCurrentImageIndex] = useState(0); // Vị trí ảnh đang xem
 
@@ -65,29 +59,6 @@ const ProblemCard: React.FC<ProblemCardProps> = ({ problem, onClose }) => {
     return `${day}/${month}/${year}`;
   };
 
-  const handleSave = async () => {
-    if (!problem) return;
-
-    const updatedProblem = {
-      ...problem,
-      problem: problemState,
-      decription: descriptionState,
-    };
-
-    try {
-      // Gửi dữ liệu cập nhật lên API
-      await updateProblemById(updatedProblem.id, updatedProblem);
-
-      // Reset trạng thái chỉnh sửa sau khi lưu thành công
-      setIsEdited(false);
-
-      // Đóng modal
-      onClose();
-    } catch (error) {
-      console.error("Error updating problem:", error);
-    }
-  };
-
   return (
     <Card className="border-none shadow-none rounded-none transition-shadow duration-200">
       <CardHeader>
@@ -105,34 +76,40 @@ const ProblemCard: React.FC<ProblemCardProps> = ({ problem, onClose }) => {
       </CardHeader>
       <CardContent>
         <div className="space-y-6">
+          {/* Sự cố */}
           <div className="flex items-start space-x-2">
             <Info className="w-5 h-5 text-blue-500" />
             <div className="flex-1">
               <h3 className="font-semibold text-gray-700">Sự cố:</h3>
-              <textarea
-                className="w-full p-2 border rounded-md text-gray-600"
-                value={problemState}
-                onChange={(e) => {
-                  setProblemState(e.target.value);
-                  setIsEdited(true);
-                }}
-              />
+              <div className="w-full p-2 border rounded-[8px] mt-2 text-gray-600 bg-white">
+                {problem.problem || "Không có thông tin"}
+              </div>
             </div>
           </div>
+          
+          {/* Mô tả chi tiết */}
           <div className="flex items-start space-x-2">
             <Info className="w-5 h-5 text-green-500" />
             <div className="flex-1">
               <h3 className="font-semibold text-gray-700">Mô tả chi tiết:</h3>
-              <textarea
-                className="w-full p-2 border rounded-md text-gray-600"
-                value={descriptionState}
-                onChange={(e) => {
-                  setDescriptionState(e.target.value);
-                  setIsEdited(true);
-                }}
-              />
+              <div className="w-full p-2 border rounded-[8px] mt-2 text-gray-600 bg-white">
+                {problem.decription || "Không có thông tin"}
+              </div>
             </div>
           </div>
+          
+          {/* Giải quyết */}
+          <div className="flex items-start space-x-2">
+            <Info className="w-5 h-5 text-green-500" />
+            <div className="flex-1">
+              <h3 className="font-semibold text-gray-700">Giải quyết:</h3>
+              <div className="w-full p-2 border rounded-[8px] mt-2 text-gray-600 bg-white">
+                {problem.solution || "Không có thông tin"}
+              </div>
+            </div>
+          </div>
+          
+          {/* Hình ảnh */}
           {problem.image &&
             Array.isArray(problem.image) &&
             problem.image.length > 0 && (
@@ -150,14 +127,15 @@ const ProblemCard: React.FC<ProblemCardProps> = ({ problem, onClose }) => {
                         onClick={() => {
                           setCurrentImageIndex(index);
                           setVisible(true);
-                        }} // Mở Viewer khi click vào ảnh
+                        }} 
                       />
                     ))}
                   </div>
                 </div>
               </div>
             )}
-
+          
+          {/* Viewer để xem ảnh lớn hơn */}
           <Viewer
             visible={visible}
             onClose={() => setVisible(false)}
@@ -165,31 +143,6 @@ const ProblemCard: React.FC<ProblemCardProps> = ({ problem, onClose }) => {
             activeIndex={currentImageIndex}
             className="h-[80vh] w-[80vw]"
           />
-
-          <div className="grid grid-cols-2 gap-4 border-t pt-4">
-            {/* <div>
-              <h4 className="text-sm text-gray-500">Ngày tạo:</h4>
-              <p className="text-sm text-gray-600">
-                {formatDate(problem.createdAt)}
-              </p>
-            </div>
-            <div>
-              <h4 className="text-sm text-gray-500">Cập nhật lần cuối:</h4>
-              <p className="text-sm text-gray-600">
-                {formatDate(problem.updatedAt)}
-              </p>
-            </div> */}
-          </div>
-          {isEdited && (
-            <div className="text-right">
-              <button
-                className="bg-blue-500 text-white px-4 py-2 rounded-md"
-                onClick={handleSave}
-              >
-                Lưu
-              </button>
-            </div>
-          )}
         </div>
       </CardContent>
     </Card>

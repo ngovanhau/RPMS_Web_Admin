@@ -168,9 +168,9 @@ const Tenant: React.FC = () => {
                   <th className="p-4 border-2 border-gray-300 text-left">
                     Số điện thoại
                   </th>
-                  <th className="p-4 border-2 border-gray-300 text-left">
+                  {/* <th className="p-4 border-2 border-gray-300 text-left">
                     CMND/CCCD
-                  </th>
+                  </th> */}
                   <th className="p-4 border-2 border-gray-300 text-left">
                     Email
                   </th>
@@ -202,7 +202,7 @@ const Tenant: React.FC = () => {
                         </DropdownMenuContent>
                       </DropdownMenu>
                       <div onClick={() => handleView(tenant)}>
-                        <IoEye className="w-5 h-5 text-gray-600" />
+                        <IoEye className="w-5 h-5 text-themeColor" />
                       </div>
                     </td>
                     <td className="p-4 border border-gray-300">
@@ -214,9 +214,9 @@ const Tenant: React.FC = () => {
                     <td className="p-4 border border-gray-300">
                       {tenant.phone_number}
                     </td>
-                    <td className="p-4 border border-gray-300">
+                    {/* <td className="p-4 border border-gray-300">
                       {tenant.cccd}
-                    </td>
+                    </td> */}
                     <td className="p-4 border border-gray-300">
                       {tenant.email}
                     </td>

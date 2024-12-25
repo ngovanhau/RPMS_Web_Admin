@@ -323,7 +323,7 @@ const DashBoardBooking: React.FC = () => {
                               }}
                               title="Xem chi tiết"
                             >
-                              <IoEye className="w-5 h-5 text-gray-600" />
+                              <IoEye className="w-5 h-5 text-themeColor" />
                             </button>
                           </div>
                         </td>

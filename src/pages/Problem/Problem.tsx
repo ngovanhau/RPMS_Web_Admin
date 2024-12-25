@@ -12,6 +12,7 @@ import {
 import ProblemTable from "./components/ProblemTable";
 import { Problem } from "@/types/types";
 import {
+  deleteProblemById,
   fetchAllProblems,
   fetchProblemByBuildingId,
   fetchProblemsByRoomId,
@@ -21,6 +22,9 @@ import { useProblemStore } from "@/stores/problemStore";
 import ProblemCard from "./components/ProblemDetail";
 import CustomModal from "@/components/Modal/Modal";
 import { Bell } from "lucide-react";
+import { TextField } from "@mui/material";
+import { Button } from "@/components/ui/button";
+import ProblemView from "./components/ProblemView";
 
 const DashBoardProblem: React.FC = () => {
   const [selectedOption, setSelectedOption] = useState("Đang yêu cầu");
@@ -31,7 +35,10 @@ const DashBoardProblem: React.FC = () => {
     null
   );
   const [selectedProblem, setSelectedProblem] = useState<Problem | null>(null); // Lưu Problem được chọn
-
+  const [confirmModal, setConfirmModal] = useState(false);
+  const [completeModal, setCompleteModal] = useState(false);
+  const [cancelModal, setCancelModal] = useState(false)
+  const [fixModal, setFixModal] = useState(false)
   // Fetching data from stores and APIs
   const userData = useAuthStore((state) => state.userData);
   const buildings = useBuildingStore((state) => state.buildings);
@@ -107,6 +114,96 @@ const DashBoardProblem: React.FC = () => {
     fetchInitialData();
   }, []);
 
+  const handleSubmitConfirm = async () => {
+    if (selectedProblem) {
+      const updatedProblem: Problem = {
+        ...selectedProblem,
+        status: 1,
+      };
+  
+      try {
+        const response = await updateProblemById(updatedProblem.id, updatedProblem);
+        if (response.isSuccess) {
+          setConfirmModal(false);
+          setSelectedProblem(null);
+          fetchInitialData();
+        } else {
+          console.error("Cập nhật vấn đề không thành công:", response.message);
+        }
+      } catch (error) {
+        console.error("Lỗi khi cập nhật vấn đề:", error);
+      }
+    } else {
+      console.error("Không có vấn đề nào được chọn để cập nhật");
+    }
+  };
+  const handleSubmitComplete = async () => {
+    if (selectedProblem) {
+      const updatedProblem: Problem = {
+        ...selectedProblem,
+        status: 2,
+      };
+  
+      try {
+        const response = await updateProblemById(updatedProblem.id, updatedProblem);
+        if (response.isSuccess) {
+          setCompleteModal(false);
+          setSelectedProblem(null);
+          fetchInitialData();
+        } else {
+          console.error("Cập nhật vấn đề không thành công:", response.message);
+        }
+      } catch (error) {
+        console.error("Lỗi khi cập nhật vấn đề:", error);
+      }
+    } else {
+      console.error("Không có vấn đề nào được chọn để cập nhật");
+    }
+  };
+  const handleSubmitCancel = async () => {
+    if (selectedProblem) {
+      const updatedProblem: Problem = {
+        ...selectedProblem,
+        status: 3,
+      };
+  
+      try {
+        const response = await updateProblemById(updatedProblem.id, updatedProblem);
+        if (response.isSuccess) {
+          setCancelModal(false);
+          setSelectedProblem(null);
+          fetchInitialData();
+        } else {
+          console.error("Cập nhật vấn đề không thành công:", response.message);
+        }
+      } catch (error) {
+        console.error("Lỗi khi cập nhật vấn đề:", error);
+      }
+    } else {
+      console.error("Không có vấn đề nào được chọn để cập nhật");
+    }
+  };
+  
+
+
+  const handleOpenModalComplete = async (updatedProblem: Problem) => {
+    setCompleteModal(true);
+    setSelectedProblem(updatedProblem);
+  };
+  const handleOpenModalConfirm = async (updatedProblem: Problem) => {
+    setConfirmModal(true);
+    setSelectedProblem(updatedProblem);
+  };
+  const handleOpenModalCancel = async (updatedProblem: Problem) => {
+    setCancelModal(true);
+    setSelectedProblem(updatedProblem);
+  };
+  const handleOpenModalFix = async (updatedProblem: Problem) => {
+    setFixModal(true);
+    setSelectedProblem(updatedProblem);
+  };
+
+
   const handleStatusChange = async (updatedProblem: Problem) => {
     try {
       // Gọi API để cập nhật toàn bộ vấn đề
@@ -114,9 +211,6 @@ const DashBoardProblem: React.FC = () => {
         updatedProblem.id,
         updatedProblem
       );
-      if (userData?.role === "ADMIN") {
-        await fetchAllProblems();
-      }
     } catch (error) {
       console.error(
         `Lỗi khi thay đổi trạng thái cho ID: ${updatedProblem.id}`,
@@ -125,21 +219,10 @@ const DashBoardProblem: React.FC = () => {
     }
   };
 
-  const handleFatalLevelChange = async (updatedProblem: Problem) => {
-    try {
-      // Gọi API để cập nhật toàn bộ vấn đề
-      const response = await updateProblemById(
-        updatedProblem.id,
-        updatedProblem
-      );
-      if (userData?.role === "ADMIN") {
-        await fetchAllProblems();
-      }
-    } catch (error) {
-      console.error(
-        `Lỗi khi thay đổi mức độ nghiêm trọng cho ID: ${updatedProblem.id}`,
-        error
-      );
+  const handleDelete = async (problemId: string) => {
+    const response = await deleteProblemById(problemId);
+    if (response.isSuccess) {
+      fetchInitialData();
     }
   };
 
@@ -157,7 +240,6 @@ const DashBoardProblem: React.FC = () => {
 
   return (
     <div className="flex flex-col flex-1 bg-gray-100 w-full overflow-y-hidden">
-
       <div className="flex h-[100%] p-4 overflow-hidden">
         <div className="flex flex-1 rounded-[8px] flex-col py-4 px-4 w-full bg-white">
           <OptionSelector
@@ -168,10 +250,14 @@ const DashBoardProblem: React.FC = () => {
             onBuildingChange={handleBuildingSelect}
           />
           <ProblemTable
+            onFix={handleOpenModalFix}
+            onCancel={handleOpenModalCancel}
+            onComplete={handleOpenModalComplete}
+            onConfirm={handleOpenModalConfirm}
+            ondelete={handleDelete}
             problems={filteredProblems} // Use filtered problems here
             fatalLevelMap={fatalLevelMap}
             statusMap={statusMap}
-            onFatalLevelChange={handleFatalLevelChange}
             onStatusChange={handleStatusChange}
             onProblemSelect={handleProblemSelect}
           />
@@ -185,6 +271,115 @@ const DashBoardProblem: React.FC = () => {
       >
         <ProblemCard onClose={handleModalClose} problem={selectedProblem} />
       </CustomModal>
+
+      <CustomModal
+        header="Xác nhận xử lý"
+        isOpen={confirmModal}
+        onClose={() => setConfirmModal(false)}
+        className="max-w-[30%]"
+        children={
+          <div className="w-full pt-4 gap-4 flex flex-col">
+            <ProblemView problem={selectedProblem!}/>
+            <TextField
+              value={selectedProblem?.solution || ''}
+              label="Ghi chú"
+              fullWidth
+              variant="outlined"
+              onChange={(e) =>
+                setSelectedProblem((prev) =>
+                  prev ? { ...prev, solution: e.target.value } : prev
+                )
+              }
+            />
+            <div className="flex justify-end space-x-4">
+              <Button 
+              onClick={()=> setConfirmModal(false)}  
+              className="w-24 rounded">
+                Hủy
+              </Button>
+              <Button
+                onClick={handleSubmitConfirm}
+                className="w-24 rounded bg-themeColor hover:bg-blue-700 text-white"
+              >
+                Lưu
+              </Button>
+            </div>
+          </div>
+        }
+      />
+
+<CustomModal
+        header="Xác nhận thành công"
+        isOpen={completeModal}
+        onClose={() => setCompleteModal(false)}
+        className="max-w-[30%]"
+        children={
+          <div className="w-full pt-4 gap-4 flex flex-col">
+            <ProblemView problem={selectedProblem!}/>
+            <TextField
+              value={selectedProblem?.solution || ''}
+              label="Ghi chú"
+              fullWidth
+              variant="outlined"
+              onChange={(e) =>
+                setSelectedProblem((prev) =>
+                  prev ? { ...prev, solution: e.target.value } : prev
+                )
+              }
+            />
+            <div className="flex justify-end space-x-4">
+              <Button 
+              onClick={()=> setCompleteModal(false)}  
+              className="w-24 rounded">
+                Hủy
+              </Button>
+              <Button
+                onClick={handleSubmitComplete}
+                className="w-24 rounded bg-themeColor hover:bg-blue-700 text-white"
+              >
+                Lưu
+              </Button>
+            </div>
+          </div>
+        }
+      />
+
+<CustomModal
+        header="Hủy"
+        isOpen={cancelModal}
+        onClose={() => setCancelModal(false)}
+        className="max-w-[30%]"
+        children={
+          <div className="w-full pt-4 gap-4 flex flex-col">
+            <ProblemView problem={selectedProblem!}/>
+            <TextField
+              value={selectedProblem?.solution || ''}
+              label="Lý do hủy"
+              fullWidth
+              variant="outlined"
+              onChange={(e) =>
+                setSelectedProblem((prev) =>
+                  prev ? { ...prev, solution: e.target.value } : prev
+                )
+              }
+            />
+            <div className="flex justify-end space-x-4">
+              <Button 
+              onClick={()=> setCancelModal(false)}  
+              className="w-24 rounded">
+                Hủy
+              </Button>
+              <Button
+                onClick={handleSubmitCancel}
+                className="w-24 rounded bg-themeColor hover:bg-blue-700 text-white"
+              >
+                Lưu
+              </Button>
+            </div>
+          </div>
+        }
+      />
+
     </div>
   );
 };

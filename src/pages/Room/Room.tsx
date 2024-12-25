@@ -176,8 +176,8 @@ const DashBoardRoom: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col flex-1 bg-gray-200 w-full overflow-y-hidden ">
-      <div className="flex h-[87%] flex-row justify-between bg-gray-200 p-4">
+    <div className="flex flex-col h-[90%] bg-gray-200 w-full ">
+      <div className="flex h-[90%] flex-row justify-between bg-gray-200 p-4">
         <div className="w-[24%] h-full rounded-[8px] overflow-hidden flex flex-col bg-white">
           <div className="h-[90%] relative  w-full overflow-y-scroll scrollbar-hide border-b">
             <div className="flex absolute top-0 left-0 w-full">
@@ -261,10 +261,7 @@ const DashBoardRoom: React.FC = () => {
         </div>
 
         <div className="w-[75%] h-full flex-col rounded-[8px]  overflow-hidden">
-          {error ? (
-            // <div className="text-red-500">{error}</div>
-            <></>
-          ) : (
+
             <div className="h-[75px] items-center flex flex-row rounded-[8px] w-full px-3 bg-white">
               <div className="w-[5%]">
                 <MdApartment className="text-[#001eb4] text-4xl" />{" "}
@@ -292,7 +289,7 @@ const DashBoardRoom: React.FC = () => {
                 </button>
               </div>
             </div>
-          )}
+          
           <div className="h-[70px] items-center justify-between flex flex-row w-full  mt-2 rounded-[8px] overflow-hidden">
             <div className="h-full w-[18%] bg-white flex flex-row justify-center items-center rounded-[8px] overflow-hidden">
               <div className="w-1/4 h-full flex justify-center items-center  ">

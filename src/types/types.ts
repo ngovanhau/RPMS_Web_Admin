@@ -219,6 +219,7 @@ export interface Problem  {
   decription?: string; // Optional
   image?: string[]; // Optional
   fatal_level?: number; // Optional, assuming it can be null
+  solution: string;
   status?: number; // Optional, assuming it can be null
   createdAt?: string; // Optional, assuming it can be null
   updatedAt?: string; // Optional, assuming it can be null
@@ -284,3 +285,47 @@ export interface UserTokens{
   device: string
   token: string
 } 
+
+
+export interface DebtType {
+    id: string; // ID của hóa đơn
+    bill_name: string; // Tên hóa đơn
+    building_id: string; // ID của tòa nhà
+    cost_room: number; // Chi phí phòng
+    cost_service: number; // Chi phí dịch vụ
+    customer_id: string; // ID của khách hàng
+    customer_name: string; // Tên khách hàng
+    date: string; // Ngày tạo hóa đơn (ISO 8601)
+    discount: number; // Giảm giá
+    due_date: string; // Hạn thanh toán (ISO 8601)
+    final_amount: number; // Số tiền cuối cùng (sau khi giảm giá, tính cả dịch vụ)
+    month: number; // Tháng của hóa đơn
+    note: string; // Ghi chú
+    payment_date: string; // Ngày thanh toán (ISO 8601)
+    penalty_amount: number; // Phí phạt
+    roomid: string; // ID của phòng
+    roomname: string; // Tên phòng
+    status: number; // Trạng thái hóa đơn (0: chưa thanh toán, 1: đã thanh toán, v.v.)
+    status_payment: number; // Trạng thái thanh toán (0: chưa, 1: đã)
+    total_amount: number; // Tổng tiền (trước giảm giá)
+    transaction_id: string; // Mã giao dịch thanh toán
+    year: number; // Năm của hóa đơn
+  }
+
+
+export interface LiquidationData {
+    debtmoney: number; // Tổng tiền khách nợ
+    penalty_fee: number; // Phí phạt
+    deposit_amount: number; // Số tiền đặt cọc
+    end_day: Date; // Ngày kết thúc hợp đồng (ISO format)
+    amount: number; // Tổng số tiền thanh lý
+  }
+  
+
+  export interface PaymentScheduleType {
+    roomId: string; // ID của phòng
+    roomname: string; // Tên của phòng
+    billingStartDate: string; // Ngày bắt đầu thanh toán (ISO format)
+    status: string; // Trạng thái thanh toán
+  }
+  

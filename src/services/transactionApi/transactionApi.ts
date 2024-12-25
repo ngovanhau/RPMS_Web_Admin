@@ -1,6 +1,7 @@
 import useTransactionStore from "@/stores/transactionStore";
 import api from "../axios";
 import { Transaction } from "@/types/types";
+import useBillStore from "@/stores/invoiceStore";
 
 export const getAllTransaction = async () => {
     try {
@@ -47,6 +48,39 @@ export const deleteTransaction = async ( transactionId : String ) => {
 export const updateTransaction = async ( transaction : Transaction ) => {
     try {
         const response = await api.put(`incomeexpensegroup/update?id=${transaction.id}`, transaction)
+        return response.data
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+export const getBillByRoomIdAndStatus = async ( roomId : string , status : number ) => {
+    try {
+        const response = await api.get(`/bill/getbillbyroomidandstatus?id=${roomId}&statuspayment=${status}`)
+        useBillStore.getState().clearBills()
+        useBillStore.getState().setBills(response.data.data)
+        return response.data
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+export const getBillByBuildingIdAndStatus = async ( buildingId : string , status : number ) => {
+    try {
+        const response = await api.get(`/bill/getbybuildingidandstatus?id=${buildingId}&status=${status}`)
+        useBillStore.getState().clearBills()
+        useBillStore.getState().setBills(response.data.data)
+        return response.data
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+export const getAllBillByStatus = async ( status : number ) => {
+    try {
+        const response = await api.get(`/bill/billallbystatus?statuspayment=${status}`)
+        useBillStore.getState().clearBills()
+        useBillStore.getState().setBills(response.data.data)
         return response.data
     } catch (error) {
         console.log(error)

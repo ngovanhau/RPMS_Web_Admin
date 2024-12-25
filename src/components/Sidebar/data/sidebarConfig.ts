@@ -1,4 +1,4 @@
-import { FaClipboardList, FaPiggyBank, FaMoneyBill, FaBolt, FaFileInvoiceDollar, FaRegCreditCard ,FaLock, FaBuilding, FaDoorOpen, FaConciergeBell, FaUserFriends, FaFileContract, FaUser, FaCalendarAlt, FaRegBuilding } from 'react-icons/fa';
+import { FaClipboardList, FaPiggyBank, FaMoneyBill, FaBolt, FaFileInvoiceDollar, FaRegCreditCard ,FaLock, FaBuilding, FaDoorOpen, FaConciergeBell, FaUserFriends, FaFileContract, FaUser, FaCalendarAlt, FaRegBuilding, FaBook, FaRegClock  } from 'react-icons/fa';
 import { TbBrandDatabricks } from "react-icons/tb";
 import { MdHomeRepairService, MdOutlineContactPage, MdOutlineDashboard, MdOutlineReportProblem } from "react-icons/md";
 import { BsCurrencyDollar } from "react-icons/bs";
@@ -77,10 +77,21 @@ export const sidebarItems = [
         icon: FaFileInvoiceDollar,
       },
       {
+        type: "debt-record",
+        label: "Sổ nợ",
+        icon: FaBook, 
+      },
+      {
+        type: "payment-schedule",
+        label: "Lịch thanh toán",
+        icon: FaRegClock, 
+      },
+      {
         type: "income-expense",
         label: "Thu chi",
         icon: FaPiggyBank, 
       },
+      
       {
         type: "transaction-group",
         label: "Nhóm giao dịch",
